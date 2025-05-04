@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Flashcards</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .answer-btn {
+            margin: 10px;
+            min-height: 80px;
+            white-space: normal;
+            word-wrap: break-word;
+        }
+        .disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        .tag {
+            display: inline-block;
+            background-color: #e9ecef;
+            padding: 2px 8px;
+            margin: 2px;
+            border-radius: 12px;
+            font-size: 0.9em;
+        }
+        #question-container {
+            min-height: 200px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="row mb-4">
+            <div class="col">
+                <select id="module-select" class="form-select">
+                    <option value="">Select Module</option>
+                    {% for module in modules %}
+                    <option value="{{ module }}">{{ module }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col">
+                <select id="topic-select" class="form-select" disabled>
+                    <option value="">Select Topic</option>
+                </select>
+            </div>
+            <div class="col">
+                <select id="subtopic-select" class="form-select" disabled>
+                    <option value="">Select Subtopic</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="question-container" class="p-4 mb-4 bg-light rounded">
+            <h4 id="question-text">Select filters to start</h4>
+            <div id="question-info" class="small text-muted mt-2">
+                <span id="module-info"></span> |
+                <span id="topic-info"></span> |
+                <span id="subtopic-info"></span>
+            </div>
+            <div id="tags-container" class="mt-2"></div>
+        </div>
+
+        <div id="answers-container" class="row">
+            <div class="col-md-6"><button class="btn btn-primary w-100 answer-btn" disabled></button></div>
+            <div class="col-md-6"><button class="btn btn-primary w-100 answer-btn" disabled></button></div>
+            <div class="col-md-6"><button class="btn btn-primary w-100 answer-btn" disabled></button></div>
+            <div class="col-md-6"><button class="btn btn-primary w-100 answer-btn" disabled></button></div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        let currentCorrectAnswer = '';
+        // Add state management variables
+        let currentSelections = {
+            module: '',
+            topic: '',
+            subtopic: '',
+            tags: [] // Keep this for compatibility but we won't use it for filtering
+        };
+
+        function updateFilters() {
+            const data = {
+                module: currentSelections.module,
+                topic: currentSelections.topic,
+                subtopic: currentSelections.subtopic
+            };
+
+            $.ajax({
+                url: '/get_filters',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: function(response) {
+                    // Update topic select
+                    $('#topic-select').html('<option value="">Select Topic</option>');
+                    response.topics.forEach(topic => {
+                        $('#topic-select').append(`<option value="${topic}">${topic}</option>`);
+                    });
+                    $('#topic-select').prop('disabled', !data.module);
+                    if (currentSelections.topic) {
+                        $('#topic-select').val(currentSelections.topic);
+                    }
+
+                    // Update subtopic select
+                    $('#subtopic-select').html('<option value="">Select Subtopic</option>');
+                    response.subtopics.forEach(subtopic => {
+                        $('#subtopic-select').append(`<option value="${subtopic}">${subtopic}</option>`);
+                    });
+                    $('#subtopic-select').prop('disabled', !data.topic);
+                    if (currentSelections.subtopic) {
+                        $('#subtopic-select').val(currentSelections.subtopic);
+                    }
+                }
+            });
+        }
+
+        function getNewQuestion() {
+            const data = {
+                module: currentSelections.module,
+                topic: currentSelections.topic,
+                subtopic: currentSelections.subtopic,
+                tags: currentSelections.tags
+            };
+
+            if (!data.module) return;
+
+            $.ajax({
+                url: '/get_question',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: function(response) {
+                    if (response.error) {
+                        $('#question-text').text(response.error);
+                        return;
+                    }
+
+                    $('#question-text').text(response.question);
+                    $('#module-info').text(response.module);
+                    $('#topic-info').text(response.topic);
+                    $('#subtopic-info').text(response.subtopic);
+                    
+                    // Update tags
+                    $('#tags-container').empty();
+                    response.tags.forEach(tag => {
+                        $('#tags-container').append(`<span class="tag">${tag}</span>`);
+                    });
+
+                    // Reset and update answer buttons
+                    $('.answer-btn').removeClass('btn-success btn-danger disabled')
+                        .addClass('btn-primary')
+                        .prop('disabled', false);
+                    
+                    response.answers.forEach((answer, index) => {
+                        $('.answer-btn').eq(index).text(answer);
+                    });
+
+                    currentCorrectAnswer = response.correct_answer;
+                }
+            });
+        }
+
+        $('.answer-btn').click(function() {
+            const selectedAnswer = $(this).text();
+            if (selectedAnswer === currentCorrectAnswer) {
+                $(this).removeClass('btn-primary').addClass('btn-success');
+                setTimeout(getNewQuestion, 1000);
+            } else {
+                $(this).removeClass('btn-primary').addClass('btn-danger disabled');
+            }
+        });
+
+        $('#module-select').change(function() {
+            currentSelections.module = $(this).val();
+            currentSelections.topic = '';
+            currentSelections.subtopic = '';
+            currentSelections.tags = [];
+            updateFilters();
+            getNewQuestion();
+        });
+
+        $('#topic-select').change(function() {
+            currentSelections.topic = $(this).val();
+            currentSelections.subtopic = '';
+            updateFilters();
+            getNewQuestion();
+        });
+
+        $('#subtopic-select').change(function() {
+            currentSelections.subtopic = $(this).val();
+            updateFilters();
+            getNewQuestion();
+        });
+
+        // Initialize selections from URL parameters if present
+        $(document).ready(function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('module')) {
+                currentSelections.module = urlParams.get('module');
+                $('#module-select').val(currentSelections.module);
+                updateFilters();
+            }
+        });
+    </script>
+</body>
+</html>

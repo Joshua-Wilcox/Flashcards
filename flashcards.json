@@ -1,0 +1,4090 @@
+[
+  {
+    "Question": "How does a virtual machine differ from a physical machine in terms of architecture and implementation?",
+    "Answer": "A virtual machine is defined by its software-based architecture and instruction set, simulating a hypothetical machine, whereas a physical machine is built on hardware.",
+    "Module": "Programming II",
+    "Topic": "Java Virtual Machine",
+    "Sub-Topic": "Virtual Machine Concepts",
+    "Tags": ["virtual machine", "physical machine", "architecture", "instruction set"]
+  },
+  {
+    "Question": "What are the two main ways to think about a virtual machine?",
+    "Answer": "It can be considered as a runtime instance of software representing the machine, or as a description of a hypothetical architecture and instruction set.",
+    "Module": "Programming II",
+    "Topic": "Java Virtual Machine",
+    "Sub-Topic": "Virtual Machine Concepts",
+    "Tags": ["virtual machine", "runtime", "architecture", "instruction set"]
+  },
+  {
+    "Question": "Why is the JVM important for cross-platform compatibility?",
+    "Answer": "It enables the 'Write Once, Run Anywhere' principle by generating machine code for each supported operating system, removing the need for OS-specific implementations.",
+    "Module": "Programming II",
+    "Topic": "Java Virtual Machine",
+    "Sub-Topic": "Cross-Platform Execution",
+    "Tags": ["JVM", "cross-platform", "write once run anywhere"]
+  },
+  {
+    "Question": "What is the relationship between the JDK and the JRE?",
+    "Answer": "The JDK includes the JRE as well as development tools like compilers and debuggers, while the JRE provides the runtime environment for executing Java applications.",
+    "Module": "Programming II",
+    "Topic": "Structure of a Java Program",
+    "Sub-Topic": "JDK and JRE",
+    "Tags": ["JDK", "JRE", "Java development", "runtime"]
+  },
+  {
+    "Question": "Which components are included in the Java Development Kit (JDK)?",
+    "Answer": "It contains the Java Runtime Environment, development tools such as compilers and debuggers, Java APIs and libraries, and documentation.",
+    "Module": "Programming II",
+    "Topic": "Structure of a Java Program",
+    "Sub-Topic": "JDK Components",
+    "Tags": ["JDK", "components", "development tools"]
+  },
+  {
+    "Question": "What is the primary purpose of the Java Runtime Environment (JRE)?",
+    "Answer": "It provides the necessary environment for running Java applications, including the JVM, core libraries, class loaders, and the JIT compiler.",
+    "Module": "Programming II",
+    "Topic": "Structure of a Java Program",
+    "Sub-Topic": "JRE Components",
+    "Tags": ["JRE", "runtime", "JVM", "libraries"]
+  },
+  {
+    "Question": "How does the JRE implement the 'Write Once, Run Anywhere' concept?",
+    "Answer": "By offering a consistent runtime environment and libraries across platforms, allowing Java applications to run identically on any system with a compatible JRE.",
+    "Module": "Programming II",
+    "Topic": "Structure of a Java Program",
+    "Sub-Topic": "JRE and Portability",
+    "Tags": ["JRE", "portability", "write once run anywhere"]
+  },
+  {
+    "Question": "What are the three primary subsystems of the JVM architecture?",
+    "Answer": "They are the Class Loader Subsystem, Runtime Data Areas (Memory), and the Execution Engine.",
+    "Module": "Programming II",
+    "Topic": "Architecture of the JVM",
+    "Sub-Topic": "JVM Subsystems",
+    "Tags": ["JVM", "architecture", "subsystems"]
+  },
+  {
+    "Question": "What is the role of the Class Loader subsystem in the JVM?",
+    "Answer": "It loads, links, and initializes class files, verifies bytecode safety, and maintains the runtime type system.",
+    "Module": "Programming II",
+    "Topic": "Architecture of the JVM",
+    "Sub-Topic": "Class Loader",
+    "Tags": ["JVM", "class loader", "bytecode", "type system"]
+  },
+  {
+    "Question": "Which memory areas in the JVM are shared among threads, and which are not?",
+    "Answer": "The Heap and Method Area are shared, while each thread has its own Java Stack and Program Counter.",
+    "Module": "Programming II",
+    "Topic": "Architecture of the JVM",
+    "Sub-Topic": "Memory Areas",
+    "Tags": ["JVM", "memory", "heap", "method area", "stack", "program counter"]
+  },
+  {
+    "Question": "What is stored in the JVM's Method Area?",
+    "Answer": "It holds class metadata and static variables.",
+    "Module": "Programming II",
+    "Topic": "Architecture of the JVM",
+    "Sub-Topic": "Memory Areas",
+    "Tags": ["JVM", "method area", "metadata", "static variables"]
+  },
+  {
+    "Question": "Where are objects and arrays stored in the JVM?",
+    "Answer": "They are stored in the Heap, which is also where garbage collection occurs.",
+    "Module": "Programming II",
+    "Topic": "Architecture of the JVM",
+    "Sub-Topic": "Memory Areas",
+    "Tags": ["JVM", "heap", "objects", "arrays", "garbage collection"]
+  },
+  {
+    "Question": "What is the function of the Java Stack in the JVM?",
+    "Answer": "It stores thread-specific data, method calls, local variables, parameters, and is used for calculations.",
+    "Module": "Programming II",
+    "Topic": "Architecture of the JVM",
+    "Sub-Topic": "Memory Areas",
+    "Tags": ["JVM", "stack", "thread", "local variables"]
+  },
+  {
+    "Question": "How does the JVM keep track of the execution point for each thread?",
+    "Answer": "Each thread has its own Program Counter register that holds the address of the next instruction to execute.",
+    "Module": "Programming II",
+    "Topic": "Architecture of the JVM",
+    "Sub-Topic": "Memory Areas",
+    "Tags": ["JVM", "program counter", "thread", "execution"]
+  },
+  {
+    "Question": "What are the main components of the JVM Execution Engine?",
+    "Answer": "It consists of the Interpreter, Just-In-Time (JIT) Compiler, and Garbage Collector.",
+    "Module": "Programming II",
+    "Topic": "Execution Engine",
+    "Sub-Topic": "Execution Engine Components",
+    "Tags": ["JVM", "execution engine", "interpreter", "JIT", "garbage collector"]
+  },
+  {
+    "Question": "How does the Interpreter in the JVM Execution Engine work?",
+    "Answer": "It reads bytecode instructions sequentially and executes them one by one, providing quick startup but slower performance for repeated code.",
+    "Module": "Programming II",
+    "Topic": "Execution Engine",
+    "Sub-Topic": "Interpreter",
+    "Tags": ["JVM", "interpreter", "bytecode", "execution"]
+  },
+  {
+    "Question": "What is the purpose of the JIT Compiler in the JVM?",
+    "Answer": "It identifies frequently executed code (hot spots), compiles bytecode to native machine code for faster execution, and applies optimizations.",
+    "Module": "Programming II",
+    "Topic": "Execution Engine",
+    "Sub-Topic": "JIT Compiler",
+    "Tags": ["JVM", "JIT", "compiler", "optimization"]
+  },
+  {
+    "Question": "How does the Garbage Collector in the JVM improve memory management?",
+    "Answer": "It automatically reclaims memory by removing unused objects, using algorithms like Mark-and-Sweep or Generational collection, and runs in background threads.",
+    "Module": "Programming II",
+    "Topic": "Execution Engine",
+    "Sub-Topic": "Garbage Collector",
+    "Tags": ["JVM", "garbage collector", "memory management"]
+  },
+  {
+    "Question": "What is the relationship between the Execution Engine and the Runtime Data Areas in the JVM?",
+    "Answer": "The Execution Engine reads from and writes to the Java Stack and Heap, accesses method metadata from the Method Area, and updates the Program Counter as execution progresses.",
+    "Module": "Programming II",
+    "Topic": "Execution Engine",
+    "Sub-Topic": "Execution Engine Operation",
+    "Tags": ["JVM", "execution engine", "runtime data areas"]
+  },
+  {
+    "Question": "What steps does the Class Loader perform when loading a class?",
+    "Answer": "It locates the .class file, verifies it is a well-formed Java class, and loads it into the Method Area, linking and initializing class variables.",
+    "Module": "Programming II",
+    "Topic": "Class Loader",
+    "Sub-Topic": "Class Loading Process",
+    "Tags": ["JVM", "class loader", "class file", "method area"]
+  },
+  {
+    "Question": "What is the main purpose of variables in Java?",
+    "Answer": "They are used to store data, which can be either primitive types or objects created within the program.",
+    "Module": "Programming II",
+    "Topic": "Java Variables",
+    "Sub-Topic": "Variables",
+    "Tags": ["variables", "Java", "data storage"]
+  },
+  {
+    "Question": "What are the rules for naming variables in Java?",
+    "Answer": "Names should not start with capital letters or numbers; capital letters are reserved for classes and constants, and names should be meaningful.",
+    "Module": "Programming II",
+    "Topic": "Java Variables",
+    "Sub-Topic": "Naming Principles",
+    "Tags": ["variables", "naming", "Java"]
+  },
+  {
+    "Question": "How many primitive types does Java have and what are they?",
+    "Answer": "There are 8: byte, short, int, long, float, double, char, and boolean.",
+    "Module": "Programming II",
+    "Topic": "Java Variables",
+    "Sub-Topic": "Primitive Types",
+    "Tags": ["primitive types", "Java", "data types"]
+  },
+  {
+    "Question": "What is the difference between passing a primitive type and an object to a method in Java?",
+    "Answer": "Primitive types are passed by value (copy of the value), while objects are passed by reference (reference to the object).",
+    "Module": "Programming II",
+    "Topic": "Java Variables",
+    "Sub-Topic": "Properties",
+    "Tags": ["pass by value", "pass by reference", "Java"]
+  },
+  {
+    "Question": "What is the default value of a class variable in Java?",
+    "Answer": "It is null if the variable is a reference type.",
+    "Module": "Programming II",
+    "Topic": "Java Variables",
+    "Sub-Topic": "Objects",
+    "Tags": ["default value", "objects", "Java"]
+  },
+  {
+    "Question": "How are objects stored and referenced in Java variables?",
+    "Answer": "Variables hold references to objects, which are stored in memory; the variable itself does not contain the object.",
+    "Module": "Programming II",
+    "Topic": "Java Variables",
+    "Sub-Topic": "Objects",
+    "Tags": ["objects", "references", "Java"]
+  },
+  {
+    "Question": "What is the scope of a variable declared within a pair of curly braces in Java?",
+    "Answer": "It is visible only within those braces.",
+    "Module": "Programming II",
+    "Topic": "Java Variables",
+    "Sub-Topic": "Scopes",
+    "Tags": ["scope", "variables", "Java"]
+  },
+  {
+    "Question": "What happens if a local variable in a method has the same name as a member variable in Java?",
+    "Answer": "The local variable shadows the member variable within the method.",
+    "Module": "Programming II",
+    "Topic": "Java Variables",
+    "Sub-Topic": "Scopes",
+    "Tags": ["shadowing", "variables", "Java"]
+  },
+  {
+    "Question": "How can you reference a member variable inside a method when there is a naming conflict in Java?",
+    "Answer": "By using the 'this' keyword.",
+    "Module": "Programming II",
+    "Topic": "Java Variables",
+    "Sub-Topic": "This Keyword",
+    "Tags": ["this", "member variable", "Java"]
+  },
+  {
+    "Question": "What is the entry point of a Java application?",
+    "Answer": "The main method, which must be public, static, return void, and take a String array as an argument.",
+    "Module": "Programming II",
+    "Topic": "Java Intro",
+    "Sub-Topic": "Main Method",
+    "Tags": ["main method", "entry point", "Java"]
+  },
+  {
+    "Question": "What is the purpose of the main method in Java?",
+    "Answer": "It creates objects and tells them what to do; it is the first method executed in a Java application.",
+    "Module": "Programming II",
+    "Topic": "Java Intro",
+    "Sub-Topic": "Main Method",
+    "Tags": ["main method", "Java"]
+  },
+  {
+    "Question": "What are the steps to define a method in Java?",
+    "Answer": "Decide on access modifier (public/private), static or not, return type, method name, and parameters.",
+    "Module": "Programming II",
+    "Topic": "Methods in Java",
+    "Sub-Topic": "Defining Methods",
+    "Tags": ["methods", "definition", "Java"]
+  },
+  {
+    "Question": "How does passing a primitive type to a method differ from passing an object in Java?",
+    "Answer": "A primitive type's value is copied, so changes inside the method do not affect the original; an object reference allows changes to the object's state.",
+    "Module": "Programming II",
+    "Topic": "Methods in Java",
+    "Sub-Topic": "Primitives vs Objects",
+    "Tags": ["parameters", "primitives", "objects", "Java"]
+  },
+  {
+    "Question": "What constitutes a method's signature in Java?",
+    "Answer": "The method name, number and type of parameters, and their order.",
+    "Module": "Programming II",
+    "Topic": "Methods in Java",
+    "Sub-Topic": "Overloading",
+    "Tags": ["method signature", "overloading", "Java"]
+  },
+  {
+    "Question": "Can the return type be used to distinguish overloaded methods in Java?",
+    "Answer": "No, the return type is not part of the method signature.",
+    "Module": "Programming II",
+    "Topic": "Methods in Java",
+    "Sub-Topic": "Overloading",
+    "Tags": ["overloading", "return type", "Java"]
+  },
+  {
+    "Question": "What is the most fundamental collection of data in Java?",
+    "Answer": "The array, which is an object with special syntax.",
+    "Module": "Programming II",
+    "Topic": "Arrays",
+    "Sub-Topic": "Arrays",
+    "Tags": ["arrays", "collections", "Java"]
+  },
+  {
+    "Question": "How do you declare and instantiate an array in Java?",
+    "Answer": "Declare with type[] name; instantiate with new type[length].",
+    "Module": "Programming II",
+    "Topic": "Arrays",
+    "Sub-Topic": "Declaration and Instantiation",
+    "Tags": ["arrays", "declaration", "instantiation", "Java"]
+  },
+  {
+    "Question": "What are the rules for arrays in Java?",
+    "Answer": "They can hold primitives or objects, are themselves objects, can only hold one type, and must declare the type.",
+    "Module": "Programming II",
+    "Topic": "Arrays",
+    "Sub-Topic": "Rules",
+    "Tags": ["arrays", "rules", "Java"]
+  },
+  {
+    "Question": "What is the difference between a for loop and a for-each loop in Java?",
+    "Answer": "A for loop uses an index to access elements, while a for-each loop iterates over elements directly without exposing the index.",
+    "Module": "Programming II",
+    "Topic": "Arrays",
+    "Sub-Topic": "For Each Loop",
+    "Tags": ["for loop", "for-each", "arrays", "Java"]
+  },
+  {
+    "Question": "What is encapsulation in Java?",
+    "Answer": "It is the bundling of data with methods that operate on that data, restricting direct access from outside the class.",
+    "Module": "Programming II",
+    "Topic": "Encapsulation + Constructors",
+    "Sub-Topic": "Encapsulation",
+    "Tags": ["encapsulation", "Java"]
+  },
+  {
+    "Question": "How do setters and getters support encapsulation?",
+    "Answer": "They provide controlled access to private variables, allowing validation or transformation when setting or getting values.",
+    "Module": "Programming II",
+    "Topic": "Encapsulation + Constructors",
+    "Sub-Topic": "Setters and Getters",
+    "Tags": ["setters", "getters", "encapsulation", "Java"]
+  },
+  {
+    "Question": "What are the benefits of encapsulation?",
+    "Answer": "It supports self-management of classes, hides internal details, and results in cleaner, more maintainable code.",
+    "Module": "Programming II",
+    "Topic": "Encapsulation + Constructors",
+    "Sub-Topic": "Benefits",
+    "Tags": ["encapsulation", "benefits", "Java"]
+  },
+  {
+    "Question": "What is a constructor in Java and what are its rules?",
+    "Answer": "It is a special method with the same name as the class, no return type, and is used to initialize objects.",
+    "Module": "Programming II",
+    "Topic": "Encapsulation + Constructors",
+    "Sub-Topic": "Constructors",
+    "Tags": ["constructor", "initialization", "Java"]
+  },
+  {
+    "Question": "What happens if no constructor is defined in a Java class?",
+    "Answer": "The compiler provides a default constructor that takes no parameters and performs no actions.",
+    "Module": "Programming II",
+    "Topic": "Encapsulation + Constructors",
+    "Sub-Topic": "Default Constructor",
+    "Tags": ["default constructor", "Java"]
+  },
+  {
+    "Question": "What is the Java library?",
+    "Answer": "It is a collection of helpful classes, such as ArrayList, that provide reusable functionality.",
+    "Module": "Programming II",
+    "Topic": "The Java Library",
+    "Sub-Topic": "Java Library",
+    "Tags": ["Java library", "classes", "Java"]
+  },
+  {
+    "Question": "What is the main problem with arrays that ArrayLists solve?",
+    "Answer": "Arrays have a fixed size and are difficult to extend, while ArrayLists can change size dynamically.",
+    "Module": "Programming II",
+    "Topic": "Collections and Iterators",
+    "Sub-Topic": "Problems with Arrays",
+    "Tags": ["arrays", "ArrayList", "Java"]
+  },
+  {
+    "Question": "How do you add and remove elements from an ArrayList in Java?",
+    "Answer": "Use the add() method to add and remove() to remove elements.",
+    "Module": "Programming II",
+    "Topic": "Collections and Iterators",
+    "Sub-Topic": "ArrayList Syntax",
+    "Tags": ["ArrayList", "add", "remove", "Java"]
+  },
+  {
+    "Question": "What is the difference between an array and an ArrayList in Java?",
+    "Answer": "Arrays have a fixed size and special syntax, while ArrayLists are dynamic and provide more methods.",
+    "Module": "Programming II",
+    "Topic": "Collections and Iterators",
+    "Sub-Topic": "Array vs ArrayList",
+    "Tags": ["arrays", "ArrayList", "Java"]
+  },
+  {
+    "Question": "Can ArrayLists store primitive types in Java?",
+    "Answer": "No, they can only store objects.",
+    "Module": "Programming II",
+    "Topic": "Collections and Iterators",
+    "Sub-Topic": "Primitives",
+    "Tags": ["ArrayList", "primitives", "Java"]
+  },
+  {
+    "Question": "What are generics in Java and how do they relate to ArrayLists?",
+    "Answer": "Generics allow you to specify the type of objects an ArrayList can hold, enforcing type safety.",
+    "Module": "Programming II",
+    "Topic": "Collections and Iterators",
+    "Sub-Topic": "Generics",
+    "Tags": ["generics", "ArrayList", "Java"]
+  },
+  {
+    "Question": "What is an iterator in Java?",
+    "Answer": "It is an object that enables traversal through a collection, one element at a time.",
+    "Module": "Programming II",
+    "Topic": "Collections and Iterators",
+    "Sub-Topic": "Iterators",
+    "Tags": ["iterator", "collections", "Java"]
+  },
+  {
+    "Question": "What are the main methods provided by the Iterator interface in Java?",
+    "Answer": "hasNext(), next(), and remove().",
+    "Module": "Programming II",
+    "Topic": "Collections and Iterators",
+    "Sub-Topic": "Iterator Methods",
+    "Tags": ["iterator", "methods", "Java"]
+  },
+  {
+    "Question": "Why is it safer to remove elements from a collection using an iterator?",
+    "Answer": "Because the iterator's remove() method avoids concurrent modification issues during iteration.",
+    "Module": "Programming II",
+    "Topic": "Collections and Iterators",
+    "Sub-Topic": "Iterator Methods",
+    "Tags": ["iterator", "remove", "Java"]
+  },
+  {
+    "Question": "What are the advantages of using iterators in Java?",
+    "Answer": "They provide a uniform way to access elements, hide implementation details, and allow safe removal during iteration.",
+    "Module": "Programming II",
+    "Topic": "Collections and Iterators",
+    "Sub-Topic": "Iterator Advantages",
+    "Tags": ["iterator", "advantages", "Java"]
+  },
+  {
+    "Question": "What is the purpose of enums in Java?",
+    "Answer": "They model variables with a finite set of constant values, improving type safety and code clarity.",
+    "Module": "Programming II",
+    "Topic": "Enums, Vars, and Ellipsis",
+    "Sub-Topic": "Enums",
+    "Tags": ["enum", "constants", "Java"]
+  },
+  {
+    "Question": "What problems do enums solve compared to static final constants?",
+    "Answer": "They prevent mixing unrelated constants, avoid brittle code, and provide more context and type safety.",
+    "Module": "Programming II",
+    "Topic": "Enums, Vars, and Ellipsis",
+    "Sub-Topic": "Enums",
+    "Tags": ["enum", "static final", "Java"]
+  },
+  {
+    "Question": "What does the values() method of an enum return in Java?",
+    "Answer": "An array of all possible values of the enum.",
+    "Module": "Programming II",
+    "Topic": "Enums, Vars, and Ellipsis",
+    "Sub-Topic": "Enum Methods",
+    "Tags": ["enum", "values()", "Java"]
+  },
+  {
+    "Question": "What does the ordinal() method of an enum return in Java?",
+    "Answer": "The position of the enum constant in its declaration, as an integer.",
+    "Module": "Programming II",
+    "Topic": "Enums, Vars, and Ellipsis",
+    "Sub-Topic": "Enum Methods",
+    "Tags": ["enum", "ordinal()", "Java"]
+  },
+  {
+    "Question": "How are Java enums implemented under the hood?",
+    "Answer": "Each enum type is an instantiation of an anonymous inner class, supporting the singleton pattern.",
+    "Module": "Programming II",
+    "Topic": "Enums, Vars, and Ellipsis",
+    "Sub-Topic": "Enum Implementation",
+    "Tags": ["enum", "implementation", "Java"]
+  },
+  {
+    "Question": "What is the singleton programming pattern and how do enums relate to it?",
+    "Answer": "It restricts a class to a single instance; enums are implemented as singletons in Java.",
+    "Module": "Programming II",
+    "Topic": "Enums, Vars, and Ellipsis",
+    "Sub-Topic": "Singleton Pattern",
+    "Tags": ["singleton", "enum", "Java"]
+  },
+  {
+    "Question": "What is a static variable in Java and how is it shared?",
+    "Answer": "It is a class variable shared across all instances of the class.",
+    "Module": "Programming II",
+    "Topic": "Static Variables",
+    "Sub-Topic": "Overview",
+    "Tags": ["static variable", "class variable", "Java"]
+  },
+  {
+    "Question": "Where are static variables stored in the JVM?",
+    "Answer": "In the heap, specifically in the constant pool.",
+    "Module": "Programming II",
+    "Topic": "Static Variables",
+    "Sub-Topic": "JVM Details",
+    "Tags": ["static variable", "heap", "JVM", "Java"]
+  },
+  {
+    "Question": "When are static variables initialized in Java?",
+    "Answer": "At class loading time, before any objects are constructed.",
+    "Module": "Programming II",
+    "Topic": "Static Variables",
+    "Sub-Topic": "Initialization",
+    "Tags": ["static variable", "initialization", "Java"]
+  },
+  {
+    "Question": "Why can't the 'this' keyword be used with static variables or methods?",
+    "Answer": "Because static members belong to the class, not to any instance, and 'this' refers to an instance.",
+    "Module": "Programming II",
+    "Topic": "Static Variables",
+    "Sub-Topic": "This Keyword",
+    "Tags": ["static", "this", "Java"]
+  },
+  {
+    "Question": "What is a static final variable in Java and where must it be declared?",
+    "Answer": "It is a constant that must be declared directly under the first line of the class.",
+    "Module": "Programming II",
+    "Topic": "Static Variables",
+    "Sub-Topic": "Static Final Variables",
+    "Tags": ["static final", "constant", "Java"]
+  },
+  {
+    "Question": "What is a static method in Java and what are its limitations?",
+    "Answer": "It is a class-based method that cannot reference instance-specific variables or methods, nor use 'this'.",
+    "Module": "Programming II",
+    "Topic": "Static Variables",
+    "Sub-Topic": "Static Methods",
+    "Tags": ["static method", "limitations", "Java"]
+  },
+  {
+    "Question": "Why might you use a static method in Java?",
+    "Answer": "When functionality does not depend on instance data, such as utility methods in Math or Arrays classes.",
+    "Module": "Programming II",
+    "Topic": "Static Variables",
+    "Sub-Topic": "Static Methods",
+    "Tags": ["static method", "utility", "Java"]
+  },
+  {
+    "Question": "What distinguishes a process from a thread in terms of memory and resource management?",
+    "Answer": "A process has its own memory space and system resources, while a thread shares the process's resources such as memory and open files.",
+    "Module": "Programming II",
+    "Topic": "Java Multithreading",
+    "Sub-Topic": "Processes vs Threads",
+    "Tags": ["process", "thread", "memory", "resources"]
+  },
+  {
+    "Question": "Why is multithreading considered more efficient than single-threaded execution?",
+    "Answer": "It allows background processing and enables multiple tasks to run concurrently, improving resource utilization and responsiveness.",
+    "Module": "Programming II",
+    "Topic": "Java Multithreading",
+    "Sub-Topic": "Threading Motivation",
+    "Tags": ["multithreading", "efficiency", "concurrency"]
+  },
+  {
+    "Question": "Which Java class provides built-in support for creating threads?",
+    "Answer": "The Thread class provides built-in support for creating and managing threads.",
+    "Module": "Programming II",
+    "Topic": "Java Multithreading",
+    "Sub-Topic": "Java Threading Support",
+    "Tags": ["Thread class", "Java", "multithreading"]
+  },
+  {
+    "Question": "What memory areas are unique to each thread in the JVM?",
+    "Answer": "Each thread has its own Java Stack and Program Counter register.",
+    "Module": "Programming II",
+    "Topic": "Java Multithreading",
+    "Sub-Topic": "JVM Thread Memory",
+    "Tags": ["JVM", "thread", "Java Stack", "Program Counter"]
+  },
+  {
+    "Question": "Which memory areas are shared among all threads in the JVM?",
+    "Answer": "The Heap and Metaspace (method area) are shared among all threads.",
+    "Module": "Programming II",
+    "Topic": "Java Multithreading",
+    "Sub-Topic": "JVM Shared Memory",
+    "Tags": ["JVM", "heap", "metaspace", "shared memory"]
+  },
+  {
+    "Question": "What must be done when creating a class that extends Thread to define its behavior?",
+    "Answer": "The run() method must be overridden to specify the thread's behavior.",
+    "Module": "Programming II",
+    "Topic": "Java Multithreading",
+    "Sub-Topic": "Extending Thread",
+    "Tags": ["Thread", "run method", "Java"]
+  },
+  {
+    "Question": "Why should start() be used instead of run() to begin thread execution?",
+    "Answer": "start() creates a new thread and invokes run() in that thread, enabling concurrent execution, while calling run() directly executes in the current thread.",
+    "Module": "Programming II",
+    "Topic": "Java Multithreading",
+    "Sub-Topic": "Thread Start",
+    "Tags": ["start method", "run method", "concurrency"]
+  },
+  {
+    "Question": "What is the main advantage of implementing Runnable instead of extending Thread?",
+    "Answer": "It allows a class to extend other classes while still supporting multithreading, as Java supports only single inheritance but multiple interfaces.",
+    "Module": "Programming II",
+    "Topic": "Java Multithreading",
+    "Sub-Topic": "Runnable Interface",
+    "Tags": ["Runnable", "Thread", "inheritance"]
+  },
+  {
+    "Question": "How is a thread started when using the Runnable interface?",
+    "Answer": "A Thread object is created with the Runnable as its target, and start() is called on the Thread.",
+    "Module": "Programming II",
+    "Topic": "Java Multithreading",
+    "Sub-Topic": "Runnable Start",
+    "Tags": ["Runnable", "Thread", "start method"]
+  },
+  {
+    "Question": "How can thread priorities be set in Java?",
+    "Answer": "By calling setPriority(int) on a Thread object, using constants like Thread.MIN_PRIORITY, Thread.NORM_PRIORITY, and Thread.MAX_PRIORITY.",
+    "Module": "Programming II",
+    "Topic": "Java Multithreading",
+    "Sub-Topic": "Thread Priorities",
+    "Tags": ["thread priority", "setPriority", "Java"]
+  },
+  {
+    "Question": "What is the effect of calling Thread.yield() in a thread?",
+    "Answer": "It hints to the scheduler that the current thread is willing to yield the CPU, allowing other threads to execute.",
+    "Module": "Programming II",
+    "Topic": "Java Multithreading",
+    "Sub-Topic": "Yielding Threads",
+    "Tags": ["Thread.yield", "scheduler", "Java"]
+  },
+  {
+    "Question": "How does Thread.interrupt() affect a running thread?",
+    "Answer": "It sets the thread's interrupt flag, which can be checked or cause certain blocking operations to throw InterruptedException.",
+    "Module": "Programming II",
+    "Topic": "Java Multithreading",
+    "Sub-Topic": "Interrupting Threads",
+    "Tags": ["Thread.interrupt", "InterruptedException", "Java"]
+  },
+  {
+    "Question": "What must a thread do to respond to an interruption?",
+    "Answer": "It should periodically check its interrupt status or handle InterruptedException in blocking operations.",
+    "Module": "Programming II",
+    "Topic": "Java Multithreading",
+    "Sub-Topic": "Interrupt Handling",
+    "Tags": ["interruption", "thread", "Java"]
+  },
+  {
+    "Question": "What is the Producer-Consumer problem and why is synchronization needed?",
+    "Answer": "It involves coordinating producer and consumer threads sharing a resource, requiring synchronization to avoid race conditions and manage buffer states.",
+    "Module": "Programming II",
+    "Topic": "Java Multithreading",
+    "Sub-Topic": "Producer-Consumer Model",
+    "Tags": ["producer-consumer", "synchronization", "race condition"]
+  },
+  {
+    "Question": "What does the wait() method do in Java's monitor model?",
+    "Answer": "It causes the current thread to pause and release the object's lock until notified by another thread.",
+    "Module": "Programming II",
+    "Topic": "Java Multithreading",
+    "Sub-Topic": "wait method",
+    "Tags": ["wait", "monitor", "Java"]
+  },
+  {
+    "Question": "When must wait() and notify() be called in Java?",
+    "Answer": "They must be called from within a synchronized block or method on the object's monitor.",
+    "Module": "Programming II",
+    "Topic": "Java Multithreading",
+    "Sub-Topic": "wait/notify usage",
+    "Tags": ["wait", "notify", "synchronized", "Java"]
+  },
+  {
+    "Question": "What is the difference between notify() and notifyAll() in Java monitors?",
+    "Answer": "notify() wakes a single waiting thread, while notifyAll() wakes all threads waiting on the object's monitor.",
+    "Module": "Programming II",
+    "Topic": "Java Multithreading",
+    "Sub-Topic": "notify vs notifyAll",
+    "Tags": ["notify", "notifyAll", "monitor", "Java"]
+  },
+  {
+    "Question": "What is a monitor in the context of Java concurrency?",
+    "Answer": "It is a synchronization construct that encapsulates data and operations, ensuring mutual exclusion and supporting condition variables for thread coordination.",
+    "Module": "Programming II",
+    "Topic": "Java Multithreading",
+    "Sub-Topic": "Monitors",
+    "Tags": ["monitor", "synchronization", "Java"]
+  },
+  {
+    "Question": "How does the synchronized keyword relate to Java monitors?",
+    "Answer": "It places code inside a monitor, ensuring only one thread can execute the block at a time using the object's mutex lock.",
+    "Module": "Programming II",
+    "Topic": "Java Multithreading",
+    "Sub-Topic": "synchronized keyword",
+    "Tags": ["synchronized", "monitor", "mutex", "Java"]
+  },
+  {
+    "Question": "What happens to a thread that calls wait() inside a synchronized block?",
+    "Answer": "It is blocked, placed in the object's wait queue, and releases the mutex lock for other threads to enter.",
+    "Module": "Programming II",
+    "Topic": "Java Multithreading",
+    "Sub-Topic": "wait behavior",
+    "Tags": ["wait", "mutex", "thread", "Java"]
+  },
+  {
+    "Question": "What is a race condition and how can it occur in Java multithreading?",
+    "Answer": "It occurs when multiple threads access and modify shared data concurrently, leading to unpredictable results due to unsynchronized access.",
+    "Module": "Programming II",
+    "Topic": "Java Multithreading",
+    "Sub-Topic": "Race Condition",
+    "Tags": ["race condition", "shared data", "Java"]
+  },
+  {
+    "Question": "Why is count++ not atomic in a multithreaded context?",
+    "Answer": "Because it involves multiple steps (load, increment, store) that can be interleaved by the scheduler, causing inconsistent updates.",
+    "Module": "Programming II",
+    "Topic": "Java Multithreading",
+    "Sub-Topic": "Atomicity",
+    "Tags": ["atomicity", "increment", "race condition"]
+  },
+  {
+    "Question": "How does a synchronized block prevent race conditions?",
+    "Answer": "It ensures that only one thread can execute the critical section at a time, protecting shared variables from concurrent modification.",
+    "Module": "Programming II",
+    "Topic": "Java Multithreading",
+    "Sub-Topic": "Synchronized Block",
+    "Tags": ["synchronized", "critical section", "race condition"]
+  },
+  {
+    "Question": "What is the effect of declaring a method as synchronized in Java?",
+    "Answer": "It acquires the object's lock for the entire method, ensuring thread-safe access to shared resources.",
+    "Module": "Programming II",
+    "Topic": "Java Multithreading",
+    "Sub-Topic": "Synchronized Method",
+    "Tags": ["synchronized", "method", "thread safety"]
+  },
+  {
+    "Question": "Why is it good practice to keep sleep() calls outside synchronized blocks?",
+    "Answer": "To avoid holding locks during long operations, which can block other threads and reduce concurrency.",
+    "Module": "Programming II",
+    "Topic": "Java Multithreading",
+    "Sub-Topic": "Synchronization Best Practices",
+    "Tags": ["sleep", "synchronized", "locks", "Java"]
+  },
+  {
+    "Question": "What is the risk of over-synchronizing code in Java?",
+    "Answer": "It can cause unnecessary blocking and heavy runtime overheads, reducing performance.",
+    "Module": "Programming II",
+    "Topic": "Java Multithreading",
+    "Sub-Topic": "OverSynchronising",
+    "Tags": ["synchronization", "performance", "blocking"]
+  },
+  {
+    "Question": "How can different locks be used to protect independent shared variables?",
+    "Answer": "By synchronizing on separate lock objects for each variable, allowing independent access and updates.",
+    "Module": "Programming II",
+    "Topic": "Java Multithreading",
+    "Sub-Topic": "Different Locks",
+    "Tags": ["locks", "synchronization", "shared variables"]
+  },
+  {
+    "Question": "What is a deadlock and how can it occur in Java multithreading?",
+    "Answer": "It happens when threads hold locks and wait for each other in a cycle, preventing any from proceeding.",
+    "Module": "Programming II",
+    "Topic": "Java Multithreading",
+    "Sub-Topic": "Deadlocks",
+    "Tags": ["deadlock", "locks", "Java"]
+  },
+  {
+    "Question": "What are the main states of a Java thread during its lifecycle?",
+    "Answer": "New, Runnable, Blocked, Waiting, Timed Waiting, and Terminated.",
+    "Module": "Programming II",
+    "Topic": "Java Multithreading",
+    "Sub-Topic": "Thread States",
+    "Tags": ["thread state", "lifecycle", "Java"]
+  },
+  {
+    "Question": "How can you check if a thread has started in Java?",
+    "Answer": "By calling isAlive() on the thread object.",
+    "Module": "Programming II",
+    "Topic": "Java Multithreading",
+    "Sub-Topic": "Thread Management",
+    "Tags": ["isAlive", "thread", "Java"]
+  },
+  {
+    "Question": "What method is used to wait for a thread to finish before continuing execution?",
+    "Answer": "The join() method is used to wait for a thread to complete.",
+    "Module": "Programming II",
+    "Topic": "Java Multithreading",
+    "Sub-Topic": "Thread Management",
+    "Tags": ["join", "thread", "Java"]
+  },
+  {
+    "Question": "What is the difference between a user thread and a daemon thread in Java?",
+    "Answer": "User threads keep the JVM running until they finish, while daemon threads provide background services and do not prevent JVM termination.",
+    "Module": "Programming II",
+    "Topic": "Java Multithreading",
+    "Sub-Topic": "Daemon vs User Thread",
+    "Tags": ["daemon thread", "user thread", "JVM"]
+  },
+  {
+    "Question": "How can a thread be set as a daemon thread in Java?",
+    "Answer": "By calling setDaemon(true) on the thread before it is started.",
+    "Module": "Programming II",
+    "Topic": "Java Multithreading",
+    "Sub-Topic": "Daemon Thread",
+    "Tags": ["setDaemon", "daemon thread", "Java"]
+  },
+  {
+    "Question": "What is the recommended way to stop a thread in Java?",
+    "Answer": "By using a boolean flag checked in the thread's run loop, rather than deprecated methods like stop() or suspend().",
+    "Module": "Programming II",
+    "Topic": "Java Multithreading",
+    "Sub-Topic": "Stopping Threads",
+    "Tags": ["stop thread", "boolean flag", "Java"]
+  },
+  {
+    "Question": "What distinguishes event-driven programming from sequential and concurrent execution?",
+    "Answer": "It waits for specific actions to occur and responds to them, rather than following a predetermined sequence or running multiple tasks in parallel.",
+    "Module": "Programming II",
+    "Topic": "Event Driven Programming",
+    "Sub-Topic": "Execution Models",
+    "Tags": ["event-driven", "sequential", "concurrent", "execution"]
+  },
+  {
+    "Question": "How does a scene graph structure organize UI elements in JavaFX?",
+    "Answer": "It arranges nodes in a hierarchical tree, with a single root node and parent-child relationships between containers and components.",
+    "Module": "Programming II",
+    "Topic": "Event Driven Programming",
+    "Sub-Topic": "Scene Graphs",
+    "Tags": ["scene graph", "JavaFX", "UI", "nodes"]
+  },
+  {
+    "Question": "What is the difference between parent and leaf nodes in a JavaFX scene graph?",
+    "Answer": "Parent nodes can contain children, while leaf nodes cannot and represent individual UI components.",
+    "Module": "Programming II",
+    "Topic": "Event Driven Programming",
+    "Sub-Topic": "Scene Graphs",
+    "Tags": ["parent node", "leaf node", "JavaFX"]
+  },
+  {
+    "Question": "What is the role of a Stage in a JavaFX application?",
+    "Answer": "It represents the top-level window, controls window properties, and can hold one active Scene at a time.",
+    "Module": "Programming II",
+    "Topic": "Event Driven Programming",
+    "Sub-Topic": "Stage",
+    "Tags": ["Stage", "JavaFX", "window"]
+  },
+  {
+    "Question": "How do VBox and HBox containers differ in JavaFX?",
+    "Answer": "One arranges children vertically in a column, while the other arranges them horizontally in a row.",
+    "Module": "Programming II",
+    "Topic": "Event Driven Programming",
+    "Sub-Topic": "Containers",
+    "Tags": ["VBox", "HBox", "JavaFX", "layout"]
+  },
+  {
+    "Question": "What is the purpose of a StackPane in JavaFX?",
+    "Answer": "It layers its children in a stack, centering them by default and allowing for overlapping UI elements.",
+    "Module": "Programming II",
+    "Topic": "Event Driven Programming",
+    "Sub-Topic": "Containers",
+    "Tags": ["StackPane", "JavaFX", "layout"]
+  },
+  {
+    "Question": "How does an AnchorPane support responsive layouts in JavaFX?",
+    "Answer": "It allows nodes to be anchored to specific sides, enabling elements to resize proportionally with the window.",
+    "Module": "Programming II",
+    "Topic": "Event Driven Programming",
+    "Sub-Topic": "Containers",
+    "Tags": ["AnchorPane", "JavaFX", "responsive", "layout"]
+  },
+  {
+    "Question": "What happens when a button is clicked in JavaFX?",
+    "Answer": "An ActionEvent is generated and passed to any registered event handlers, which then execute their code.",
+    "Module": "Programming II",
+    "Topic": "Event Handling",
+    "Sub-Topic": "Buttons and Action Events",
+    "Tags": ["Button", "ActionEvent", "JavaFX", "event handler"]
+  },
+  {
+    "Question": "How can you attach an event handler to a button in JavaFX?",
+    "Answer": "By using the setOnAction method and providing a lambda expression or an EventHandler implementation.",
+    "Module": "Programming II",
+    "Topic": "Event Handling",
+    "Sub-Topic": "Buttons and Action Events",
+    "Tags": ["Button", "setOnAction", "JavaFX", "event handler"]
+  },
+  {
+    "Question": "What are the four types of nested classes in Java, and how do they differ?",
+    "Answer": "They are static nested, non-static inner, local inner, and anonymous inner classes, each with different access to enclosing class members and scope.",
+    "Module": "Programming II",
+    "Topic": "Nested Classes",
+    "Sub-Topic": "Types",
+    "Tags": ["nested class", "static", "inner", "Java"]
+  },
+  {
+    "Question": "Why might you use a static nested class as an event handler in JavaFX?",
+    "Answer": "It can be created without an instance of the outer class and is useful for helper classes that only need static context.",
+    "Module": "Programming II",
+    "Topic": "Nested Classes",
+    "Sub-Topic": "Static Nested Classes",
+    "Tags": ["static nested class", "event handler", "JavaFX"]
+  },
+  {
+    "Question": "How does a non-static inner class differ from a static nested class in Java?",
+    "Answer": "It has access to all members of the enclosing class, including private fields, and is always associated with an instance.",
+    "Module": "Programming II",
+    "Topic": "Nested Classes",
+    "Sub-Topic": "Non-static Inner Classes",
+    "Tags": ["inner class", "Java", "enclosing class"]
+  },
+  {
+    "Question": "What is a local inner class and when is it useful in JavaFX?",
+    "Answer": "It is defined within a method or block, only visible there, and is useful for specialized implementations needed in a specific context.",
+    "Module": "Programming II",
+    "Topic": "Nested Classes",
+    "Sub-Topic": "Local Inner Classes",
+    "Tags": ["local inner class", "JavaFX", "scope"]
+  },
+  {
+    "Question": "How do lambda expressions simplify event handling in JavaFX?",
+    "Answer": "They provide a concise syntax for implementing single-method interfaces, making code more readable and reducing boilerplate.",
+    "Module": "Programming II",
+    "Topic": "Nested Classes",
+    "Sub-Topic": "Lambda Expressions",
+    "Tags": ["lambda", "event handler", "JavaFX"]
+  },
+  {
+    "Question": "What are the main benefits of using nested classes in Java?",
+    "Answer": "They allow logical grouping, encapsulation, improved readability, direct access to enclosing class members, and reduced namespace pollution.",
+    "Module": "Programming II",
+    "Topic": "Nested Classes",
+    "Sub-Topic": "Benefits",
+    "Tags": ["nested class", "encapsulation", "Java"]
+  },
+  {
+    "Question": "How does the method reference operator (::) improve code readability in Java?",
+    "Answer": "It provides a shorthand for referring to methods or constructors, reducing boilerplate when using lambdas.",
+    "Module": "Programming II",
+    "Topic": "Lambdas",
+    "Sub-Topic": "Method Reference Operator",
+    "Tags": ["method reference", "lambda", "Java"]
+  },
+  {
+    "Question": "What is the purpose of JavaFX property classes like StringProperty and ObjectProperty?",
+    "Answer": "They wrap Java primitives and objects, enabling binding and automatic updates between UI components and data.",
+    "Module": "Programming II",
+    "Topic": "JavaFX Properties and Binding",
+    "Sub-Topic": "Property Classes",
+    "Tags": ["JavaFX", "property", "binding"]
+  },
+  {
+    "Question": "How does binding improve UI synchronization in JavaFX applications?",
+    "Answer": "It keeps components automatically updated with changes in underlying data, reducing the need for manual updates.",
+    "Module": "Programming II",
+    "Topic": "JavaFX Properties and Binding",
+    "Sub-Topic": "Binding",
+    "Tags": ["binding", "JavaFX", "UI"]
+  },
+  {
+    "Question": "What is the Hollywood Principle in the context of JavaFX binding?",
+    "Answer": "It means that objects are notified of changes by a central authority, rather than constantly polling for updates.",
+    "Module": "Programming II",
+    "Topic": "JavaFX Properties and Binding",
+    "Sub-Topic": "Hollywood Principle",
+    "Tags": ["Hollywood Principle", "binding", "JavaFX"]
+  },
+  {
+    "Question": "How does a ChangeListener work in JavaFX?",
+    "Answer": "It responds automatically when the value of an observable property changes, receiving the old and new values.",
+    "Module": "Programming II",
+    "Topic": "JavaFX Properties and Binding",
+    "Sub-Topic": "ChangeListener",
+    "Tags": ["ChangeListener", "JavaFX", "observable"]
+  },
+  {
+    "Question": "What is the difference between using an anonymous class and a lambda for a ChangeListener in JavaFX?",
+    "Answer": "A lambda provides a more concise syntax, while an anonymous class is more verbose but can be used for more complex logic.",
+    "Module": "Programming II",
+    "Topic": "JavaFX Properties and Binding",
+    "Sub-Topic": "ChangeListener",
+    "Tags": ["ChangeListener", "lambda", "JavaFX"]
+  },
+  {
+    "Question": "How can you open a new window in JavaFX?",
+    "Answer": "By creating a new Stage, setting its Scene, and calling show() on it.",
+    "Module": "Programming II",
+    "Topic": "Timers, Transitions, and Custom Components",
+    "Sub-Topic": "Stages",
+    "Tags": ["Stage", "window", "JavaFX"]
+  },
+  {
+    "Question": "What is the Timeline class used for in JavaFX?",
+    "Answer": "It schedules actions over time by managing a sequence of KeyFrame objects.",
+    "Module": "Programming II",
+    "Topic": "Timers, Transitions, and Custom Components",
+    "Sub-Topic": "Timers and Scheduling",
+    "Tags": ["Timeline", "KeyFrame", "JavaFX"]
+  },
+  {
+    "Question": "How does the KeyFrame class work in JavaFX animations?",
+    "Answer": "It specifies an action and the time after the start of the timeline when that action should occur.",
+    "Module": "Programming II",
+    "Topic": "Timers, Transitions, and Custom Components",
+    "Sub-Topic": "Timers and Scheduling",
+    "Tags": ["KeyFrame", "Timeline", "JavaFX"]
+  },
+  {
+    "Question": "What is reflection in Java and what can it be used for?",
+    "Answer": "It allows objects to examine themselves and fetch information about fields, methods, and constructors at runtime.",
+    "Module": "Programming II",
+    "Topic": "Timers, Transitions, and Custom Components",
+    "Sub-Topic": "Reflection",
+    "Tags": ["reflection", "Class", "Java"]
+  },
+  {
+    "Question": "What is Maven and what are its main purposes?",
+    "Answer": "It is a build, project management, and dependency management tool that automates compiling, packaging, and managing libraries.",
+    "Module": "Programming II",
+    "Topic": "Maven and JavaFX",
+    "Sub-Topic": "Maven Overview",
+    "Tags": ["Maven", "build tool", "dependency management"]
+  },
+  {
+    "Question": "How does Maven manage dependencies for a Java project?",
+    "Answer": "It uses a POM file to declare dependencies, automatically downloads them, and resolves transitive dependencies.",
+    "Module": "Programming II",
+    "Topic": "Maven and JavaFX",
+    "Sub-Topic": "Dependency Management",
+    "Tags": ["Maven", "dependencies", "POM"]
+  },
+  {
+    "Question": "What is the standard directory layout for a Maven project?",
+    "Answer": "It separates source code, resources, tests, and build output into specific folders like src/main/java and target.",
+    "Module": "Programming II",
+    "Topic": "Maven and JavaFX",
+    "Sub-Topic": "Project Structure",
+    "Tags": ["Maven", "directory layout", "project structure"]
+  },
+  {
+    "Question": "What are the main elements of a Maven POM file?",
+    "Answer": "It includes groupId, artifactId, version, dependencies, build configuration, and project metadata.",
+    "Module": "Programming II",
+    "Topic": "Maven and JavaFX",
+    "Sub-Topic": "POM Structure",
+    "Tags": ["Maven", "POM", "project configuration"]
+  },
+  {
+    "Question": "How can Maven properties be used in a POM file?",
+    "Answer": "They allow centralizing configuration values and can be referenced throughout the POM for consistency.",
+    "Module": "Programming II",
+    "Topic": "Maven and JavaFX",
+    "Sub-Topic": "POM Structure",
+    "Tags": ["Maven", "properties", "POM"]
+  },
+  {
+    "Question": "What is the purpose of specifying dependency scope in Maven?",
+    "Answer": "It controls when a dependency is available, such as only during testing or at runtime.",
+    "Module": "Programming II",
+    "Topic": "Maven and JavaFX",
+    "Sub-Topic": "Dependency Management",
+    "Tags": ["Maven", "dependency scope", "POM"]
+  },
+  {
+    "Question": "How does Maven resolve transitive dependencies?",
+    "Answer": "It automatically includes dependencies of dependencies, simplifying management but allowing exclusions to prevent conflicts.",
+    "Module": "Programming II",
+    "Topic": "Maven and JavaFX",
+    "Sub-Topic": "Dependency Management",
+    "Tags": ["Maven", "transitive dependencies"]
+  },
+  {
+    "Question": "What is the Maven build lifecycle and what are its main phases?",
+    "Answer": "It is a sequence of phases like validate, compile, test, package, install, and deploy, each executing specific build goals.",
+    "Module": "Programming II",
+    "Topic": "Maven and JavaFX",
+    "Sub-Topic": "Build Lifecycle",
+    "Tags": ["Maven", "build lifecycle", "phases"]
+  },
+  {
+    "Question": "How do Maven plugins extend the build process?",
+    "Answer": "They perform tasks such as compiling code, running tests, packaging, and generating documentation.",
+    "Module": "Programming II",
+    "Topic": "Maven and JavaFX",
+    "Sub-Topic": "Plugins",
+    "Tags": ["Maven", "plugins", "build process"]
+  },
+  {
+    "Question": "What is the difference between the Maven Shade and Assembly plugins?",
+    "Answer": "One creates a self-contained JAR with dependencies, while the other assembles a JAR with dependencies using a descriptor.",
+    "Module": "Programming II",
+    "Topic": "Maven and JavaFX",
+    "Sub-Topic": "Plugins",
+    "Tags": ["Maven", "shade plugin", "assembly plugin"]
+  },
+  {
+    "Question": "How does Maven support generating documentation for Java projects?",
+    "Answer": "It uses the Javadoc plugin to create HTML documentation from code comments, which can be included in the project site.",
+    "Module": "Programming II",
+    "Topic": "Maven and JavaFX",
+    "Sub-Topic": "Documentation",
+    "Tags": ["Maven", "Javadoc", "documentation"]
+  },
+  {
+    "Question": "What are some best practices for managing dependencies in Maven?",
+    "Answer": "Use explicit versions, appropriate scopes, keep dependencies up-to-date, and be aware of transitive conflicts.",
+    "Module": "Programming II",
+    "Topic": "Maven and JavaFX",
+    "Sub-Topic": "Best Practices",
+    "Tags": ["Maven", "dependencies", "best practices"]
+  },
+  {
+    "Question": "Why is it beneficial to use profiles in Maven?",
+    "Answer": "They allow for environment-specific configurations, making it easier to manage builds for different deployment targets.",
+    "Module": "Programming II",
+    "Topic": "Maven and JavaFX",
+    "Sub-Topic": "Best Practices",
+    "Tags": ["Maven", "profiles", "configuration"]
+  },
+  {
+    "Question": "How does recursion help in breaking down complex problems in Java?",
+    "Answer": "It divides a large problem into smaller subproblems that use the same logic, making the solution easier to conceptualize and implement.",
+    "Module": "Programming II",
+    "Topic": "Control Flow",
+    "Sub-Topic": "Recursion",
+    "Tags": ["recursion", "problem solving", "Java"]
+  },
+  {
+    "Question": "What is stored in a stack frame during recursive method calls in Java?",
+    "Answer": "It contains method parameters, local variables, return addresses, and references needed for execution.",
+    "Module": "Programming II",
+    "Topic": "Control Flow",
+    "Sub-Topic": "Recursion and the Java Stack",
+    "Tags": ["recursion", "stack frame", "Java"]
+  },
+  {
+    "Question": "Why can deep recursion lead to a StackOverflowError in Java?",
+    "Answer": "Each recursive call creates a new stack frame, and Java does not optimize tail recursion, so deep recursion can exhaust the stack.",
+    "Module": "Programming II",
+    "Topic": "Control Flow",
+    "Sub-Topic": "Tail Recursion",
+    "Tags": ["recursion", "stack overflow", "Java"]
+  },
+  {
+    "Question": "How does tail recursion differ from regular recursion, and why is it not optimized in Java?",
+    "Answer": "Tail recursion makes the recursive call the last operation, but Java's JVM still creates a new stack frame for each call, unlike some functional languages.",
+    "Module": "Programming II",
+    "Topic": "Control Flow",
+    "Sub-Topic": "Tail Recursion",
+    "Tags": ["tail recursion", "optimization", "Java"]
+  },
+  {
+    "Question": "What is a design pattern in software engineering?",
+    "Answer": "It is a reusable general solution to a common software design problem, providing a template for solving similar issues.",
+    "Module": "Programming II",
+    "Topic": "Design Patterns",
+    "Sub-Topic": "Overview",
+    "Tags": ["design pattern", "software engineering"]
+  },
+  {
+    "Question": "What are the main benefits of using design patterns in software development?",
+    "Answer": "They improve reusability, maintainability, scalability, flexibility, code readability, and encapsulation.",
+    "Module": "Programming II",
+    "Topic": "Design Patterns",
+    "Sub-Topic": "Why Use Design Patterns",
+    "Tags": ["design pattern", "benefits"]
+  },
+  {
+    "Question": "How does the Singleton pattern help manage shared resources?",
+    "Answer": "It ensures only one instance of a class exists, providing a global access point for shared resources like configurations.",
+    "Module": "Programming II",
+    "Topic": "Design Patterns",
+    "Sub-Topic": "Creational Patterns",
+    "Tags": ["singleton", "shared resources", "design pattern"]
+  },
+  {
+    "Question": "What is the purpose of the Factory Method pattern?",
+    "Answer": "It delegates object creation to subclasses, improving flexibility by abstracting the instantiation process.",
+    "Module": "Programming II",
+    "Topic": "Design Patterns",
+    "Sub-Topic": "Creational Patterns",
+    "Tags": ["factory method", "object creation", "design pattern"]
+  },
+  {
+    "Question": "How does the Abstract Factory pattern simplify switching between families of related objects?",
+    "Answer": "It creates families of related objects without specifying their concrete classes, ensuring consistency and easy switching.",
+    "Module": "Programming II",
+    "Topic": "Design Patterns",
+    "Sub-Topic": "Creational Patterns",
+    "Tags": ["abstract factory", "object families", "design pattern"]
+  },
+  {
+    "Question": "What advantage does the Builder pattern provide when constructing complex objects?",
+    "Answer": "It separates construction from representation, allowing step-by-step creation and different configurations for the final object.",
+    "Module": "Programming II",
+    "Topic": "Design Patterns",
+    "Sub-Topic": "Creational Patterns",
+    "Tags": ["builder", "complex objects", "design pattern"]
+  },
+  {
+    "Question": "When is the Prototype pattern especially useful?",
+    "Answer": "It is efficient when object creation is costly and similarities exist across objects, as it generates new objects by copying an existing instance.",
+    "Module": "Programming II",
+    "Topic": "Design Patterns",
+    "Sub-Topic": "Creational Patterns",
+    "Tags": ["prototype", "object cloning", "design pattern"]
+  },
+  {
+    "Question": "How does the Adapter pattern facilitate integration with legacy systems?",
+    "Answer": "It converts one interface into another, allowing incompatible systems to work together.",
+    "Module": "Programming II",
+    "Topic": "Design Patterns",
+    "Sub-Topic": "Structural Patterns",
+    "Tags": ["adapter", "legacy systems", "design pattern"]
+  },
+  {
+    "Question": "What is the main benefit of the Bridge pattern?",
+    "Answer": "It separates abstraction from implementation, enabling both to evolve independently and enhancing scalability.",
+    "Module": "Programming II",
+    "Topic": "Design Patterns",
+    "Sub-Topic": "Structural Patterns",
+    "Tags": ["bridge", "abstraction", "implementation", "design pattern"]
+  },
+  {
+    "Question": "How does the Composite pattern simplify client code?",
+    "Answer": "It organizes objects into tree structures, allowing individual objects and composites to be treated uniformly.",
+    "Module": "Programming II",
+    "Topic": "Design Patterns",
+    "Sub-Topic": "Structural Patterns",
+    "Tags": ["composite", "tree structure", "design pattern"]
+  },
+  {
+    "Question": "What is the purpose of the Decorator pattern?",
+    "Answer": "It dynamically attaches additional responsibilities to an object, extending functionality without modifying existing code.",
+    "Module": "Programming II",
+    "Topic": "Design Patterns",
+    "Sub-Topic": "Structural Patterns",
+    "Tags": ["decorator", "extensibility", "design pattern"]
+  },
+  {
+    "Question": "How does the Facade pattern improve clarity in complex systems?",
+    "Answer": "It offers a simplified interface to a complex subsystem, decoupling client interactions from detailed operations.",
+    "Module": "Programming II",
+    "Topic": "Design Patterns",
+    "Sub-Topic": "Structural Patterns",
+    "Tags": ["facade", "interface", "design pattern"]
+  },
+  {
+    "Question": "When is the Flyweight pattern most suitable?",
+    "Answer": "It is useful for managing large numbers of fine-grained objects efficiently by sharing common parts of object state.",
+    "Module": "Programming II",
+    "Topic": "Design Patterns",
+    "Sub-Topic": "Structural Patterns",
+    "Tags": ["flyweight", "memory efficiency", "design pattern"]
+  },
+  {
+    "Question": "What is the role of the Proxy pattern?",
+    "Answer": "It controls access to a target object, often adding security or managing resources, and is useful for lazy initialization or logging.",
+    "Module": "Programming II",
+    "Topic": "Design Patterns",
+    "Sub-Topic": "Structural Patterns",
+    "Tags": ["proxy", "access control", "design pattern"]
+  },
+  {
+    "Question": "How does the Functor pattern enable advanced functional programming techniques?",
+    "Answer": "It treats functions as objects, allowing them to be passed and manipulated like data, supporting composition of behaviors.",
+    "Module": "Programming II",
+    "Topic": "Design Patterns",
+    "Sub-Topic": "Behavioural Patterns",
+    "Tags": ["functor", "functional programming", "design pattern"]
+  },
+  {
+    "Question": "What problem does the Iterator pattern solve?",
+    "Answer": "It provides sequential access to elements in a collection without exposing the underlying structure, simplifying traversal.",
+    "Module": "Programming II",
+    "Topic": "Design Patterns",
+    "Sub-Topic": "Behavioural Patterns",
+    "Tags": ["iterator", "collection traversal", "design pattern"]
+  },
+  {
+    "Question": "How does the Chain of Responsibility pattern decouple senders and receivers?",
+    "Answer": "It passes requests along a chain of handlers until one processes the request, allowing dynamic configuration of handling.",
+    "Module": "Programming II",
+    "Topic": "Design Patterns",
+    "Sub-Topic": "Behavioural Patterns",
+    "Tags": ["chain of responsibility", "decoupling", "design pattern"]
+  },
+  {
+    "Question": "What is the main use of the Command pattern?",
+    "Answer": "It encapsulates a request as an object, allowing parameterization, queuing, and support for undoable operations.",
+    "Module": "Programming II",
+    "Topic": "Design Patterns",
+    "Sub-Topic": "Behavioural Patterns",
+    "Tags": ["command", "request encapsulation", "design pattern"]
+  },
+  {
+    "Question": "How does the Interpreter pattern support parsing domain-specific languages?",
+    "Answer": "It represents grammar rules as classes, enabling the implementation of language interpreters.",
+    "Module": "Programming II",
+    "Topic": "Design Patterns",
+    "Sub-Topic": "Behavioural Patterns",
+    "Tags": ["interpreter", "DSL", "design pattern"]
+  },
+  {
+    "Question": "What is the benefit of the Mediator pattern?",
+    "Answer": "It centralizes communication between objects, reducing coupling and simplifying interaction management.",
+    "Module": "Programming II",
+    "Topic": "Design Patterns",
+    "Sub-Topic": "Behavioural Patterns",
+    "Tags": ["mediator", "communication", "design pattern"]
+  },
+  {
+    "Question": "How does the Memento pattern enable undo mechanisms?",
+    "Answer": "It captures and preserves an object's internal state without violating encapsulation, allowing restoration later.",
+    "Module": "Programming II",
+    "Topic": "Design Patterns",
+    "Sub-Topic": "Behavioural Patterns",
+    "Tags": ["memento", "undo", "design pattern"]
+  },
+  {
+    "Question": "What is the Observer pattern used for?",
+    "Answer": "It defines a one-to-many dependency where changes in one object automatically notify others, supporting event handling.",
+    "Module": "Programming II",
+    "Topic": "Design Patterns",
+    "Sub-Topic": "Behavioural Patterns",
+    "Tags": ["observer", "event handling", "design pattern"]
+  },
+  {
+    "Question": "How does the State pattern simplify complex conditional logic?",
+    "Answer": "It allows an object to change its behavior when its internal state changes, encapsulating state-specific behavior in separate classes.",
+    "Module": "Programming II",
+    "Topic": "Design Patterns",
+    "Sub-Topic": "Behavioural Patterns",
+    "Tags": ["state", "conditional logic", "design pattern"]
+  },
+  {
+    "Question": "What is the main advantage of the Strategy pattern?",
+    "Answer": "It defines interchangeable algorithms that can be selected at runtime, promoting flexibility by isolating implementations.",
+    "Module": "Programming II",
+    "Topic": "Design Patterns",
+    "Sub-Topic": "Behavioural Patterns",
+    "Tags": ["strategy", "algorithm selection", "design pattern"]
+  },
+  {
+    "Question": "How does the Template Method pattern maintain consistency across implementations?",
+    "Answer": "It defines an algorithm's structure while allowing subclasses to override specific steps, enabling customization.",
+    "Module": "Programming II",
+    "Topic": "Design Patterns",
+    "Sub-Topic": "Behavioural Patterns",
+    "Tags": ["template method", "customization", "design pattern"]
+  },
+  {
+    "Question": "What is the benefit of the Visitor pattern?",
+    "Answer": "It separates algorithms from the objects they operate on, allowing new operations without modifying classes.",
+    "Module": "Programming II",
+    "Topic": "Design Patterns",
+    "Sub-Topic": "Behavioural Patterns",
+    "Tags": ["visitor", "extensibility", "design pattern"]
+  },
+  {
+    "Question": "How does the Composite pattern enable recursive composition in Java?",
+    "Answer": "It allows objects to be composed into tree structures, so clients can treat both simple and complex elements identically.",
+    "Module": "Programming II",
+    "Topic": "Design Patterns",
+    "Sub-Topic": "Composite Pattern",
+    "Tags": ["composite", "recursive composition", "Java"]
+  },
+  {
+    "Question": "What are the key components of the Composite pattern?",
+    "Answer": "It consists of a common interface, leaf objects, and composite objects that can contain children.",
+    "Module": "Programming II",
+    "Topic": "Design Patterns",
+    "Sub-Topic": "Composite Pattern",
+    "Tags": ["composite", "interface", "leaf", "Java"]
+  },
+  {
+    "Question": "How does the Composite pattern simplify working with hierarchical data?",
+    "Answer": "It allows individual objects and groups to be managed through a single interface, making operations on hierarchies straightforward.",
+    "Module": "Programming II",
+    "Topic": "Design Patterns",
+    "Sub-Topic": "Composite Pattern",
+    "Tags": ["composite", "hierarchical data", "Java"]
+  },
+  {
+    "Question": "What are some trade-offs to consider when using the Composite pattern?",
+    "Answer": "The interface may include methods not relevant for all objects, deep hierarchies can impact performance, and memory usage may increase.",
+    "Module": "Programming II",
+    "Topic": "Design Patterns",
+    "Sub-Topic": "Composite Pattern",
+    "Tags": ["composite", "trade-offs", "Java"]
+  },
+  {
+    "Question": "What is the difference between checked and unchecked exceptions in Java?",
+    "Answer": "Checked exceptions are checked at compile time and must be handled, while unchecked exceptions are checked at runtime and usually indicate programming errors.",
+    "Module": "Programming II",
+    "Topic": "Exceptions",
+    "Sub-Topic": "Checked vs Unchecked",
+    "Tags": ["exceptions", "checked", "unchecked", "Java"]
+  },
+  {
+    "Question": "Why must checked exceptions be handled or declared in Java?",
+    "Answer": "Because the compiler enforces handling of checked exceptions to ensure robust error management.",
+    "Module": "Programming II",
+    "Topic": "Exceptions",
+    "Sub-Topic": "Checked Exceptions",
+    "Tags": ["exceptions", "checked", "Java"]
+  },
+  {
+    "Question": "What are common causes of unchecked exceptions in Java?",
+    "Answer": "They often result from logic errors, poor programming, or lack of input sanitization.",
+    "Module": "Programming II",
+    "Topic": "Exceptions",
+    "Sub-Topic": "Unchecked Exceptions",
+    "Tags": ["exceptions", "unchecked", "Java"]
+  },
+  {
+    "Question": "What is the main benefit of using inheritance in object-oriented programming?",
+    "Answer": "It allows classes to share common functionality while maintaining encapsulation, enabling code reuse and hierarchical relationships.",
+    "Module": "Programming II",
+    "Topic": "Inheritance",
+    "Sub-Topic": "Definition",
+    "Tags": ["inheritance", "object-oriented", "encapsulation", "code reuse"]
+  },
+  {
+    "Question": "How does a subclass relate to a superclass in Java?",
+    "Answer": "A subclass inherits all properties and methods from its superclass and can add its own methods and properties.",
+    "Module": "Programming II",
+    "Topic": "Inheritance",
+    "Sub-Topic": "Definition",
+    "Tags": ["subclass", "superclass", "inheritance", "Java"]
+  },
+  {
+    "Question": "What is an inheritance hierarchy and why is it useful?",
+    "Answer": "It is a tree of classes where subclasses can also be superclasses, organizing related classes and promoting code reuse.",
+    "Module": "Programming II",
+    "Topic": "Inheritance",
+    "Sub-Topic": "Inheritance Hierarchies",
+    "Tags": ["inheritance", "hierarchy", "Java"]
+  },
+  {
+    "Question": "How do you specify that a class is a subclass of another in Java?",
+    "Answer": "By using the 'extends' keyword in the class declaration.",
+    "Module": "Programming II",
+    "Topic": "Inheritance",
+    "Sub-Topic": "Java Implementation",
+    "Tags": ["extends", "subclass", "Java"]
+  },
+  {
+    "Question": "What is encapsulation and how is it enforced in Java?",
+    "Answer": "It is the principle that each class manages its own data, enforced using access modifiers like public and private.",
+    "Module": "Programming II",
+    "Topic": "Inheritance",
+    "Sub-Topic": "Encapsulation",
+    "Tags": ["encapsulation", "access modifiers", "Java"]
+  },
+  {
+    "Question": "How does the 'protected' access modifier differ from 'private' and 'public' in Java?",
+    "Answer": "It allows access to the class itself, its subclasses, and other classes in the same package.",
+    "Module": "Programming II",
+    "Topic": "Inheritance",
+    "Sub-Topic": "Access Modifiers",
+    "Tags": ["protected", "access modifier", "Java"]
+  },
+  {
+    "Question": "What is the purpose of the 'super()' keyword in a subclass constructor?",
+    "Answer": "It calls the constructor of the superclass to initialize inherited fields.",
+    "Module": "Programming II",
+    "Topic": "Inheritance",
+    "Sub-Topic": "Constructors",
+    "Tags": ["super", "constructor", "Java"]
+  },
+  {
+    "Question": "Why can't a subclass directly access private fields of its superclass?",
+    "Answer": "Because private fields are only accessible within the class they are declared in, maintaining encapsulation.",
+    "Module": "Programming II",
+    "Topic": "Inheritance",
+    "Sub-Topic": "Encapsulation",
+    "Tags": ["private", "encapsulation", "Java"]
+  },
+  {
+    "Question": "What is the significance of the Object class in Java's inheritance model?",
+    "Answer": "All classes implicitly inherit from Object, gaining methods like equals() and toString().",
+    "Module": "Programming II",
+    "Topic": "Inheritance",
+    "Sub-Topic": "Object Class",
+    "Tags": ["Object class", "inheritance", "Java"]
+  },
+  {
+    "Question": "How are attributes represented in UML class diagrams?",
+    "Answer": "With visibility, name, type, multiplicity, and initial value, using symbols like + for public and - for private.",
+    "Module": "Programming II",
+    "Topic": "UML Class Diagrams",
+    "Sub-Topic": "Attributes",
+    "Tags": ["UML", "attributes", "class diagram"]
+  },
+  {
+    "Question": "What does a filled diamond represent in a UML class diagram?",
+    "Answer": "It indicates a composition relationship, where the part cannot exist independently of the whole.",
+    "Module": "Programming II",
+    "Topic": "UML Class Diagrams",
+    "Sub-Topic": "Composition",
+    "Tags": ["UML", "composition", "class diagram"]
+  },
+  {
+    "Question": "How does aggregation differ from composition in UML?",
+    "Answer": "Aggregation is a weak whole-part relationship where parts can exist independently; composition is a strong relationship where parts cannot.",
+    "Module": "Programming II",
+    "Topic": "UML Class Diagrams",
+    "Sub-Topic": "Aggregation",
+    "Tags": ["UML", "aggregation", "composition", "class diagram"]
+  },
+  {
+    "Question": "What is method overriding and when does it occur?",
+    "Answer": "It occurs when a subclass provides its own implementation of a method defined in its superclass with the same signature.",
+    "Module": "Programming II",
+    "Topic": "Polymorphism",
+    "Sub-Topic": "Overriding Methods",
+    "Tags": ["overriding", "method", "subclass", "Java"]
+  },
+  {
+    "Question": "Why can't private methods be overridden in Java?",
+    "Answer": "Because private methods are not visible to subclasses, so they cannot be redefined or accessed.",
+    "Module": "Programming II",
+    "Topic": "Polymorphism",
+    "Sub-Topic": "Overriding Methods",
+    "Tags": ["private", "overriding", "Java"]
+  },
+  {
+    "Question": "What is dynamic binding and how does it enable polymorphism?",
+    "Answer": "It determines at runtime which overridden method to call, allowing the actual object's method to be executed.",
+    "Module": "Programming II",
+    "Topic": "Polymorphism",
+    "Sub-Topic": "Dynamic Binding",
+    "Tags": ["dynamic binding", "polymorphism", "Java"]
+  },
+  {
+    "Question": "How does upcasting support polymorphism in Java?",
+    "Answer": "It allows a subclass object to be treated as a superclass, enabling dynamic method dispatch at runtime.",
+    "Module": "Programming II",
+    "Topic": "Polymorphism",
+    "Sub-Topic": "Upcasting",
+    "Tags": ["upcasting", "polymorphism", "Java"]
+  },
+  {
+    "Question": "What is the Liskov Substitution Principle and why is it important?",
+    "Answer": "It states that objects of a superclass should be replaceable with objects of a subclass without affecting program correctness.",
+    "Module": "Programming II",
+    "Topic": "Polymorphism",
+    "Sub-Topic": "Substitution",
+    "Tags": ["Liskov Substitution Principle", "polymorphism", "Java"]
+  },
+  {
+    "Question": "How do substitution, overriding, and dynamic binding together enable polymorphism?",
+    "Answer": "They allow methods to operate on superclass references, with subclass-specific behavior determined at runtime.",
+    "Module": "Programming II",
+    "Topic": "Polymorphism",
+    "Sub-Topic": "Polymorphism",
+    "Tags": ["polymorphism", "overriding", "dynamic binding", "Java"]
+  },
+  {
+    "Question": "What is an abstract class and what is its primary purpose?",
+    "Answer": "It is a class that cannot be instantiated directly and serves as a blueprint for subclasses, often containing abstract methods.",
+    "Module": "Programming II",
+    "Topic": "Abstract Classes and Interfaces",
+    "Sub-Topic": "Abstract Classes",
+    "Tags": ["abstract class", "blueprint", "Java"]
+  },
+  {
+    "Question": "What must a concrete subclass do if it inherits from an abstract class with abstract methods?",
+    "Answer": "It must provide implementations for all inherited abstract methods or itself be declared abstract.",
+    "Module": "Programming II",
+    "Topic": "Abstract Classes and Interfaces",
+    "Sub-Topic": "Implementing Abstract Methods",
+    "Tags": ["abstract class", "subclass", "Java"]
+  },
+  {
+    "Question": "Can abstract classes in Java have constructors and fields?",
+    "Answer": "Yes, they can have constructors, fields, and static methods, and their constructors are called when a subclass is instantiated.",
+    "Module": "Programming II",
+    "Topic": "Abstract Classes and Interfaces",
+    "Sub-Topic": "Characteristics",
+    "Tags": ["abstract class", "constructor", "fields", "Java"]
+  },
+  {
+    "Question": "When should you use an abstract class instead of an interface in Java?",
+    "Answer": "When related classes share common behavior or state and you want to provide both method declarations and implementations.",
+    "Module": "Programming II",
+    "Topic": "Abstract Classes and Interfaces",
+    "Sub-Topic": "Abstract Classes vs Interfaces",
+    "Tags": ["abstract class", "interface", "Java"]
+  },
+  {
+    "Question": "What is the main advantage of using interfaces in Java?",
+    "Answer": "They allow multiple inheritance of type, enabling classes to implement multiple contracts and share common behavior.",
+    "Module": "Programming II",
+    "Topic": "Abstract Classes and Interfaces",
+    "Sub-Topic": "Interfaces",
+    "Tags": ["interface", "multiple inheritance", "Java"]
+  },
+  {
+    "Question": "How does a class implement multiple interfaces in Java?",
+    "Answer": "By listing multiple interface names after the 'implements' keyword, separated by commas.",
+    "Module": "Programming II",
+    "Topic": "Abstract Classes and Interfaces",
+    "Sub-Topic": "Implements Keyword",
+    "Tags": ["implements", "interface", "Java"]
+  },
+  {
+    "Question": "What is the difference between 'extends' and 'implements' in Java?",
+    "Answer": "'extends' is used for class inheritance, while 'implements' is used for interface implementation.",
+    "Module": "Programming II",
+    "Topic": "Abstract Classes and Interfaces",
+    "Sub-Topic": "Extends vs Implements",
+    "Tags": ["extends", "implements", "Java"]
+  },
+  {
+    "Question": "How do interfaces support polymorphism in Java?",
+    "Answer": "They allow unrelated classes to share a common contract, enabling objects to be treated uniformly based on the interface.",
+    "Module": "Programming II",
+    "Topic": "Abstract Classes and Interfaces",
+    "Sub-Topic": "Interfaces and Polymorphism",
+    "Tags": ["interface", "polymorphism", "Java"]
+  },
+  {
+    "Question": "What happens if a class does not implement all methods of an interface it declares?",
+    "Answer": "The class must be declared abstract; otherwise, a compile-time error occurs.",
+    "Module": "Programming II",
+    "Topic": "Abstract Classes and Interfaces",
+    "Sub-Topic": "Interfaces",
+    "Tags": ["interface", "abstract class", "Java"]
+  },
+  {
+    "Question": "Why can't abstract methods be declared as private in Java?",
+    "Answer": "Because abstract methods must be accessible to subclasses for implementation, which private methods are not.",
+    "Module": "Programming II",
+    "Topic": "Abstract Classes and Interfaces",
+    "Sub-Topic": "Abstract Methods",
+    "Tags": ["abstract method", "private", "Java"]
+  },
+  {
+    "Question": "How does the Pet interface example demonstrate polymorphism in Java?",
+    "Answer": "It shows multiple unrelated classes implementing the same interface and providing their own behavior for the play() method.",
+    "Module": "Programming II",
+    "Topic": "Abstract Classes and Interfaces",
+    "Sub-Topic": "Interfaces in Practice",
+    "Tags": ["interface", "polymorphism", "Java"]
+  },
+  {
+    "Question": "What must a class do to allow its objects to be serialised in Java?",
+    "Answer": "It must implement the java.io.Serializable interface.",
+    "Module": "Programming II",
+    "Topic": "Java Storage and Files",
+    "Sub-Topic": "Object Serialisation",
+    "Tags": ["serialisation", "Serializable", "Java", "interface"]
+  },
+  {
+    "Question": "What is the purpose of a 'tagging' interface like java.io.Serializable?",
+    "Answer": "It marks a class as supporting a certain capability without requiring any methods to be implemented.",
+    "Module": "Programming II",
+    "Topic": "Java Storage and Files",
+    "Sub-Topic": "Object Serialisation",
+    "Tags": ["tagging interface", "Serializable", "Java"]
+  },
+  {
+    "Question": "What is the process for serialising an object to a file in Java?",
+    "Answer": "Create an ObjectOutputStream with a FileOutputStream, then call writeObject on the object to be serialised.",
+    "Module": "Programming II",
+    "Topic": "Java Storage and Files",
+    "Sub-Topic": "Serialisation Process",
+    "Tags": ["serialisation", "ObjectOutputStream", "writeObject", "Java"]
+  },
+  {
+    "Question": "How can an object be deserialised from a file in Java?",
+    "Answer": "By using an ObjectInputStream constructed from an InputStream and calling readObject.",
+    "Module": "Programming II",
+    "Topic": "Java Storage and Files",
+    "Sub-Topic": "Deserialisation",
+    "Tags": ["deserialisation", "ObjectInputStream", "readObject", "Java"]
+  },
+  {
+    "Question": "Which parts of an object are preserved during serialisation?",
+    "Answer": "Only the non-static, non-transient member variables are saved.",
+    "Module": "Programming II",
+    "Topic": "Java Storage and Files",
+    "Sub-Topic": "Serialisation FAQ",
+    "Tags": ["serialisation", "member variables", "Java"]
+  },
+  {
+    "Question": "Are static fields saved during serialisation in Java?",
+    "Answer": "No, static fields are ignored and not serialised.",
+    "Module": "Programming II",
+    "Topic": "Java Storage and Files",
+    "Sub-Topic": "Serialisation FAQ",
+    "Tags": ["serialisation", "static fields", "Java"]
+  },
+  {
+    "Question": "Why might making all classes serialisable cause problems in the future?",
+    "Answer": "Because changes in class implementations or the JDK could break compatibility with previously serialised objects.",
+    "Module": "Programming II",
+    "Topic": "Java Storage and Files",
+    "Sub-Topic": "Serialisation FAQ",
+    "Tags": ["serialisation", "compatibility", "Java"]
+  },
+  {
+    "Question": "How does Java ensure that deserialised objects match the current class implementation?",
+    "Answer": "It uses a version UID, a 64-bit hash of the class description, to check compatibility during deserialisation.",
+    "Module": "Programming II",
+    "Topic": "Java Storage and Files",
+    "Sub-Topic": "Object Versioning",
+    "Tags": ["serialisation", "version UID", "Java"]
+  },
+  {
+    "Question": "What happens if the version UID of a serialised object does not match the class during deserialisation?",
+    "Answer": "Deserialisation fails because the object may not be compatible with the current class definition.",
+    "Module": "Programming II",
+    "Topic": "Java Storage and Files",
+    "Sub-Topic": "Object Versioning",
+    "Tags": ["serialisation", "version UID", "Java"]
+  },
+  {
+    "Question": "What does the JVM do when serialising an object with references to other objects?",
+    "Answer": "It serialises the entire object graph reachable from the original object, preserving the structure.",
+    "Module": "Programming II",
+    "Topic": "Java Storage and Files",
+    "Sub-Topic": "Serialisation of Reference Types",
+    "Tags": ["serialisation", "object graph", "Java"]
+  },
+  {
+    "Question": "How does Java prevent serialising the same object multiple times in an object graph?",
+    "Answer": "It keeps track of already serialised objects and does not serialise them again.",
+    "Module": "Programming II",
+    "Topic": "Java Storage and Files",
+    "Sub-Topic": "Serialisation of Reference Types",
+    "Tags": ["serialisation", "object graph", "Java"]
+  },
+  {
+    "Question": "How does the Externalizable interface differ from Serializable in Java?",
+    "Answer": "It allows the developer to specify exactly what to serialise by implementing writeExternal and readExternal methods.",
+    "Module": "Programming II",
+    "Topic": "Java Storage and Files",
+    "Sub-Topic": "Externalizable Interface",
+    "Tags": ["Externalizable", "serialisation", "Java"]
+  },
+  {
+    "Question": "What methods must a class implement when using the Externalizable interface?",
+    "Answer": "It must provide public void writeExternal(ObjectOutput out) and public void readExternal(ObjectInput in).",
+    "Module": "Programming II",
+    "Topic": "Java Storage and Files",
+    "Sub-Topic": "Externalizable Interface",
+    "Tags": ["Externalizable", "writeExternal", "readExternal", "Java"]
+  },
+  {
+    "Question": "How can you prevent a field from being serialised in Java?",
+    "Answer": "By declaring the field as transient.",
+    "Module": "Programming II",
+    "Topic": "Java Storage and Files",
+    "Sub-Topic": "Transient Keyword",
+    "Tags": ["transient", "serialisation", "Java"]
+  },
+  {
+    "Question": "What is the effect of marking a field as transient in a serialisable class?",
+    "Answer": "The field will not be saved during serialisation.",
+    "Module": "Programming II",
+    "Topic": "Java Storage and Files",
+    "Sub-Topic": "Transient Keyword",
+    "Tags": ["transient", "serialisation", "Java"]
+  },
+  {
+    "Question": "What steps are involved in Java's default serialisation process?",
+    "Answer": "A hashcode of the class is written, then all non-static, non-transient fields are serialised, with reference types handled recursively.",
+    "Module": "Programming II",
+    "Topic": "Java Storage and Files",
+    "Sub-Topic": "Default Serialisation",
+    "Tags": ["serialisation", "default process", "Java"]
+  },
+  {
+    "Question": "How does Java represent files internally?",
+    "Answer": "As sequential streams of bytes, terminated by an EOF marker.",
+    "Module": "Programming II",
+    "Topic": "Java Storage and Files",
+    "Sub-Topic": "File Structure in Java",
+    "Tags": ["file", "byte stream", "Java"]
+  },
+  {
+    "Question": "What is the purpose of the File class in Java?",
+    "Answer": "It provides an abstract representation of a file and a way to address files in a platform-independent manner.",
+    "Module": "Programming II",
+    "Topic": "Java Storage and Files",
+    "Sub-Topic": "The File Class",
+    "Tags": ["File class", "file handling", "Java"]
+  },
+  {
+    "Question": "Does creating a File object in Java create a file on the disk?",
+    "Answer": "No, it only creates a reference to a file path.",
+    "Module": "Programming II",
+    "Topic": "Java Storage and Files",
+    "Sub-Topic": "The File Class",
+    "Tags": ["File class", "file creation", "Java"]
+  },
+  {
+    "Question": "How can a new file be created in Java?",
+    "Answer": "By calling createNewFile() on a File object.",
+    "Module": "Programming II",
+    "Topic": "Java Storage and Files",
+    "Sub-Topic": "Creating Files",
+    "Tags": ["File class", "createNewFile", "Java"]
+  },
+  {
+    "Question": "What are the main steps for performing file IO using streams in Java?",
+    "Answer": "Prepare the file, set up the IO stream, read or write data, and close the stream.",
+    "Module": "Programming II",
+    "Topic": "Java Storage and Files",
+    "Sub-Topic": "Input and Output Streams",
+    "Tags": ["file IO", "streams", "Java"]
+  },
+  {
+    "Question": "What is the difference between OutputStream and InputStream in Java?",
+    "Answer": "OutputStream is used for writing bytes to a destination, while InputStream is for reading bytes from a source.",
+    "Module": "Programming II",
+    "Topic": "Java Storage and Files",
+    "Sub-Topic": "Byte-based Streams",
+    "Tags": ["OutputStream", "InputStream", "Java"]
+  },
+  {
+    "Question": "How do you write a string to a file using OutputStream in Java?",
+    "Answer": "Convert the string to bytes and use the write method of OutputStream.",
+    "Module": "Programming II",
+    "Topic": "Java Storage and Files",
+    "Sub-Topic": "OutputStream",
+    "Tags": ["OutputStream", "write", "Java"]
+  },
+  {
+    "Question": "How can you read the contents of a file into a byte array in Java?",
+    "Answer": "Create a byte array of the file's length and use InputStream's read method.",
+    "Module": "Programming II",
+    "Topic": "Java Storage and Files",
+    "Sub-Topic": "InputStream",
+    "Tags": ["InputStream", "read", "Java"]
+  },
+  {
+    "Question": "What is the purpose of Reader and Writer classes in Java IO?",
+    "Answer": "They are used for reading and writing character-based data.",
+    "Module": "Programming II",
+    "Topic": "Java Storage and Files",
+    "Sub-Topic": "Character Based Streams",
+    "Tags": ["Reader", "Writer", "Java"]
+  },
+  {
+    "Question": "How do you write text to a file using a Writer in Java?",
+    "Answer": "Create a Writer object for the file and call its write method with the string.",
+    "Module": "Programming II",
+    "Topic": "Java Storage and Files",
+    "Sub-Topic": "Writer Stream",
+    "Tags": ["Writer", "write", "Java"]
+  },
+  {
+    "Question": "How can you read a file character by character in Java?",
+    "Answer": "Use a Reader and repeatedly call read until it returns -1.",
+    "Module": "Programming II",
+    "Topic": "Java Storage and Files",
+    "Sub-Topic": "Reader Stream",
+    "Tags": ["Reader", "read", "Java"]
+  },
+  {
+    "Question": "What are ByteArrayOutputStream and ByteArrayInputStream used for?",
+    "Answer": "They allow reading and writing data to and from byte arrays in memory.",
+    "Module": "Programming II",
+    "Topic": "Java Storage and Files",
+    "Sub-Topic": "ByteArray Streams",
+    "Tags": ["ByteArrayOutputStream", "ByteArrayInputStream", "Java"]
+  },
+  {
+    "Question": "How do PipedOutputStream and PipedInputStream facilitate inter-thread communication?",
+    "Answer": "They allow one thread to write data to a piped output stream and another to read from the corresponding piped input stream.",
+    "Module": "Programming II",
+    "Topic": "Java Storage and Files",
+    "Sub-Topic": "Pipeline Streams",
+    "Tags": ["PipedOutputStream", "PipedInputStream", "Java", "threads"]
+  },
+  {
+    "Question": "What is the main use of PrintStream in Java?",
+    "Answer": "It provides convenient methods for writing formatted data to an output stream.",
+    "Module": "Programming II",
+    "Topic": "Java Storage and Files",
+    "Sub-Topic": "Print Streams",
+    "Tags": ["PrintStream", "formatted output", "Java"]
+  },
+  {
+    "Question": "How do FilterOutputStream and FilterInputStream enhance existing streams?",
+    "Answer": "They wrap other streams to add extra functionality, such as buffering or data conversion.",
+    "Module": "Programming II",
+    "Topic": "Java Storage and Files",
+    "Sub-Topic": "Filter Streams",
+    "Tags": ["FilterOutputStream", "FilterInputStream", "Java"]
+  },
+  {
+    "Question": "What is the purpose of BufferedOutputStream and DataOutputStream in Java IO?",
+    "Answer": "BufferedOutputStream adds buffering for efficiency, while DataOutputStream allows writing primitive data types in a portable way.",
+    "Module": "Programming II",
+    "Topic": "Java Storage and Files",
+    "Sub-Topic": "Filter Streams",
+    "Tags": ["BufferedOutputStream", "DataOutputStream", "Java"]
+  },
+  {
+    "Question": "What is the difference between white box and black box testing?",
+    "Answer": "White box testing requires knowledge of internal structure and code, while black box testing focuses on input-output behaviour without code access.",
+    "Module": "Programming II",
+    "Topic": "Unit Testing",
+    "Sub-Topic": "White Box vs Black Box",
+    "Tags": ["white box", "black box", "testing", "Java"]
+  },
+  {
+    "Question": "Who typically performs white box testing and what does it focus on?",
+    "Answer": "Developers perform it, focusing on whether methods work correctly using code knowledge.",
+    "Module": "Programming II",
+    "Topic": "Unit Testing",
+    "Sub-Topic": "White Box Testing",
+    "Tags": ["white box", "testing", "Java"]
+  },
+  {
+    "Question": "What is the main focus of black box testing?",
+    "Answer": "It tests the relationship between input and output without knowledge of internal implementation.",
+    "Module": "Programming II",
+    "Topic": "Unit Testing",
+    "Sub-Topic": "Black Box Testing",
+    "Tags": ["black box", "testing", "Java"]
+  },
+  {
+    "Question": "What are the differences between unit, integration, and system testing?",
+    "Answer": "Unit testing checks isolated code units, integration testing checks combinations of units, and system testing checks the whole system.",
+    "Module": "Programming II",
+    "Topic": "Unit Testing",
+    "Sub-Topic": "Testing Types",
+    "Tags": ["unit testing", "integration testing", "system testing", "Java"]
+  },
+  {
+    "Question": "At what stage of development is unit testing typically performed?",
+    "Answer": "It is done during development, often by developers, as a white box strategy.",
+    "Module": "Programming II",
+    "Topic": "Unit Testing",
+    "Sub-Topic": "Unit Testing",
+    "Tags": ["unit testing", "development", "Java"]
+  },
+  {
+    "Question": "What is the purpose of integration testing?",
+    "Answer": "It tests the interaction between combined units of code, using both white box and black box strategies.",
+    "Module": "Programming II",
+    "Topic": "Unit Testing",
+    "Sub-Topic": "Integration Testing",
+    "Tags": ["integration testing", "testing", "Java"]
+  },
+  {
+    "Question": "Who usually performs system testing and what is its focus?",
+    "Answer": "End users and developers perform it at the end of development, focusing on the entire system's behaviour.",
+    "Module": "Programming II",
+    "Topic": "Unit Testing",
+    "Sub-Topic": "System Testing",
+    "Tags": ["system testing", "testing", "Java"]
+  },
+  {
+    "Question": "What is meant by 'testing in isolation' in unit testing?",
+    "Answer": "It means replacing collaborating objects with mock data to test a unit independently.",
+    "Module": "Programming II",
+    "Topic": "Unit Testing",
+    "Sub-Topic": "Testing in Isolation",
+    "Tags": ["unit testing", "isolation", "mock", "Java"]
+  },
+  {
+    "Question": "What is a stub in the context of unit testing?",
+    "Answer": "It is a simulated object with the minimum methods required for a test, used for state verification.",
+    "Module": "Programming II",
+    "Topic": "Unit Testing",
+    "Sub-Topic": "Stubs",
+    "Tags": ["stub", "unit testing", "Java"]
+  },
+  {
+    "Question": "How does a mock differ from a stub in testing?",
+    "Answer": "A mock simulates real object behaviour and is used for behaviour verification, not just state.",
+    "Module": "Programming II",
+    "Topic": "Unit Testing",
+    "Sub-Topic": "Mocks",
+    "Tags": ["mock", "unit testing", "Java"]
+  },
+  {
+    "Question": "When would you use a stub versus a mock in unit testing?",
+    "Answer": "Stubs are used for verifying state, while mocks are used for verifying behaviour.",
+    "Module": "Programming II",
+    "Topic": "Unit Testing",
+    "Sub-Topic": "Stubs vs Mocks",
+    "Tags": ["stub", "mock", "unit testing", "Java"]
+  },
+  {
+    "Question": "What is the main advantage of using a contiguous chunk of memory for arrays?",
+    "Answer": "It allows for constant-time access to any element and efficient use of memory.",
+    "Module": "Algorithmics",
+    "Topic": "Arrays and Linked Lists",
+    "Sub-Topic": "Arrays - Properties",
+    "Tags": ["arrays", "contiguous memory", "access time", "memory efficiency"]
+  },
+  {
+    "Question": "Why do insertions and deletions in the middle of an array have linear time complexity?",
+    "Answer": "Because shifting elements is required to maintain contiguity, resulting in Θ(n) operations.",
+    "Module": "Algorithmics",
+    "Topic": "Arrays and Linked Lists",
+    "Sub-Topic": "Arrays - Disadvantages",
+    "Tags": ["arrays", "insertion", "deletion", "time complexity"]
+  },
+  {
+    "Question": "How does resizing a variable-length array affect performance?",
+    "Answer": "Occasional resizing requires copying all elements, which is costly, but most add operations remain constant time.",
+    "Module": "Algorithmics",
+    "Topic": "Arrays and Linked Lists",
+    "Sub-Topic": "Variable Length Arrays",
+    "Tags": ["arrays", "resizing", "performance", "copying"]
+  },
+  {
+    "Question": "What is the time complexity for performing N adds to a resizable array?",
+    "Answer": "The amortized time per add is constant, but resizing steps are Θ(n) when they occur.",
+    "Module": "Algorithmics",
+    "Topic": "Arrays and Linked Lists",
+    "Sub-Topic": "Time Analysis",
+    "Tags": ["arrays", "amortized analysis", "resizing"]
+  },
+  {
+    "Question": "How do linked lists differ from arrays in terms of memory layout?",
+    "Answer": "They use non-contiguous memory and pointers, allowing efficient insertions and deletions.",
+    "Module": "Algorithmics",
+    "Topic": "Arrays and Linked Lists",
+    "Sub-Topic": "Linked Lists",
+    "Tags": ["linked lists", "memory layout", "pointers"]
+  },
+  {
+    "Question": "What is the structure of a singly linked list node?",
+    "Answer": "Each node contains a value and a reference to the next node.",
+    "Module": "Algorithmics",
+    "Topic": "Arrays and Linked Lists",
+    "Sub-Topic": "Singly Linked List",
+    "Tags": ["linked lists", "node structure", "singly linked list"]
+  },
+  {
+    "Question": "How does a doubly linked list differ from a singly linked list?",
+    "Answer": "It has pointers to both the next and previous nodes, enabling bidirectional traversal.",
+    "Module": "Algorithmics",
+    "Topic": "Arrays and Linked Lists",
+    "Sub-Topic": "Doubly Linked List",
+    "Tags": ["linked lists", "doubly linked list", "bidirectional"]
+  },
+  {
+    "Question": "What is the time complexity of stack operations implemented with a linked list?",
+    "Answer": "All stack operations (push, pop, peek, isEmpty) are constant time, Θ(1).",
+    "Module": "Algorithmics",
+    "Topic": "Stack Implementation",
+    "Sub-Topic": "Linked List Stack",
+    "Tags": ["stack", "linked list", "time complexity"]
+  },
+  {
+    "Question": "Why is array implementation of stacks often preferred over linked lists?",
+    "Answer": "It avoids the overhead of creating and destroying node objects and uses less memory.",
+    "Module": "Algorithmics",
+    "Topic": "Stack Implementation",
+    "Sub-Topic": "Array vs Linked List Stack",
+    "Tags": ["stack", "array", "linked list", "performance"]
+  },
+  {
+    "Question": "How does a queue differ from a stack in terms of element access?",
+    "Answer": "A queue uses FIFO order, adding at one end and removing from the other, while a stack uses LIFO.",
+    "Module": "Algorithmics",
+    "Topic": "Queue Implementation",
+    "Sub-Topic": "Queue vs Stack",
+    "Tags": ["queue", "stack", "FIFO", "LIFO"]
+  },
+  {
+    "Question": "What is the purpose of head and tail pointers in a linked list queue?",
+    "Answer": "They allow efficient enqueue at the back and dequeue at the front.",
+    "Module": "Algorithmics",
+    "Topic": "Queue Implementation",
+    "Sub-Topic": "Linked List Queue",
+    "Tags": ["queue", "linked list", "head", "tail"]
+  },
+  {
+    "Question": "What is a skip list and how does it achieve fast search?",
+    "Answer": "It uses multiple levels of linked lists, allowing logarithmic time search, insertion, and deletion.",
+    "Module": "Algorithmics",
+    "Topic": "Skip Lists",
+    "Sub-Topic": "Structure and Operations",
+    "Tags": ["skip list", "search", "insertion", "deletion"]
+  },
+  {
+    "Question": "What is the main advantage of skip lists over balanced trees?",
+    "Answer": "They are simpler to implement and achieve probabilistic balancing without complex rotations.",
+    "Module": "Algorithmics",
+    "Topic": "Skip Lists",
+    "Sub-Topic": "Advantages",
+    "Tags": ["skip list", "balanced trees", "simplicity"]
+  },
+  {
+    "Question": "What is encapsulation in the context of abstract data types?",
+    "Answer": "It separates the interface from the implementation, allowing changes without affecting usage.",
+    "Module": "Algorithmics",
+    "Topic": "Abstract Data Types",
+    "Sub-Topic": "Encapsulation",
+    "Tags": ["encapsulation", "ADT", "interface", "implementation"]
+  },
+  {
+    "Question": "What is the difference between an ADT and a class interface?",
+    "Answer": "An ADT is language-independent and specifies operations, while a class interface is language-specific.",
+    "Module": "Algorithmics",
+    "Topic": "Abstract Data Types",
+    "Sub-Topic": "ADT vs Interface",
+    "Tags": ["ADT", "interface", "language independence"]
+  },
+  {
+    "Question": "What is the defining characteristic of a stack?",
+    "Answer": "It restricts access to only the top element, enforcing LIFO order.",
+    "Module": "Algorithmics",
+    "Topic": "Stacks",
+    "Sub-Topic": "Description",
+    "Tags": ["stack", "LIFO", "access restriction"]
+  },
+  {
+    "Question": "What are the standard operations supported by a stack?",
+    "Answer": "Push, pop, peek, and isEmpty.",
+    "Module": "Algorithmics",
+    "Topic": "Stacks",
+    "Sub-Topic": "Standard Operations",
+    "Tags": ["stack", "operations", "push", "pop", "peek", "isEmpty"]
+  },
+  {
+    "Question": "How does the push operation work in an array-based stack?",
+    "Answer": "It increments the top index and assigns the new element to that position if space is available.",
+    "Module": "Algorithmics",
+    "Topic": "Stacks",
+    "Sub-Topic": "Array Implementation",
+    "Tags": ["stack", "push", "array"]
+  },
+  {
+    "Question": "What is the process for evaluating fully-bracketed arithmetic expressions using stacks?",
+    "Answer": "Numbers and operators are pushed onto separate stacks, and operations are performed when closing brackets are encountered.",
+    "Module": "Algorithmics",
+    "Topic": "Stacks",
+    "Sub-Topic": "Expression Evaluation",
+    "Tags": ["stack", "expression evaluation", "arithmetic"]
+  },
+  {
+    "Question": "What is the main difference between a queue and a stack?",
+    "Answer": "A queue uses FIFO order, while a stack uses LIFO order.",
+    "Module": "Algorithmics",
+    "Topic": "Queues",
+    "Sub-Topic": "Description",
+    "Tags": ["queue", "stack", "FIFO", "LIFO"]
+  },
+  {
+    "Question": "How is the enqueue operation implemented in an array-based queue?",
+    "Answer": "It increments the rear index and assigns the new element to that position if space is available.",
+    "Module": "Algorithmics",
+    "Topic": "Queues",
+    "Sub-Topic": "Array Implementation",
+    "Tags": ["queue", "enqueue", "array"]
+  },
+  {
+    "Question": "What is a priority queue and how does it differ from a regular queue?",
+    "Answer": "It dequeues elements based on priority rather than order of insertion.",
+    "Module": "Algorithmics",
+    "Topic": "Priority Queues",
+    "Sub-Topic": "Description",
+    "Tags": ["priority queue", "queue", "priority"]
+  },
+  {
+    "Question": "What is the most efficient data structure for implementing a priority queue?",
+    "Answer": "A heap, which allows efficient insertion and removal of the highest-priority element.",
+    "Module": "Algorithmics",
+    "Topic": "Priority Queues",
+    "Sub-Topic": "Implementation",
+    "Tags": ["priority queue", "heap", "efficiency"]
+  },
+  {
+    "Question": "What is the defining property of a set data structure?",
+    "Answer": "It contains only unique elements and does not allow duplicates.",
+    "Module": "Algorithmics",
+    "Topic": "Sets",
+    "Sub-Topic": "Description",
+    "Tags": ["set", "uniqueness", "duplicates"]
+  },
+  {
+    "Question": "How does an array-based set ensure uniqueness of elements?",
+    "Answer": "It checks for the presence of an element before adding it.",
+    "Module": "Algorithmics",
+    "Topic": "Sets",
+    "Sub-Topic": "Array Implementation",
+    "Tags": ["set", "array", "uniqueness"]
+  },
+  {
+    "Question": "What is a map and how does it differ from a set?",
+    "Answer": "A map stores key-value pairs, while a set stores only unique values.",
+    "Module": "Algorithmics",
+    "Topic": "Maps",
+    "Sub-Topic": "Description",
+    "Tags": ["map", "set", "key-value"]
+  },
+  {
+    "Question": "How is a map typically implemented using arrays?",
+    "Answer": "By storing parallel arrays or an array of objects containing key-value pairs.",
+    "Module": "Algorithmics",
+    "Topic": "Maps",
+    "Sub-Topic": "Array Implementation",
+    "Tags": ["map", "array", "key-value"]
+  },
+  {
+    "Question": "What is the main structural property of a tree?",
+    "Answer": "It is an acyclic undirected graph with a hierarchical parent-child relationship.",
+    "Module": "Algorithmics",
+    "Topic": "Trees",
+    "Sub-Topic": "Defining Trees",
+    "Tags": ["tree", "structure", "hierarchy"]
+  },
+  {
+    "Question": "How is the level of a node in a tree defined?",
+    "Answer": "It is the distance from the root node.",
+    "Module": "Algorithmics",
+    "Topic": "Trees",
+    "Sub-Topic": "Node Level",
+    "Tags": ["tree", "node", "level"]
+  },
+  {
+    "Question": "What is the maximum number of nodes at level l in a binary tree?",
+    "Answer": "2^l nodes.",
+    "Module": "Algorithmics",
+    "Topic": "Binary Trees",
+    "Sub-Topic": "Properties",
+    "Tags": ["binary tree", "nodes", "level"]
+  },
+  {
+    "Question": "What is the recursive definition of a binary search tree?",
+    "Answer": "Left subtree elements are less than the root, right subtree elements are greater, and both subtrees are BSTs.",
+    "Module": "Algorithmics",
+    "Topic": "Binary Search Trees",
+    "Sub-Topic": "Definition",
+    "Tags": ["binary search tree", "recursion", "properties"]
+  },
+  {
+    "Question": "How does in-order traversal of a binary search tree work?",
+    "Answer": "It visits the left subtree, then the root, then the right subtree, resulting in sorted order.",
+    "Module": "Algorithmics",
+    "Topic": "Binary Search Trees",
+    "Sub-Topic": "Traversal",
+    "Tags": ["binary search tree", "in-order traversal", "sorted order"]
+  },
+  {
+    "Question": "What is the process for deleting a node with two children in a BST?",
+    "Answer": "Replace it with its in-order successor, then remove the successor node.",
+    "Module": "Algorithmics",
+    "Topic": "Binary Search Trees",
+    "Sub-Topic": "Deletion",
+    "Tags": ["binary search tree", "deletion", "in-order successor"]
+  },
+  {
+    "Question": "What is the purpose of tree rotation in balancing binary trees?",
+    "Answer": "It restructures the tree to reduce its height and maintain balance.",
+    "Module": "Algorithmics",
+    "Topic": "Balancing Trees",
+    "Sub-Topic": "Rotation",
+    "Tags": ["tree rotation", "balancing", "binary tree"]
+  },
+  {
+    "Question": "What is the balance factor in an AVL tree?",
+    "Answer": "It is the difference in height between the left and right subtrees of a node.",
+    "Module": "Algorithmics",
+    "Topic": "AVL Trees",
+    "Sub-Topic": "Balance Factor",
+    "Tags": ["AVL tree", "balance factor", "height"]
+  },
+  {
+    "Question": "How does the height of an AVL tree relate to the number of nodes?",
+    "Answer": "The height is logarithmic in the number of nodes, ensuring efficient operations.",
+    "Module": "Algorithmics",
+    "Topic": "AVL Trees",
+    "Sub-Topic": "Height Analysis",
+    "Tags": ["AVL tree", "height", "logarithmic"]
+  },
+  {
+    "Question": "What is the defining property of a heap?",
+    "Answer": "It is a complete binary tree where each child has a value greater than or equal to its parent (min-heap) or less than or equal (max-heap).",
+    "Module": "Algorithmics",
+    "Topic": "Heaps",
+    "Sub-Topic": "Properties",
+    "Tags": ["heap", "binary tree", "min-heap", "max-heap"]
+  },
+  {
+    "Question": "How is a heap typically implemented in memory?",
+    "Answer": "Using an array, with parent and child indices calculated by simple formulas.",
+    "Module": "Algorithmics",
+    "Topic": "Heaps",
+    "Sub-Topic": "Array Implementation",
+    "Tags": ["heap", "array", "implementation"]
+  },
+  {
+    "Question": "What is the time complexity of adding or removing elements from a heap?",
+    "Answer": "Both operations are logarithmic time, Θ(log n), due to percolation up or down.",
+    "Module": "Algorithmics",
+    "Topic": "Heaps",
+    "Sub-Topic": "Time Complexity",
+    "Tags": ["heap", "add", "remove", "time complexity"]
+  },
+  {
+    "Question": "How does heap sort work?",
+    "Answer": "Elements are added to a heap and then repeatedly removed to produce a sorted array.",
+    "Module": "Algorithmics",
+    "Topic": "Heaps",
+    "Sub-Topic": "Heap Sort",
+    "Tags": ["heap sort", "sorting", "heap"]
+  },
+  {
+    "Question": "What is the main advantage of multiway trees for disk-based storage?",
+    "Answer": "They minimize the number of disk accesses by increasing the branching factor.",
+    "Module": "Algorithmics",
+    "Topic": "Multiway Trees",
+    "Sub-Topic": "Disk Access",
+    "Tags": ["multiway tree", "disk access", "branching factor"]
+  },
+  {
+    "Question": "What is the key difference between B-trees and binary trees?",
+    "Answer": "B-trees are balanced multiway trees designed for efficient disk storage and retrieval.",
+    "Module": "Algorithmics",
+    "Topic": "B-Trees",
+    "Sub-Topic": "Definition and Use",
+    "Tags": ["B-tree", "binary tree", "disk storage"]
+  },
+  {
+    "Question": "How do B+ trees improve sequential access compared to B-trees?",
+    "Answer": "They link leaf nodes together, allowing efficient range queries and sequential access.",
+    "Module": "Algorithmics",
+    "Topic": "B+ Trees",
+    "Sub-Topic": "Sequential Access",
+    "Tags": ["B+ tree", "sequential access", "range queries"]
+  },
+  {
+    "Question": "What is a trie and what is its primary use?",
+    "Answer": "It is a multiway tree used for storing large sets of words, supporting efficient prefix queries.",
+    "Module": "Algorithmics",
+    "Topic": "Trie",
+    "Sub-Topic": "Definition and Use",
+    "Tags": ["trie", "multiway tree", "prefix queries"]
+  },
+  {
+    "Question": "What is the main motivation for using hash tables?",
+    "Answer": "They enable constant-time lookup, insertion, and deletion using keys as indices.",
+    "Module": "Algorithmics",
+    "Topic": "Hash Tables",
+    "Sub-Topic": "Motivation",
+    "Tags": ["hash table", "lookup", "constant time"]
+  },
+  {
+    "Question": "What is a hash collision and how can it be resolved?",
+    "Answer": "It occurs when two keys map to the same index; it can be resolved by separate chaining or open addressing.",
+    "Module": "Algorithmics",
+    "Topic": "Hash Tables",
+    "Sub-Topic": "Collision Resolution",
+    "Tags": ["hash table", "collision", "resolution"]
+  },
+  {
+    "Question": "What is the difference between separate chaining and open addressing?",
+    "Answer": "Separate chaining uses linked lists at each table entry, while open addressing searches for another open slot within the table.",
+    "Module": "Algorithmics",
+    "Topic": "Hash Tables",
+    "Sub-Topic": "Collision Resolution Strategies",
+    "Tags": ["hash table", "separate chaining", "open addressing"]
+  },
+  {
+    "Question": "How does linear probing work in open addressing?",
+    "Answer": "It checks the next slot sequentially until an empty slot is found.",
+    "Module": "Algorithmics",
+    "Topic": "Hash Tables",
+    "Sub-Topic": "Linear Probing",
+    "Tags": ["hash table", "linear probing", "open addressing"]
+  },
+  {
+    "Question": "What is the main drawback of linear probing?",
+    "Answer": "It causes clustering, which increases the number of probes needed as the table fills.",
+    "Module": "Algorithmics",
+    "Topic": "Hash Tables",
+    "Sub-Topic": "Linear Probing",
+    "Tags": ["hash table", "clustering", "performance"]
+  },
+  {
+    "Question": "How does quadratic probing reduce clustering in hash tables?",
+    "Answer": "It checks slots at increasing intervals, reducing the likelihood of clusters.",
+    "Module": "Algorithmics",
+    "Topic": "Hash Tables",
+    "Sub-Topic": "Quadratic Probing",
+    "Tags": ["hash table", "quadratic probing", "clustering"]
+  },
+  {
+    "Question": "What is double hashing and why is it used?",
+    "Answer": "It uses a second hash function to determine probe intervals, providing a more uniform distribution and reducing clustering.",
+    "Module": "Algorithmics",
+    "Topic": "Hash Tables",
+    "Sub-Topic": "Double Hashing",
+    "Tags": ["hash table", "double hashing", "probe interval"]
+  },
+  {
+    "Question": "What is the purpose of the union-find data structure?",
+    "Answer": "It efficiently manages dynamic connectivity by supporting union and find operations on disjoint sets.",
+    "Module": "Algorithmics",
+    "Topic": "Union Find",
+    "Sub-Topic": "Purpose",
+    "Tags": ["union-find", "disjoint sets", "connectivity"]
+  },
+  {
+    "Question": "How does the quick-find algorithm determine if two elements are connected?",
+    "Answer": "It checks if their component identifiers are the same in the id array.",
+    "Module": "Algorithmics",
+    "Topic": "Union Find",
+    "Sub-Topic": "Quick-Find",
+    "Tags": ["union-find", "quick-find", "connected"]
+  },
+  {
+    "Question": "What is the main drawback of the quick-find algorithm?",
+    "Answer": "Its union operation is linear time, O(N), due to the need to update many entries.",
+    "Module": "Algorithmics",
+    "Topic": "Union Find",
+    "Sub-Topic": "Quick-Find",
+    "Tags": ["union-find", "quick-find", "performance"]
+  },
+  {
+    "Question": "How does the quick-union algorithm represent components?",
+    "Answer": "As trees, with each element pointing to its parent and roots representing components.",
+    "Module": "Algorithmics",
+    "Topic": "Union Find",
+    "Sub-Topic": "Quick-Union",
+    "Tags": ["union-find", "quick-union", "tree"]
+  },
+  {
+    "Question": "What improvement does weighting bring to the union-find structure?",
+    "Answer": "It merges smaller trees into larger ones, keeping trees balanced and improving performance.",
+    "Module": "Algorithmics",
+    "Topic": "Union Find",
+    "Sub-Topic": "Weighting",
+    "Tags": ["union-find", "weighting", "performance"]
+  },
+  {
+    "Question": "What is path compression in union-find and why is it useful?",
+    "Answer": "It flattens trees during find operations, making future finds faster.",
+    "Module": "Algorithmics",
+    "Topic": "Union Find",
+    "Sub-Topic": "Path Compression",
+    "Tags": ["union-find", "path compression", "performance"]
+  },
+  {
+    "Question": "What is the main reason brute force approaches are impractical for problems like the Travelling Salesman Problem with large input sizes?",
+    "Answer": "The number of possible solutions grows factorially with input size, making computation infeasible even with massive parallelism or extremely fast processors.",
+    "Module": "Algorithmics",
+    "Topic": "Time Complexity",
+    "Sub-Topic": "Travelling Salesman",
+    "Tags": ["travelling salesman", "brute force", "factorial", "complexity"]
+  },
+  {
+    "Question": "Why is it important to consider input size when analyzing the running time of an algorithm?",
+    "Answer": "The running time depends on the size of the input, and different problems define input size differently, affecting performance analysis.",
+    "Module": "Algorithmics",
+    "Topic": "Time Complexity",
+    "Sub-Topic": "Input Size",
+    "Tags": ["input size", "algorithm analysis", "complexity"]
+  },
+  {
+    "Question": "How do primitive operations help in abstracting away hardware and compiler differences when analyzing algorithms?",
+    "Answer": "Counting primitive operations provides a hardware-independent measure of running time, focusing on the algorithm's logic rather than implementation details.",
+    "Module": "Algorithmics",
+    "Topic": "Time Complexity",
+    "Sub-Topic": "Running Time",
+    "Tags": ["primitive operations", "abstraction", "algorithm analysis"]
+  },
+  {
+    "Question": "What does the Θ (Big-Theta) notation express in the context of algorithm analysis?",
+    "Answer": "It describes that two functions grow at the same rate, providing both an upper and lower bound on the running time for large input sizes.",
+    "Module": "Algorithmics",
+    "Topic": "Time Complexity",
+    "Sub-Topic": "Big-Theta Notation",
+    "Tags": ["big-theta", "notation", "rate of growth"]
+  },
+  {
+    "Question": "Why might two algorithms with the same Big-Theta complexity still differ in practical performance?",
+    "Answer": "Big-Theta notation ignores constant factors and lower-order terms, so algorithms with the same asymptotic complexity can have different actual running times.",
+    "Module": "Algorithmics",
+    "Topic": "Time Complexity",
+    "Sub-Topic": "Big-Theta Notation",
+    "Tags": ["big-theta", "practical performance", "constants"]
+  },
+  {
+    "Question": "How can you estimate the running time of an algorithm with Θ(n²) complexity when increasing the input size?",
+    "Answer": "The running time increases quadratically, so if the input size doubles, the running time increases by a factor of four.",
+    "Module": "Algorithmics",
+    "Topic": "Time Complexity",
+    "Sub-Topic": "Estimating Run Time",
+    "Tags": ["quadratic", "estimation", "input size"]
+  },
+  {
+    "Question": "What is the main limitation of using Big-Theta notation for comparing algorithms?",
+    "Answer": "It cannot distinguish between algorithms with the same rate of growth and may be misleading for small input sizes.",
+    "Module": "Algorithmics",
+    "Topic": "Time Complexity",
+    "Sub-Topic": "Disadvantages of Big-Theta",
+    "Tags": ["big-theta", "limitations", "algorithm comparison"]
+  },
+  {
+    "Question": "How do conditional statements in code affect the analysis of an algorithm's time complexity?",
+    "Answer": "They can make it difficult to determine the exact rate of growth, leading to the use of upper and lower bounds for analysis.",
+    "Module": "Algorithmics",
+    "Topic": "Time Complexity",
+    "Sub-Topic": "Bounds of Rate of Growth",
+    "Tags": ["conditional statements", "bounds", "complexity"]
+  },
+  {
+    "Question": "What does Big-O notation represent in algorithm analysis?",
+    "Answer": "It provides an upper bound on the rate of growth of an algorithm's running time for large input sizes.",
+    "Module": "Algorithmics",
+    "Topic": "Time Complexity",
+    "Sub-Topic": "Big-O Notation",
+    "Tags": ["big-o", "upper bound", "complexity"]
+  },
+  {
+    "Question": "How does Big-Omega notation differ from Big-O notation?",
+    "Answer": "Big-Omega gives a lower bound on the rate of growth, while Big-O gives an upper bound.",
+    "Module": "Algorithmics",
+    "Topic": "Time Complexity",
+    "Sub-Topic": "Big-Omega Notation",
+    "Tags": ["big-omega", "lower bound", "complexity"]
+  },
+  {
+    "Question": "What does it mean for a function to be Θ(g(n)) in terms of Big-O and Big-Omega?",
+    "Answer": "It means the function is both O(g(n)) and Ω(g(n)), so its growth rate is tightly bounded above and below by g(n).",
+    "Module": "Algorithmics",
+    "Topic": "Time Complexity",
+    "Sub-Topic": "Theta Definition",
+    "Tags": ["big-theta", "big-o", "big-omega"]
+  },
+  {
+    "Question": "Why is Big-O notation commonly misused when describing algorithm complexity?",
+    "Answer": "People often use Big-O to describe exact growth rates when it only provides an upper bound, leading to confusion between O(n²) and Θ(n²).",
+    "Module": "Algorithmics",
+    "Topic": "Time Complexity",
+    "Sub-Topic": "Use and Misuse of Notations",
+    "Tags": ["big-o", "misuse", "notation"]
+  },
+  {
+    "Question": "What is the main strategy behind recursion in problem solving?",
+    "Answer": "It breaks a problem into smaller subproblems of the same type, solving them recursively until reaching a trivial base case.",
+    "Module": "Algorithmics",
+    "Topic": "Recursion",
+    "Sub-Topic": "What is Recursion",
+    "Tags": ["recursion", "problem solving", "base case"]
+  },
+  {
+    "Question": "How does the structure of a recursive function typically relate to mathematical induction?",
+    "Answer": "It includes a base case and a recursive case, mirroring the structure of an inductive proof.",
+    "Module": "Algorithmics",
+    "Topic": "Recursion",
+    "Sub-Topic": "Structure of Recursion",
+    "Tags": ["recursion", "induction", "base case", "recursive case"]
+  },
+  {
+    "Question": "What is the purpose of the base case in a recursive function?",
+    "Answer": "It provides a stopping condition where the solution is trivial, preventing infinite recursion.",
+    "Module": "Algorithmics",
+    "Topic": "Recursion",
+    "Sub-Topic": "Structure of Recursion",
+    "Tags": ["recursion", "base case", "termination"]
+  },
+  {
+    "Question": "Why is it important for recursive calls to operate on 'smaller' problems?",
+    "Answer": "Ensuring each call works on a reduced problem guarantees progress toward the base case and eventual termination.",
+    "Module": "Algorithmics",
+    "Topic": "Recursion",
+    "Sub-Topic": "Writing Recursive Programs",
+    "Tags": ["recursion", "termination", "problem size"]
+  },
+  {
+    "Question": "How does the recursive implementation of factorial ensure correct computation?",
+    "Answer": "It multiplies the current value by the factorial of the previous value, with a base case returning 1 for zero.",
+    "Module": "Algorithmics",
+    "Topic": "Recursion",
+    "Sub-Topic": "Factorial Example",
+    "Tags": ["recursion", "factorial", "base case"]
+  },
+  {
+    "Question": "What is the advantage of using recursion for computing integer powers, especially for even exponents?",
+    "Answer": "It allows repeated squaring, reducing the number of multiplications needed for large exponents.",
+    "Module": "Algorithmics",
+    "Topic": "Recursion",
+    "Sub-Topic": "Integer Power Example",
+    "Tags": ["recursion", "integer power", "optimization"]
+  },
+  {
+    "Question": "How does the recursive algorithm for computing the greatest common divisor (GCD) work?",
+    "Answer": "It repeatedly replaces the pair (a, b) with (b, a mod b) until b is zero, at which point a is the GCD.",
+    "Module": "Algorithmics",
+    "Topic": "Recursion",
+    "Sub-Topic": "Greatest Common Divisor",
+    "Tags": ["recursion", "gcd", "modulo"]
+  },
+  {
+    "Question": "What is a key sign that recursion may not be the best approach for a problem?",
+    "Answer": "If there is significant overlap in the subproblems, leading to redundant computation.",
+    "Module": "Algorithmics",
+    "Topic": "Recursion",
+    "Sub-Topic": "When Not to Use Recursion",
+    "Tags": ["recursion", "overlap", "inefficiency"]
+  },
+  {
+    "Question": "How can recursion be used to analyze the running time of recursive algorithms?",
+    "Answer": "By expressing the time taken for a problem of size n as a recurrence relation T(n), which can be solved to determine complexity.",
+    "Module": "Algorithmics",
+    "Topic": "Recursion",
+    "Sub-Topic": "Analysis of Recursion",
+    "Tags": ["recursion", "analysis", "recurrence relation"]
+  },
+  {
+    "Question": "What is the main assumption about the input when using radix sort?",
+    "Answer": "The input consists of an array of n items, each being a d-digit number where each digit can take up to k possible values.",
+    "Module": "Algorithmics",
+    "Topic": "Sorting Algorithms",
+    "Sub-Topic": "Radix Sort",
+    "Tags": ["radix sort", "assumptions", "input", "digits", "array"]
+  },
+  {
+    "Question": "How does radix sort process the digits of numbers in the array?",
+    "Answer": "It performs a stable sort on the array for each digit, starting from the least significant digit to the most significant digit.",
+    "Module": "Algorithmics",
+    "Topic": "Sorting Algorithms",
+    "Sub-Topic": "Radix Sort",
+    "Tags": ["radix sort", "digit processing", "stable sort"]
+  },
+  {
+    "Question": "Why is stability important for the sorting algorithm used within radix sort?",
+    "Answer": "Stability ensures that equal elements retain their relative order, which is necessary for correct multi-digit sorting in radix sort.",
+    "Module": "Algorithmics",
+    "Topic": "Sorting Algorithms",
+    "Sub-Topic": "Radix Sort",
+    "Tags": ["radix sort", "stability", "stable sort"]
+  },
+  {
+    "Question": "What is the purpose of pseudocode in algorithm analysis?",
+    "Answer": "It abstracts away language-specific details, focusing on logic and analysis rather than implementation.",
+    "Module": "Algorithmics",
+    "Topic": "Algorithm Analysis",
+    "Sub-Topic": "Pseudocode",
+    "Tags": ["pseudocode", "algorithm analysis", "abstraction"]
+  },
+  {
+    "Question": "What is the difference between assignment in mathematics and in programming pseudocode?",
+    "Answer": "In programming, assignment updates a variable's value, often denoted by ←, whereas in mathematics, an equation like x = x + 1 has no solution.",
+    "Module": "Algorithmics",
+    "Topic": "Algorithm Analysis",
+    "Sub-Topic": "Assignment",
+    "Tags": ["assignment", "pseudocode", "mathematics", "programming"]
+  },
+  {
+    "Question": "How does sequential search determine if an element exists in an array?",
+    "Answer": "It checks each element in order and returns true if a match is found; otherwise, it returns false after checking all elements.",
+    "Module": "Algorithmics",
+    "Topic": "Algorithm Analysis",
+    "Sub-Topic": "Sequential Search",
+    "Tags": ["sequential search", "array", "searching"]
+  },
+  {
+    "Question": "What is the best-case time complexity for sequential search and when does it occur?",
+    "Answer": "It is Θ(1), occurring when the target element is the first in the array.",
+    "Module": "Algorithmics",
+    "Topic": "Algorithm Analysis",
+    "Sub-Topic": "Sequential Search",
+    "Tags": ["sequential search", "best case", "complexity"]
+  },
+  {
+    "Question": "How does binary search reduce the search space in a sorted array?",
+    "Answer": "It repeatedly compares the target to the midpoint and eliminates half of the remaining elements each time.",
+    "Module": "Algorithmics",
+    "Topic": "Algorithm Analysis",
+    "Sub-Topic": "Binary Search",
+    "Tags": ["binary search", "search space", "sorted array"]
+  },
+  {
+    "Question": "What is the worst-case time complexity of binary search and why?",
+    "Answer": "It is Θ(log n) because the search space is halved with each comparison.",
+    "Module": "Algorithmics",
+    "Topic": "Algorithm Analysis",
+    "Sub-Topic": "Binary Search",
+    "Tags": ["binary search", "worst case", "complexity"]
+  },
+  {
+    "Question": "What does it mean for a sorting algorithm to be stable?",
+    "Answer": "It preserves the relative order of elements with equal keys.",
+    "Module": "Algorithmics",
+    "Topic": "Sorting Algorithms",
+    "Sub-Topic": "Properties of Sorting Algorithms",
+    "Tags": ["stability", "sorting", "algorithm properties"]
+  },
+  {
+    "Question": "What is an in-place sorting algorithm?",
+    "Answer": "It sorts the data using only a constant amount of extra memory, O(1) space.",
+    "Module": "Algorithmics",
+    "Topic": "Sorting Algorithms",
+    "Sub-Topic": "Properties of Sorting Algorithms",
+    "Tags": ["in-place", "sorting", "space complexity"]
+  },
+  {
+    "Question": "How does insertion sort build the sorted array?",
+    "Answer": "It iteratively inserts each element into its correct position within the already sorted portion of the array.",
+    "Module": "Algorithmics",
+    "Topic": "Sorting Algorithms",
+    "Sub-Topic": "Insertion Sort",
+    "Tags": ["insertion sort", "algorithm", "sorted array"]
+  },
+  {
+    "Question": "What is the worst-case time complexity of insertion sort and when does it occur?",
+    "Answer": "It is Θ(n²), occurring when the array is in reverse order.",
+    "Module": "Algorithmics",
+    "Topic": "Sorting Algorithms",
+    "Sub-Topic": "Insertion Sort",
+    "Tags": ["insertion sort", "worst case", "complexity"]
+  },
+  {
+    "Question": "Why is insertion sort efficient for nearly sorted arrays?",
+    "Answer": "Because it requires few shifts when elements are already close to their correct positions, resulting in Θ(n) time.",
+    "Module": "Algorithmics",
+    "Topic": "Sorting Algorithms",
+    "Sub-Topic": "Insertion Sort",
+    "Tags": ["insertion sort", "nearly sorted", "efficiency"]
+  },
+  {
+    "Question": "How does selection sort find the next element to place in the sorted portion?",
+    "Answer": "It searches for the smallest remaining element and swaps it into the next position.",
+    "Module": "Algorithmics",
+    "Topic": "Sorting Algorithms",
+    "Sub-Topic": "Selection Sort",
+    "Tags": ["selection sort", "algorithm", "minimum element"]
+  },
+  {
+    "Question": "Why is selection sort not stable?",
+    "Answer": "Because it swaps non-adjacent elements, which can change the order of equal elements.",
+    "Module": "Algorithmics",
+    "Topic": "Sorting Algorithms",
+    "Sub-Topic": "Selection Sort",
+    "Tags": ["selection sort", "stability", "swapping"]
+  },
+  {
+    "Question": "What is the main advantage of selection sort regarding swaps?",
+    "Answer": "It performs at most n-1 swaps, which is fewer than insertion sort, making it suitable when swaps are expensive.",
+    "Module": "Algorithmics",
+    "Topic": "Sorting Algorithms",
+    "Sub-Topic": "Selection Sort",
+    "Tags": ["selection sort", "swaps", "efficiency"]
+  },
+  {
+    "Question": "How does bubble sort move elements into their correct positions?",
+    "Answer": "It repeatedly compares and swaps adjacent elements, pushing larger elements toward the end of the array.",
+    "Module": "Algorithmics",
+    "Topic": "Sorting Algorithms",
+    "Sub-Topic": "Bubble Sort",
+    "Tags": ["bubble sort", "adjacent swap", "algorithm"]
+  },
+  {
+    "Question": "What is the time complexity of bubble sort and why is it considered inefficient?",
+    "Answer": "It is O(n²) because it requires many comparisons and swaps, especially for large arrays.",
+    "Module": "Algorithmics",
+    "Topic": "Sorting Algorithms",
+    "Sub-Topic": "Bubble Sort",
+    "Tags": ["bubble sort", "complexity", "inefficiency"]
+  },
+  {
+    "Question": "What are the main steps in the counting sort algorithm?",
+    "Answer": "Initialize a count array, count occurrences, compute cumulative counts, and place elements in the output array based on counts.",
+    "Module": "Algorithmics",
+    "Topic": "Sorting Algorithms",
+    "Sub-Topic": "Counting Sort",
+    "Tags": ["counting sort", "algorithm steps", "count array"]
+  },
+  {
+    "Question": "Why does counting sort iterate over the input array from end to start when building the output?",
+    "Answer": "To maintain the stability of the sort, ensuring equal elements retain their original order.",
+    "Module": "Algorithmics",
+    "Topic": "Sorting Algorithms",
+    "Sub-Topic": "Counting Sort",
+    "Tags": ["counting sort", "stability", "output array"]
+  },
+  {
+    "Question": "What is the time complexity of counting sort and under what condition is it most efficient?",
+    "Answer": "It is Θ(n + k), and is most efficient when the range of input values k is not much larger than n.",
+    "Module": "Algorithmics",
+    "Topic": "Sorting Algorithms",
+    "Sub-Topic": "Counting Sort",
+    "Tags": ["counting sort", "complexity", "efficiency"]
+  },
+  {
+    "Question": "What is the high-level idea behind quicksort?",
+    "Answer": "It partitions the array around a pivot, recursively sorting the subarrays on either side of the pivot.",
+    "Module": "Algorithmics",
+    "Topic": "Sorting Algorithms",
+    "Sub-Topic": "Quicksort",
+    "Tags": ["quicksort", "partitioning", "recursion"]
+  },
+  {
+    "Question": "How does the standard quicksort partitioning algorithm work?",
+    "Answer": "It moves elements less than or equal to the pivot to the left and greater elements to the right, then places the pivot in its correct position.",
+    "Module": "Algorithmics",
+    "Topic": "Sorting Algorithms",
+    "Sub-Topic": "Quicksort",
+    "Tags": ["quicksort", "partitioning", "pivot"]
+  },
+  {
+    "Question": "What is the purpose of the Hoare partitioning scheme in quicksort?",
+    "Answer": "It uses two indices moving toward each other to swap out-of-place elements, resulting in a partition around the pivot.",
+    "Module": "Algorithmics",
+    "Topic": "Sorting Algorithms",
+    "Sub-Topic": "Quicksort",
+    "Tags": ["quicksort", "Hoare partition", "partitioning"]
+  },
+  {
+    "Question": "Why is choosing the median of the first, middle, and last elements as the pivot beneficial in quicksort?",
+    "Answer": "It increases the likelihood that the pivot is close to the true median, leading to more balanced partitions and better performance.",
+    "Module": "Algorithmics",
+    "Topic": "Sorting Algorithms",
+    "Sub-Topic": "Quicksort Improvements",
+    "Tags": ["quicksort", "pivot selection", "median"]
+  },
+  {
+    "Question": "How does shuffling the array before quicksort improve its performance?",
+    "Answer": "It randomizes the input, reducing the chance of worst-case partitions and improving average performance.",
+    "Module": "Algorithmics",
+    "Topic": "Sorting Algorithms",
+    "Sub-Topic": "Quicksort Improvements",
+    "Tags": ["quicksort", "shuffling", "performance"]
+  },
+  {
+    "Question": "What is the Knuth shuffle and how is it used in sorting?",
+    "Answer": "It randomly permutes the elements of an array, ensuring each possible order is equally likely.",
+    "Module": "Algorithmics",
+    "Topic": "Sorting Algorithms",
+    "Sub-Topic": "Quicksort Improvements",
+    "Tags": ["Knuth shuffle", "randomization", "sorting"]
+  },
+  {
+    "Question": "What is the effect of using multiple pivots in quicksort?",
+    "Answer": "It can reduce cache misses, but the number of comparisons and swaps remains similar to single-pivot quicksort.",
+    "Module": "Algorithmics",
+    "Topic": "Sorting Algorithms",
+    "Sub-Topic": "Quicksort Improvements",
+    "Tags": ["quicksort", "multi-pivot", "performance"]
+  },
+  {
+    "Question": "How does merge sort divide and conquer the sorting problem?",
+    "Answer": "It recursively splits the array into halves, sorts each half, and merges the sorted halves.",
+    "Module": "Algorithmics",
+    "Topic": "Sorting Algorithms",
+    "Sub-Topic": "Merge Sort",
+    "Tags": ["merge sort", "divide and conquer", "recursion"]
+  },
+  {
+    "Question": "What is the main operation in the merge step of merge sort?",
+    "Answer": "It combines two sorted subarrays into a single sorted array by comparing and copying elements.",
+    "Module": "Algorithmics",
+    "Topic": "Sorting Algorithms",
+    "Sub-Topic": "Merge Sort",
+    "Tags": ["merge sort", "merge step", "sorted subarrays"]
+  },
+  {
+    "Question": "Why is merge sort not considered an in-place algorithm?",
+    "Answer": "Because it requires additional memory to store temporary subarrays during the merge process.",
+    "Module": "Algorithmics",
+    "Topic": "Sorting Algorithms",
+    "Sub-Topic": "Merge Sort",
+    "Tags": ["merge sort", "in-place", "memory usage"]
+  },
+  {
+    "Question": "What is the recurrence relation for the running time of merge sort?",
+    "Answer": "T(n) = 2T(n/2) + O(n), reflecting the two recursive calls and the linear-time merge step.",
+    "Module": "Algorithmics",
+    "Topic": "Sorting Algorithms",
+    "Sub-Topic": "Merge Sort",
+    "Tags": ["merge sort", "recurrence relation", "complexity"]
+  },
+  {
+    "Question": "How can insertion sort be used to improve merge sort for small subarrays?",
+    "Answer": "By switching to insertion sort when subarray sizes fall below a threshold, taking advantage of its efficiency on small arrays.",
+    "Module": "Algorithmics",
+    "Topic": "Sorting Algorithms",
+    "Sub-Topic": "Merge Sort Improvements",
+    "Tags": ["merge sort", "insertion sort", "hybrid algorithm"]
+  },
+  {
+    "Question": "What are the two main criteria for the correctness of a sorting algorithm?",
+    "Answer": "The output must be in non-decreasing order and must be a permutation of the input.",
+    "Module": "Algorithmics",
+    "Topic": "Sorting Algorithms",
+    "Sub-Topic": "Correctness",
+    "Tags": ["sorting", "correctness", "criteria"]
+  },
+  {
+    "Question": "What is a comparison-based sorting algorithm?",
+    "Answer": "It determines the order of elements solely through pairwise comparisons.",
+    "Module": "Algorithmics",
+    "Topic": "Sorting Algorithms",
+    "Sub-Topic": "Comparison-Based Sorting",
+    "Tags": ["comparison-based", "sorting", "algorithm"]
+  },
+  {
+    "Question": "How do decision trees help analyze sorting algorithms?",
+    "Answer": "They represent the sequence of comparisons as paths, allowing analysis of best, worst, and average case complexities.",
+    "Module": "Algorithmics",
+    "Topic": "Sorting Algorithms",
+    "Sub-Topic": "Decision Trees",
+    "Tags": ["decision tree", "sorting", "analysis"]
+  },
+  {
+    "Question": "What is the lower bound on the number of comparisons for comparison-based sorting algorithms?",
+    "Answer": "It is Ω(n log n), derived from the height of the decision tree being at least log2(n!).",
+    "Module": "Algorithmics",
+    "Topic": "Sorting Algorithms",
+    "Sub-Topic": "Lower Bound",
+    "Tags": ["sorting", "lower bound", "comparisons"]
+  },
+  {
+    "Question": "Why can't comparison-based sorting algorithms be faster than O(n log n) in the worst case?",
+    "Answer": "Because the number of possible input permutations requires at least log2(n!) comparisons, which is Ω(n log n).",
+    "Module": "Algorithmics",
+    "Topic": "Sorting Algorithms",
+    "Sub-Topic": "Lower Bound",
+    "Tags": ["sorting", "comparison-based", "complexity"]
+  },
+  {
+    "Question": "How does the choice of pivot affect the performance of quicksort?",
+    "Answer": "A pivot that splits the array into balanced parts leads to O(n log n) performance, while poor choices can result in O(n²) time.",
+    "Module": "Algorithmics",
+    "Topic": "Sorting Algorithms",
+    "Sub-Topic": "Quicksort",
+    "Tags": ["quicksort", "pivot", "performance"]
+  },
+  {
+    "Question": "What is the main idea behind the greedy strategy in algorithm design?",
+    "Answer": "It makes locally optimal choices at each step with the hope that these choices lead to a globally optimal solution.",
+    "Module": "Algorithmics",
+    "Topic": "Greedy Algorithms",
+    "Sub-Topic": "Introduction",
+    "Tags": ["greedy", "algorithm design", "local optimum", "global optimum"]
+  },
+  {
+    "Question": "Why does the Shortest Job First (SJF) strategy minimize the total weighted completion time when all jobs have equal weights?",
+    "Answer": "Because scheduling jobs with shorter execution times first reduces the waiting time for subsequent jobs, minimizing the sum of completion times.",
+    "Module": "Algorithmics",
+    "Topic": "Greedy Algorithms",
+    "Sub-Topic": "Job Scheduling",
+    "Tags": ["shortest job first", "scheduling", "equal weights"]
+  },
+  {
+    "Question": "How should jobs be scheduled when all have the same length but different weights to minimize the cost function?",
+    "Answer": "They should be scheduled in decreasing order of weight, so heavier jobs finish earlier and contribute less to the total cost.",
+    "Module": "Algorithmics",
+    "Topic": "Greedy Algorithms",
+    "Sub-Topic": "Job Scheduling",
+    "Tags": ["job scheduling", "equal length", "weight order"]
+  },
+  {
+    "Question": "What is the optimal greedy rule for the general weighted job scheduling problem?",
+    "Answer": "Select the job with the largest weight-to-length ratio among the remaining tasks at each step.",
+    "Module": "Algorithmics",
+    "Topic": "Greedy Algorithms",
+    "Sub-Topic": "Job Scheduling",
+    "Tags": ["job scheduling", "greedy", "weight-to-length ratio"]
+  },
+  {
+    "Question": "How does the greedy algorithm for interval scheduling select intervals?",
+    "Answer": "It repeatedly chooses the next compatible interval with the earliest finishing time.",
+    "Module": "Algorithmics",
+    "Topic": "Greedy Algorithms",
+    "Sub-Topic": "Interval Scheduling",
+    "Tags": ["interval scheduling", "greedy", "earliest finish"]
+  },
+  {
+    "Question": "What is the key step in the greedy solution for the fractional knapsack problem?",
+    "Answer": "Sort items by value-to-weight ratio and iteratively take as much as possible of the item with the highest ratio until the knapsack is full.",
+    "Module": "Algorithmics",
+    "Topic": "Greedy Algorithms",
+    "Sub-Topic": "Fractional Knapsack",
+    "Tags": ["fractional knapsack", "greedy", "value-to-weight"]
+  },
+  {
+    "Question": "Why does the greedy approach guarantee an optimal solution for the fractional knapsack problem but not for the 0-1 knapsack problem?",
+    "Answer": "Because in the fractional case, taking fractions allows always picking the best available option, while in the 0-1 case, indivisibility can prevent the greedy choice from being globally optimal.",
+    "Module": "Algorithmics",
+    "Topic": "Greedy Algorithms",
+    "Sub-Topic": "Fractional Knapsack",
+    "Tags": ["fractional knapsack", "greedy", "optimality"]
+  },
+  {
+    "Question": "How does Huffman coding achieve efficient prefix codes for symbol encoding?",
+    "Answer": "It builds a binary tree by repeatedly combining the two least frequent symbols, resulting in shorter codes for more frequent symbols.",
+    "Module": "Algorithmics",
+    "Topic": "Greedy Algorithms",
+    "Sub-Topic": "Huffman Coding",
+    "Tags": ["huffman coding", "prefix code", "greedy"]
+  },
+  {
+    "Question": "What property must a code have to be a prefix code, and why is this important?",
+    "Answer": "No codeword can be a prefix of another, ensuring that encoded messages can be uniquely decoded without ambiguity.",
+    "Module": "Algorithmics",
+    "Topic": "Greedy Algorithms",
+    "Sub-Topic": "Huffman Coding",
+    "Tags": ["prefix code", "uniqueness", "decoding"]
+  },
+  {
+    "Question": "What is the role of the union-find data structure in Kruskal's algorithm for minimum spanning trees?",
+    "Answer": "It efficiently tracks connected components to detect cycles when adding edges, ensuring the MST remains acyclic.",
+    "Module": "Algorithmics",
+    "Topic": "Graphs",
+    "Sub-Topic": "Minimum Spanning Trees",
+    "Tags": ["kruskal", "union-find", "cycle detection"]
+  },
+  {
+    "Question": "How does Prim's algorithm differ from Kruskal's in constructing a minimum spanning tree?",
+    "Answer": "Prim's grows the MST from a single vertex by always adding the minimum-weight edge connecting the tree to a new vertex, while Kruskal's adds the next smallest edge overall.",
+    "Module": "Algorithmics",
+    "Topic": "Graphs",
+    "Sub-Topic": "Minimum Spanning Trees",
+    "Tags": ["prim", "kruskal", "mst", "comparison"]
+  },
+  {
+    "Question": "Why is a priority queue used in efficient implementations of Prim's algorithm?",
+    "Answer": "It allows quick selection of the next vertex with the minimum connection cost to the current tree, improving performance.",
+    "Module": "Algorithmics",
+    "Topic": "Graphs",
+    "Sub-Topic": "Minimum Spanning Trees",
+    "Tags": ["prim", "priority queue", "efficiency"]
+  },
+  {
+    "Question": "What is the purpose of the relaxation operation in shortest path algorithms?",
+    "Answer": "It checks if a shorter path to a vertex can be found via a given edge and updates the path cost and predecessor if so.",
+    "Module": "Algorithmics",
+    "Topic": "Graphs",
+    "Sub-Topic": "Shortest Path Algorithms",
+    "Tags": ["relaxation", "shortest path", "update"]
+  },
+  {
+    "Question": "How does the Bellman-Ford algorithm handle negative edge weights in graphs?",
+    "Answer": "It repeatedly relaxes all edges for |V|-1 iterations, allowing it to find shortest paths even with negative weights, as long as there are no negative cycles.",
+    "Module": "Algorithmics",
+    "Topic": "Graphs",
+    "Sub-Topic": "Shortest Path Algorithms",
+    "Tags": ["bellman-ford", "negative weights", "relaxation"]
+  },
+  {
+    "Question": "Why can't Dijkstra's algorithm be used on graphs with negative edge weights?",
+    "Answer": "Because it assumes that once a vertex's shortest path is found, it cannot be improved, which is not true if negative weights exist.",
+    "Module": "Algorithmics",
+    "Topic": "Graphs",
+    "Sub-Topic": "Shortest Path Algorithms",
+    "Tags": ["dijkstra", "negative weights", "limitation"]
+  },
+  {
+    "Question": "What are the two key properties that make a problem suitable for dynamic programming?",
+    "Answer": "Optimal substructure, where optimal solutions can be built from subproblems, and overlapping subproblems, where the same subproblems are solved multiple times.",
+    "Module": "Algorithmics",
+    "Topic": "Dynamic Programming",
+    "Sub-Topic": "Introduction",
+    "Tags": ["dynamic programming", "optimal substructure", "overlapping subproblems"]
+  },
+  {
+    "Question": "How does memoization improve the efficiency of recursive algorithms like Fibonacci?",
+    "Answer": "It stores the results of subproblems so that each is computed only once, reducing redundant computation.",
+    "Module": "Algorithmics",
+    "Topic": "Dynamic Programming",
+    "Sub-Topic": "Memoization",
+    "Tags": ["memoization", "fibonacci", "efficiency"]
+  },
+  {
+    "Question": "What is the recurrence relation for the maximum weight independent set in a linear graph?",
+    "Answer": "The optimal value for the first j nodes is the maximum of including the jth node plus the optimal for j-2, or excluding it and taking the optimal for j-1.",
+    "Module": "Algorithmics",
+    "Topic": "Dynamic Programming",
+    "Sub-Topic": "Independent Sets",
+    "Tags": ["independent set", "recurrence", "dynamic programming"]
+  },
+  {
+    "Question": "How does the dynamic programming solution for weighted interval scheduling optimize the computation of compatible intervals?",
+    "Answer": "It sorts intervals by finish time and uses binary search to find the last compatible interval for each, reducing the time to O(n log n).",
+    "Module": "Algorithmics",
+    "Topic": "Dynamic Programming",
+    "Sub-Topic": "Interval Scheduling",
+    "Tags": ["interval scheduling", "dynamic programming", "binary search"]
+  },
+  {
+    "Question": "What is the key idea behind the bottom-up dynamic programming approach for the longest common subsequence problem?",
+    "Answer": "It fills a table where each entry represents the LCS length for prefixes of the two strings, building up solutions from smaller to larger prefixes.",
+    "Module": "Algorithmics",
+    "Topic": "Dynamic Programming",
+    "Sub-Topic": "Longest Common Subsequence",
+    "Tags": ["lcs", "bottom-up", "dynamic programming"]
+  },
+  {
+    "Question": "How does the 0-1 knapsack dynamic programming solution decide whether to include an item?",
+    "Answer": "It compares the value of including the item (if it fits) plus the optimal for the remaining capacity, versus skipping it, and takes the maximum.",
+    "Module": "Algorithmics",
+    "Topic": "Dynamic Programming",
+    "Sub-Topic": "Knapsack",
+    "Tags": ["knapsack", "dynamic programming", "inclusion decision"]
+  },
+  {
+    "Question": "What is the main difference between the memoized and bottom-up approaches for the rod cutting problem?",
+    "Answer": "Memoization uses recursion and caches results, while bottom-up builds solutions iteratively from smallest to largest subproblems.",
+    "Module": "Algorithmics",
+    "Topic": "Dynamic Programming",
+    "Sub-Topic": "Rod Cutting",
+    "Tags": ["rod cutting", "memoization", "bottom-up"]
+  },
+  {
+    "Question": "How does the maximum subarray sum dynamic programming algorithm determine whether to extend the current subarray or start a new one?",
+    "Answer": "It compares the sum of the current element and the previous best subarray to the current element alone, choosing the larger.",
+    "Module": "Algorithmics",
+    "Topic": "Dynamic Programming",
+    "Sub-Topic": "Maximum Subarray Sum",
+    "Tags": ["maximum subarray", "dynamic programming", "decision"]
+  },
+  {
+    "Question": "What is the base case for the subset sum dynamic programming solution?",
+    "Answer": "An empty set can always form a sum of 0, so opt[i][0] = true for all i.",
+    "Module": "Algorithmics",
+    "Topic": "Dynamic Programming",
+    "Sub-Topic": "Subset Sum",
+    "Tags": ["subset sum", "base case", "dynamic programming"]
+  },
+  {
+    "Question": "How does the Bellman-Ford dynamic programming formulation represent the shortest path from a source to a vertex using at most i edges?",
+    "Answer": "It uses a 2D table where each entry d[i][v] is the minimum of the previous best or the best path through any incoming edge using one more edge.",
+    "Module": "Algorithmics",
+    "Topic": "Dynamic Programming",
+    "Sub-Topic": "Bellman-Ford",
+    "Tags": ["bellman-ford", "dynamic programming", "shortest path"]
+  },
+  {
+    "Question": "What is the main idea behind the Floyd-Warshall algorithm for all-pairs shortest paths?",
+    "Answer": "It iteratively updates the shortest path between every pair of vertices by considering each vertex as an intermediate point.",
+    "Module": "Algorithmics",
+    "Topic": "Dynamic Programming",
+    "Sub-Topic": "Floyd-Warshall",
+    "Tags": ["floyd-warshall", "all-pairs shortest path", "dynamic programming"]
+  },
+  {
+    "Question": "What is the difference between adjacency lists and adjacency matrices for graph representation?",
+    "Answer": "Adjacency lists use less memory for sparse graphs and store neighbors for each vertex, while adjacency matrices use more memory but allow constant-time edge checks.",
+    "Module": "Algorithmics",
+    "Topic": "Graphs",
+    "Sub-Topic": "Graph Representation",
+    "Tags": ["adjacency list", "adjacency matrix", "graph representation"]
+  },
+  {
+    "Question": "How does BFS ensure that the shortest path from the source to each vertex is found in an unweighted graph?",
+    "Answer": "It explores vertices in layers based on distance from the source, guaranteeing that the first time a vertex is reached is via the shortest path.",
+    "Module": "Algorithmics",
+    "Topic": "Graphs",
+    "Sub-Topic": "BFS",
+    "Tags": ["bfs", "shortest path", "unweighted graph"]
+  },
+  {
+    "Question": "How can BFS be modified to detect whether a graph is bipartite?",
+    "Answer": "By coloring each vertex with one of two colors as it is discovered, and checking for adjacent vertices with the same color.",
+    "Module": "Algorithmics",
+    "Topic": "Graphs",
+    "Sub-Topic": "Bipartite Detection",
+    "Tags": ["bfs", "bipartite", "coloring"]
+  },
+  {
+    "Question": "What is the main difference between BFS and DFS in terms of exploration strategy?",
+    "Answer": "BFS explores all neighbors at the current depth before going deeper, while DFS goes as deep as possible before backtracking.",
+    "Module": "Algorithmics",
+    "Topic": "Graphs",
+    "Sub-Topic": "DFS",
+    "Tags": ["bfs", "dfs", "exploration"]
+  },
+  {
+    "Question": "How does DFS enable topological sorting of a directed acyclic graph?",
+    "Answer": "By recording the finishing times of each vertex and ordering them in reverse, producing a valid topological order.",
+    "Module": "Algorithmics",
+    "Topic": "Graphs",
+    "Sub-Topic": "Topological Sorting",
+    "Tags": ["dfs", "topological sort", "finishing time"]
+  },
+  {
+    "Question": "What is the purpose of slack variables in the standard form of a linear programming problem?",
+    "Answer": "They convert inequality constraints into equalities, allowing the problem to be solved using the simplex method.",
+    "Module": "Algorithmics",
+    "Topic": "Linear Programming",
+    "Sub-Topic": "Slack Variables",
+    "Tags": ["linear programming", "slack variable", "standard form"]
+  },
+  {
+    "Question": "How does the simplex method move toward the optimal solution in a linear program?",
+    "Answer": "It iteratively pivots from one basic feasible solution to an adjacent one, improving the objective function at each step.",
+    "Module": "Algorithmics",
+    "Topic": "Linear Programming",
+    "Sub-Topic": "Simplex Method",
+    "Tags": ["simplex", "pivot", "linear programming"]
+  },
+  {
+    "Question": "What does it mean for a feasible region in a linear program to be unbounded?",
+    "Answer": "The objective function can increase indefinitely without violating any constraints, so no finite optimal solution exists.",
+    "Module": "Algorithmics",
+    "Topic": "Linear Programming",
+    "Sub-Topic": "Unbounded Feasible Region",
+    "Tags": ["linear programming", "unbounded", "feasible region"]
+  },
+  {
+    "Question": "What is the main idea behind approximation algorithms for NP-hard problems?",
+    "Answer": "They efficiently find solutions that are provably close to optimal, even if finding the exact optimum is infeasible.",
+    "Module": "Algorithmics",
+    "Topic": "Approximation Algorithms",
+    "Sub-Topic": "Overview",
+    "Tags": ["approximation", "np-hard", "algorithm"]
+  },
+  {
+    "Question": "How does the greedy algorithm for load balancing assign tasks to machines?",
+    "Answer": "It assigns each task to the machine with the smallest current load, aiming to balance the workload.",
+    "Module": "Algorithmics",
+    "Topic": "Approximation Algorithms",
+    "Sub-Topic": "Load Balancing",
+    "Tags": ["load balancing", "greedy", "approximation"]
+  },
+  {
+    "Question": "Why is the greedy load balancing algorithm a 2-approximation?",
+    "Answer": "Because the makespan it produces is at most twice the optimal, as shown by comparing the largest task and average load lower bounds.",
+    "Module": "Algorithmics",
+    "Topic": "Approximation Algorithms",
+    "Sub-Topic": "Load Balancing",
+    "Tags": ["load balancing", "approximation", "analysis"]
+  },
+  {
+    "Question": "What is the key step in the 2-approximation algorithm for minimum vertex cover?",
+    "Answer": "Repeatedly select an uncovered edge and add both endpoints to the cover, removing all incident edges.",
+    "Module": "Algorithmics",
+    "Topic": "Approximation Algorithms",
+    "Sub-Topic": "Vertex Cover",
+    "Tags": ["vertex cover", "approximation", "algorithm"]
+  },
+  {
+    "Question": "How does backtracking solve the N-Queens problem?",
+    "Answer": "It places queens row by row, trying all columns and backtracking when a conflict is detected.",
+    "Module": "Algorithmics",
+    "Topic": "Backtracking",
+    "Sub-Topic": "N-Queens",
+    "Tags": ["n-queens", "backtracking", "search"]
+  },
+  {
+    "Question": "What is the branching strategy in the backtracking algorithm for vertex cover of size k?",
+    "Answer": "For each edge, recursively try including either endpoint in the cover and removing it and its incident edges, decrementing k.",
+    "Module": "Algorithmics",
+    "Topic": "Backtracking",
+    "Sub-Topic": "Vertex Cover",
+    "Tags": ["vertex cover", "backtracking", "branching"]
+  },
+  {
+    "Question": "How does the backtracking algorithm for k-coloring a graph ensure no two adjacent vertices share the same color?",
+    "Answer": "It assigns colors recursively, checking at each step that no neighbor has the same color before proceeding.",
+    "Module": "Algorithmics",
+    "Topic": "Backtracking",
+    "Sub-Topic": "K-Coloring",
+    "Tags": ["k-coloring", "backtracking", "constraint"]
+  },
+  {
+    "Question": "What is the purpose of unit clause propagation in the DPLL SAT solving algorithm?",
+    "Answer": "It assigns values to variables that must be true to satisfy clauses with only one literal, simplifying the formula.",
+    "Module": "Algorithmics",
+    "Topic": "Backtracking",
+    "Sub-Topic": "SAT Solving",
+    "Tags": ["sat", "dpll", "unit clause"]
+  },
+  {
+    "Question": "How can the independent set problem be reduced to SAT?",
+    "Answer": "By introducing variables for each vertex, adding clauses to ensure no two adjacent vertices are both included, and encoding the size constraint.",
+    "Module": "Algorithmics",
+    "Topic": "Backtracking",
+    "Sub-Topic": "SAT Reduction",
+    "Tags": ["independent set", "sat", "reduction"]
+  },
+  {
+    "Question": "What is the main purpose of using a layered model in network architecture?",
+    "Answer": "It standardizes network functions, separates tasks, and allows independent development and maintenance of each layer.",
+    "Module": "Networks and Security",
+    "Topic": "Internet Architecture",
+    "Sub-Topic": "Layered Model",
+    "Tags": ["layered model", "network architecture", "standardization"]
+  },
+  {
+    "Question": "Which layer in the TCP/IP model is responsible for routing data packets across networks?",
+    "Answer": "The Internet Layer handles the routing of data packets.",
+    "Module": "Networks and Security",
+    "Topic": "Internet Architecture",
+    "Sub-Topic": "TCP/IP Model",
+    "Tags": ["TCP/IP", "Internet Layer", "routing"]
+  },
+  {
+    "Question": "How does the OSI model differ from the TCP/IP model in terms of layer count and function separation?",
+    "Answer": "The OSI model has seven layers and separates presentation and session layers, while TCP/IP has four layers and combines those functions into the application layer.",
+    "Module": "Networks and Security",
+    "Topic": "Internet Architecture",
+    "Sub-Topic": "OSI vs TCP/IP",
+    "Tags": ["OSI", "TCP/IP", "layers", "comparison"]
+  },
+  {
+    "Question": "What is the function of an Internet Exchange Point (IXP)?",
+    "Answer": "It allows different ISPs to directly interconnect and exchange traffic, reducing costs and latency.",
+    "Module": "Networks and Security",
+    "Topic": "Internet Architecture",
+    "Sub-Topic": "Internet Exchange Points",
+    "Tags": ["IXP", "ISP", "interconnection"]
+  },
+  {
+    "Question": "Why is DNS considered a distributed system?",
+    "Answer": "Because it organizes name resolution regionally and not every machine needs to know the entire internet's addresses.",
+    "Module": "Networks and Security",
+    "Topic": "Internet Architecture",
+    "Sub-Topic": "Domain Name System",
+    "Tags": ["DNS", "distributed system"]
+  },
+  {
+    "Question": "What are the main responsibilities of the Internet Layer in the TCP/IP model?",
+    "Answer": "It provides unique addressing, handles next-hop routing, and hides the complexity of the physical network.",
+    "Module": "Networks and Security",
+    "Topic": "Internet Layer",
+    "Sub-Topic": "Functions",
+    "Tags": ["Internet Layer", "TCP/IP", "addressing", "routing"]
+  },
+  {
+    "Question": "Why is the Internet Protocol described as connectionless and unreliable?",
+    "Answer": "Because it sends packets on a best-effort basis without guaranteeing delivery or order.",
+    "Module": "Networks and Security",
+    "Topic": "Internet Layer",
+    "Sub-Topic": "Internet Protocol Properties",
+    "Tags": ["IP", "connectionless", "unreliable"]
+  },
+  {
+    "Question": "What happens when a data unit exceeds the Maximum Transmission Unit (MTU) on a network?",
+    "Answer": "It is fragmented into smaller packets for transmission and reassembled at the destination.",
+    "Module": "Networks and Security",
+    "Topic": "Internet Layer",
+    "Sub-Topic": "IPv4 Fragmentation",
+    "Tags": ["MTU", "fragmentation", "IPv4"]
+  },
+  {
+    "Question": "How are IPv6 addresses typically written and what feature allows them to be shortened?",
+    "Answer": "They are written in colon-hex notation and can be shortened by replacing consecutive zero blocks with '::' and omitting leading zeros.",
+    "Module": "Networks and Security",
+    "Topic": "Internet Layer",
+    "Sub-Topic": "IPv6 Addressing",
+    "Tags": ["IPv6", "address notation", "shortening"]
+  },
+  {
+    "Question": "What is the main benefit of using SLAAC (Stateless Address Autoconfiguration) in IPv6?",
+    "Answer": "It allows hosts to automatically configure their own addresses without a DHCPv6 server.",
+    "Module": "Networks and Security",
+    "Topic": "Internet Layer",
+    "Sub-Topic": "SLAAC",
+    "Tags": ["SLAAC", "IPv6", "autoconfiguration"]
+  },
+  {
+    "Question": "Why is embedding a MAC address in an IPv6 address considered a privacy risk?",
+    "Answer": "Because it allows tracking of a device across different networks and locations.",
+    "Module": "Networks and Security",
+    "Topic": "Internet Layer",
+    "Sub-Topic": "IPv6 Privacy",
+    "Tags": ["IPv6", "MAC address", "privacy"]
+  },
+  {
+    "Question": "What is the purpose of a netmask in IP networking?",
+    "Answer": "It specifies how many bits identify the network prefix, determining what is local and what requires routing.",
+    "Module": "Networks and Security",
+    "Topic": "Internet Layer",
+    "Sub-Topic": "Netmasks",
+    "Tags": ["netmask", "network prefix", "routing"]
+  },
+  {
+    "Question": "How does the ICMP protocol assist in network operations?",
+    "Answer": "It is used for information and error messages, such as router advertisement and neighbor discovery.",
+    "Module": "Networks and Security",
+    "Topic": "Internet Layer",
+    "Sub-Topic": "ICMP",
+    "Tags": ["ICMP", "error messages", "network operations"]
+  },
+  {
+    "Question": "What is the main difference between ARP and NDP?",
+    "Answer": "ARP maps IPv4 addresses to MAC addresses, while NDP performs similar functions for IPv6 and also handles router and prefix discovery.",
+    "Module": "Networks and Security",
+    "Topic": "Internet Layer",
+    "Sub-Topic": "ARP vs NDP",
+    "Tags": ["ARP", "NDP", "IPv4", "IPv6"]
+  },
+  {
+    "Question": "What is the function of a Router Advertisement in IPv6?",
+    "Answer": "It informs hosts about the network prefix, default router, and configuration options.",
+    "Module": "Networks and Security",
+    "Topic": "Internet Layer",
+    "Sub-Topic": "Router Advertisement",
+    "Tags": ["IPv6", "router advertisement", "network configuration"]
+  },
+  {
+    "Question": "How does DHCP differ between IPv4 and IPv6?",
+    "Answer": "DHCPv4 uses MAC addresses for identification, while DHCPv6 uses a DHCP Unique Identifier and can coexist with SLAAC.",
+    "Module": "Networks and Security",
+    "Topic": "Internet Layer",
+    "Sub-Topic": "DHCP vs DHCPv6",
+    "Tags": ["DHCP", "DHCPv6", "IPv4", "IPv6"]
+  },
+  {
+    "Question": "What is the main role of port numbers in the transport layer?",
+    "Answer": "They uniquely identify connection endpoints on a host for TCP and UDP communication.",
+    "Module": "Networks and Security",
+    "Topic": "Transport Layer",
+    "Sub-Topic": "Ports",
+    "Tags": ["transport layer", "ports", "TCP", "UDP"]
+  },
+  {
+    "Question": "How does TCP ensure reliable data transmission?",
+    "Answer": "By using acknowledgments, retransmissions, flow control, and congestion control.",
+    "Module": "Networks and Security",
+    "Topic": "Transport Layer",
+    "Sub-Topic": "TCP Reliability",
+    "Tags": ["TCP", "reliability", "acknowledgment", "retransmission"]
+  },
+  {
+    "Question": "What is the purpose of the three-way handshake in TCP?",
+    "Answer": "It establishes a reliable connection by synchronizing sequence numbers between sender and receiver.",
+    "Module": "Networks and Security",
+    "Topic": "Transport Layer",
+    "Sub-Topic": "TCP Connection Establishment",
+    "Tags": ["TCP", "three-way handshake", "connection establishment"]
+  },
+  {
+    "Question": "Why is UDP considered connectionless and what are the implications for applications?",
+    "Answer": "Because it does not establish a connection or guarantee delivery, so applications must handle lost packets themselves.",
+    "Module": "Networks and Security",
+    "Topic": "Transport Layer",
+    "Sub-Topic": "UDP",
+    "Tags": ["UDP", "connectionless", "application responsibility"]
+  },
+  {
+    "Question": "How does the sliding window protocol in TCP help manage data flow?",
+    "Answer": "It controls the amount of data sent based on the receiver's buffer size, preventing overflow.",
+    "Module": "Networks and Security",
+    "Topic": "Transport Layer",
+    "Sub-Topic": "TCP Flow Control",
+    "Tags": ["TCP", "sliding window", "flow control"]
+  },
+  {
+    "Question": "What is the main advantage of using QUIC over TCP for web applications?",
+    "Answer": "It reduces connection establishment time, supports multiplexing, and provides built-in encryption.",
+    "Module": "Networks and Security",
+    "Topic": "Application Layer",
+    "Sub-Topic": "QUIC",
+    "Tags": ["QUIC", "TCP", "web applications", "encryption"]
+  },
+  {
+    "Question": "How does HTTPS improve upon HTTP in terms of security?",
+    "Answer": "It encrypts data, ensures integrity, and authenticates the server using TLS.",
+    "Module": "Networks and Security",
+    "Topic": "Application Layer",
+    "Sub-Topic": "HTTPS",
+    "Tags": ["HTTPS", "HTTP", "security", "TLS"]
+  },
+  {
+    "Question": "What is the main function of the Real Time Streaming Protocol (RTSP)?",
+    "Answer": "It controls playback of streaming media, allowing commands like play, pause, and teardown.",
+    "Module": "Networks and Security",
+    "Topic": "Application Layer",
+    "Sub-Topic": "RTSP",
+    "Tags": ["RTSP", "streaming", "media control"]
+  },
+  {
+    "Question": "Why is Wi-Fi considered less secure than wired connections?",
+    "Answer": "Because wireless signals can be intercepted by anyone within range, increasing the risk of unauthorized access.",
+    "Module": "Networks and Security",
+    "Topic": "Wi-Fi Security",
+    "Sub-Topic": "Risks",
+    "Tags": ["Wi-Fi", "security", "wireless", "risks"]
+  },
+  {
+    "Question": "What is a deauthentication attack in Wi-Fi networks?",
+    "Answer": "It forces devices to disconnect by sending fake deauth messages, disrupting connectivity.",
+    "Module": "Networks and Security",
+    "Topic": "Wi-Fi Security",
+    "Sub-Topic": "Attacks",
+    "Tags": ["Wi-Fi", "deauthentication", "attack"]
+  },
+  {
+    "Question": "How does the Evil Twin attack compromise Wi-Fi security?",
+    "Answer": "By setting up a fake access point that mimics a legitimate one, tricking users into connecting and exposing their data.",
+    "Module": "Networks and Security",
+    "Topic": "Wi-Fi Security",
+    "Sub-Topic": "Attacks",
+    "Tags": ["Wi-Fi", "evil twin", "attack"]
+  },
+  {
+    "Question": "Why is WEP considered insecure for Wi-Fi protection?",
+    "Answer": "Because it uses weak encryption (RC4), a short IV, and static keys, making it vulnerable to attacks.",
+    "Module": "Networks and Security",
+    "Topic": "Wi-Fi Security",
+    "Sub-Topic": "WEP",
+    "Tags": ["WEP", "Wi-Fi", "encryption", "insecurity"]
+  },
+  {
+    "Question": "What improvement does WPA2 offer over WPA for Wi-Fi security?",
+    "Answer": "It uses AES encryption, which is more secure and efficient than RC4.",
+    "Module": "Networks and Security",
+    "Topic": "Wi-Fi Security",
+    "Sub-Topic": "WPA2",
+    "Tags": ["WPA2", "Wi-Fi", "AES", "security"]
+  },
+  {
+    "Question": "What is the main vulnerability exploited by the KRACK attack?",
+    "Answer": "It forces devices to reinstall an already used key, allowing decryption or injection of data.",
+    "Module": "Networks and Security",
+    "Topic": "Wi-Fi Security",
+    "Sub-Topic": "KRACK",
+    "Tags": ["KRACK", "Wi-Fi", "attack", "vulnerability"]
+  },
+  {
+    "Question": "How does Wi-Fi Protected Setup (WPS) make networks vulnerable?",
+    "Answer": "Because its PIN can be brute-forced quickly, compromising network security.",
+    "Module": "Networks and Security",
+    "Topic": "Wi-Fi Security",
+    "Sub-Topic": "WPS",
+    "Tags": ["WPS", "Wi-Fi", "vulnerability"]
+  },
+  {
+    "Question": "What is the main function of a firewall in network security?",
+    "Answer": "It controls access by allowing or blocking packets based on predefined rules.",
+    "Module": "Networks and Security",
+    "Topic": "Network Design and Organisation",
+    "Sub-Topic": "Firewalls",
+    "Tags": ["firewall", "network security", "access control"]
+  },
+  {
+    "Question": "How does a VPN enhance privacy and security for users?",
+    "Answer": "By encrypting data and masking the user's IP address, making online activity more private.",
+    "Module": "Networks and Security",
+    "Topic": "Network Design and Organisation",
+    "Sub-Topic": "VPNs",
+    "Tags": ["VPN", "privacy", "security", "encryption"]
+  },
+  {
+    "Question": "What is the main limitation of using a VPN for security?",
+    "Answer": "It does not guarantee end-to-end encryption, and the VPN provider could access user data.",
+    "Module": "Networks and Security",
+    "Topic": "Network Design and Organisation",
+    "Sub-Topic": "VPN Limitations",
+    "Tags": ["VPN", "limitations", "security"]
+  },
+  {
+    "Question": "What is the purpose of channel bonding in Wi-Fi networks?",
+    "Answer": "It increases data rates by combining adjacent channels into a wider channel.",
+    "Module": "Networks and Security",
+    "Topic": "Wi-Fi",
+    "Sub-Topic": "Performance",
+    "Tags": ["Wi-Fi", "channel bonding", "performance"]
+  },
+  {
+    "Question": "How does the hidden node problem affect Wi-Fi communication?",
+    "Answer": "It causes collisions at the access point when two devices out of range of each other transmit simultaneously.",
+    "Module": "Networks and Security",
+    "Topic": "Wi-Fi",
+    "Sub-Topic": "Hidden Nodes",
+    "Tags": ["Wi-Fi", "hidden node", "collision"]
+  },
+  {
+    "Question": "What mechanism does Wi-Fi use to manage the exposed node problem?",
+    "Answer": "It uses virtual carrier sensing and RTS/CTS with duration information to allow safe simultaneous transmissions.",
+    "Module": "Networks and Security",
+    "Topic": "Wi-Fi",
+    "Sub-Topic": "Exposed Node",
+    "Tags": ["Wi-Fi", "exposed node", "RTS/CTS"]
+  },
+  {
+    "Question": "What is the main function of DNS in networking?",
+    "Answer": "It maps host or domain names to IP addresses and vice versa.",
+    "Module": "Networks and Security",
+    "Topic": "DNS",
+    "Sub-Topic": "Overview",
+    "Tags": ["DNS", "name resolution", "IP address"]
+  },
+  {
+    "Question": "Why is DNS designed as a hierarchical and distributed system?",
+    "Answer": "To handle the large scale of the internet and delegate authority efficiently.",
+    "Module": "Networks and Security",
+    "Topic": "DNS",
+    "Sub-Topic": "Hierarchy",
+    "Tags": ["DNS", "hierarchy", "distribution"]
+  },
+  {
+    "Question": "What is the purpose of the MX record in DNS?",
+    "Answer": "It specifies the mail servers responsible for accepting email for a domain.",
+    "Module": "Networks and Security",
+    "Topic": "DNS",
+    "Sub-Topic": "DNS Records",
+    "Tags": ["DNS", "MX record", "email"]
+  },
+  {
+    "Question": "How does anycast improve service availability in DNS?",
+    "Answer": "By allowing clients to reach the nearest instance of a service using the same IP address.",
+    "Module": "Networks and Security",
+    "Topic": "DNS",
+    "Sub-Topic": "Anycast",
+    "Tags": ["DNS", "anycast", "availability"]
+  },
+  {
+    "Question": "What is the main purpose of NAT in IPv4 networks?",
+    "Answer": "To allow multiple devices to share a single public IP address by translating private addresses.",
+    "Module": "Networks and Security",
+    "Topic": "Subnets, NAT, and Routing",
+    "Sub-Topic": "NAT",
+    "Tags": ["NAT", "IPv4", "address translation"]
+  },
+  {
+    "Question": "Why are private IP addresses not routable on the global internet?",
+    "Answer": "Because they are reserved for internal use and must be translated by NAT for external communication.",
+    "Module": "Networks and Security",
+    "Topic": "Subnets, NAT, and Routing",
+    "Sub-Topic": "Private Addresses",
+    "Tags": ["private IP", "NAT", "routing"]
+  },
+  {
+    "Question": "How do routing tables determine the next hop for a packet?",
+    "Answer": "By matching the destination IP to the most specific prefix and selecting the corresponding route.",
+    "Module": "Networks and Security",
+    "Topic": "Subnets, NAT, and Routing",
+    "Sub-Topic": "Routing Tables",
+    "Tags": ["routing table", "next hop", "IP routing"]
+  },
+  {
+    "Question": "What is the main difference between RIP and link-state routing protocols?",
+    "Answer": "RIP uses distance vectors and periodic updates, while link-state protocols build a full network topology and compute shortest paths.",
+    "Module": "Networks and Security",
+    "Topic": "Subnets, NAT, and Routing",
+    "Sub-Topic": "Routing Protocols",
+    "Tags": ["RIP", "link-state", "routing protocol"]
+  },
+  {
+    "Question": "How does BGP prevent routing loops between autonomous systems?",
+    "Answer": "By using the AS path attribute to detect if a route includes the local AS.",
+    "Module": "Networks and Security",
+    "Topic": "Subnets, NAT, and Routing",
+    "Sub-Topic": "BGP",
+    "Tags": ["BGP", "routing loop", "AS path"]
+  },
+  {
+    "Question": "What is the main purpose of IPSEC in network security?",
+    "Answer": "To provide encryption, authentication, and data integrity for IP communications.",
+    "Module": "Networks and Security",
+    "Topic": "IPSEC and DNSSEC",
+    "Sub-Topic": "IPSEC",
+    "Tags": ["IPSEC", "encryption", "authentication", "integrity"]
+  },
+  {
+    "Question": "How does the Authentication Header in IPSEC provide security?",
+    "Answer": "By attaching a cryptographic hash to packets, ensuring data integrity and authentication.",
+    "Module": "Networks and Security",
+    "Topic": "IPSEC and DNSSEC",
+    "Sub-Topic": "Authentication Header",
+    "Tags": ["IPSEC", "authentication header", "integrity"]
+  },
+  {
+    "Question": "What is the difference between transport mode and tunnel mode in IPSEC?",
+    "Answer": "Transport mode encrypts only the payload, while tunnel mode encrypts the entire packet including the IP header.",
+    "Module": "Networks and Security",
+    "Topic": "IPSEC and DNSSEC",
+    "Sub-Topic": "Modes of Sending",
+    "Tags": ["IPSEC", "transport mode", "tunnel mode"]
+  },
+  {
+    "Question": "Why is DNSSEC necessary for modern DNS infrastructure?",
+    "Answer": "Because DNS lacks authenticity and integrity, making it vulnerable to spoofing and cache poisoning.",
+    "Module": "Networks and Security",
+    "Topic": "IPSEC and DNSSEC",
+    "Sub-Topic": "DNSSEC",
+    "Tags": ["DNSSEC", "DNS", "security"]
+  },
+  {
+    "Question": "How does DNSSEC ensure the authenticity of DNS responses?",
+    "Answer": "By using digital signatures and a chain of trust from the root zone to verify DNS records.",
+    "Module": "Networks and Security",
+    "Topic": "IPSEC and DNSSEC",
+    "Sub-Topic": "DNSSEC",
+    "Tags": ["DNSSEC", "digital signature", "authenticity"]
+  },
+  {
+    "Question": "What is the main difference between symmetric and asymmetric encryption?",
+    "Answer": "One uses the same key for both encryption and decryption, while the other uses a public-private key pair.",
+    "Module": "Networks and Security",
+    "Topic": "Principles of Cryptography",
+    "Sub-Topic": "Symmetric vs Asymmetric Encryption",
+    "Tags": ["encryption", "symmetric", "asymmetric", "cryptography"]
+  },
+  {
+    "Question": "Why is it difficult to break RSA encryption when large primes are used?",
+    "Answer": "Because factoring the product of two large primes is computationally infeasible.",
+    "Module": "Networks and Security",
+    "Topic": "Principles of Cryptography",
+    "Sub-Topic": "RSA Security",
+    "Tags": ["RSA", "encryption", "primes", "security"]
+  },
+  {
+    "Question": "What is the purpose of Euler's totient function in RSA key generation?",
+    "Answer": "It is used to determine the range for selecting the public exponent and to compute the private exponent.",
+    "Module": "Networks and Security",
+    "Topic": "Principles of Cryptography",
+    "Sub-Topic": "RSA Key Generation",
+    "Tags": ["RSA", "totient", "key generation"]
+  },
+  {
+    "Question": "How does a digital signature provide message integrity and authentication?",
+    "Answer": "By allowing the recipient to verify that the message was signed by the sender and has not been altered.",
+    "Module": "Networks and Security",
+    "Topic": "Principles of Cryptography",
+    "Sub-Topic": "Digital Signatures",
+    "Tags": ["digital signature", "integrity", "authentication"]
+  },
+  {
+    "Question": "Why can't hash functions be used for encryption?",
+    "Answer": "Because they are one-way functions and cannot be reversed to recover the original data.",
+    "Module": "Networks and Security",
+    "Topic": "Principles of Cryptography",
+    "Sub-Topic": "Hash Functions",
+    "Tags": ["hash function", "encryption", "one-way"]
+  },
+  {
+    "Question": "How does a hash function help verify the integrity of a file?",
+    "Answer": "By producing a fixed-size value that changes if the file is altered, enabling detection of tampering.",
+    "Module": "Networks and Security",
+    "Topic": "Principles of Cryptography",
+    "Sub-Topic": "Hash Function Applications",
+    "Tags": ["hash function", "integrity", "file verification"]
+  },
+  {
+    "Question": "What is the main challenge in distributing symmetric keys securely?",
+    "Answer": "Ensuring that only the intended parties receive the key without interception.",
+    "Module": "Networks and Security",
+    "Topic": "Principles of Cryptography",
+    "Sub-Topic": "Key Distribution",
+    "Tags": ["key distribution", "symmetric encryption", "security"]
+  },
+  {
+    "Question": "How does the Diffie-Hellman protocol enable secure key exchange over an insecure channel?",
+    "Answer": "By allowing two parties to compute a shared secret using public parameters and private keys, without transmitting the secret itself.",
+    "Module": "Networks and Security",
+    "Topic": "Principles of Cryptography",
+    "Sub-Topic": "Diffie-Hellman Key Exchange",
+    "Tags": ["Diffie-Hellman", "key exchange", "cryptography"]
+  },
+  {
+    "Question": "Why is a primitive root used in the Diffie-Hellman key exchange?",
+    "Answer": "To ensure that all possible values are generated, making the discrete logarithm problem hard.",
+    "Module": "Networks and Security",
+    "Topic": "Principles of Cryptography",
+    "Sub-Topic": "Diffie-Hellman Key Exchange",
+    "Tags": ["Diffie-Hellman", "primitive root", "cryptography"]
+  },
+  {
+    "Question": "What vulnerability does the man-in-the-middle attack exploit in key exchange protocols?",
+    "Answer": "The lack of authentication, allowing an attacker to intercept and alter key exchange messages.",
+    "Module": "Networks and Security",
+    "Topic": "Principles of Cryptography",
+    "Sub-Topic": "Man-in-the-Middle Attack",
+    "Tags": ["MITM", "key exchange", "vulnerability"]
+  },
+  {
+    "Question": "How can digital signatures prevent man-in-the-middle attacks in key exchange?",
+    "Answer": "By allowing parties to verify the authenticity of exchanged public values.",
+    "Module": "Networks and Security",
+    "Topic": "Principles of Cryptography",
+    "Sub-Topic": "Man-in-the-Middle Prevention",
+    "Tags": ["digital signature", "MITM", "authentication"]
+  },
+  {
+    "Question": "What is the main goal of access control in computer systems?",
+    "Answer": "To ensure that only authorized users can access specific resources in permitted ways.",
+    "Module": "Networks and Security",
+    "Topic": "Access Control",
+    "Sub-Topic": "Definition",
+    "Tags": ["access control", "authorization", "security"]
+  },
+  {
+    "Question": "What are the three main components of access control context?",
+    "Answer": "Authentication, authorization, and audit.",
+    "Module": "Networks and Security",
+    "Topic": "Access Control",
+    "Sub-Topic": "Access Control Context",
+    "Tags": ["access control", "authentication", "authorization", "audit"]
+  },
+  {
+    "Question": "What is the difference between a subject and an object in access control?",
+    "Answer": "A subject is an entity that accesses resources, while an object is a resource being accessed.",
+    "Module": "Networks and Security",
+    "Topic": "Access Control",
+    "Sub-Topic": "Subjects and Objects",
+    "Tags": ["access control", "subject", "object"]
+  },
+  {
+    "Question": "How does discretionary access control (DAC) determine access rights?",
+    "Answer": "By allowing resource owners to specify permissions for other users.",
+    "Module": "Networks and Security",
+    "Topic": "Access Control",
+    "Sub-Topic": "Discretionary Access Control",
+    "Tags": ["DAC", "access control", "permissions"]
+  },
+  {
+    "Question": "What is the main advantage of role-based access control (RBAC) over DAC?",
+    "Answer": "It simplifies administration by assigning permissions to roles rather than individual users.",
+    "Module": "Networks and Security",
+    "Topic": "Access Control",
+    "Sub-Topic": "Role-Based Access Control",
+    "Tags": ["RBAC", "access control", "roles"]
+  },
+  {
+    "Question": "How does attribute-based access control (ABAC) make access decisions?",
+    "Answer": "By evaluating rules based on attributes of users, resources, actions, and environment.",
+    "Module": "Networks and Security",
+    "Topic": "Access Control",
+    "Sub-Topic": "Attribute-Based Access Control",
+    "Tags": ["ABAC", "access control", "attributes"]
+  },
+  {
+    "Question": "What is a role hierarchy in RBAC and why is it useful?",
+    "Answer": "It allows roles to inherit permissions from other roles, simplifying policy management.",
+    "Module": "Networks and Security",
+    "Topic": "Access Control",
+    "Sub-Topic": "Role Hierarchies",
+    "Tags": ["RBAC", "role hierarchy", "permissions"]
+  },
+  {
+    "Question": "What is the main disadvantage of ABAC compared to RBAC?",
+    "Answer": "It is more complex to implement and maintain due to the large number of possible rules and attributes.",
+    "Module": "Networks and Security",
+    "Topic": "Access Control",
+    "Sub-Topic": "ABAC Disadvantages",
+    "Tags": ["ABAC", "complexity", "access control"]
+  },
+  {
+    "Question": "How does a constraint in RBAC enhance security?",
+    "Answer": "By restricting role assignments or combinations to enforce policies like separation of duties.",
+    "Module": "Networks and Security",
+    "Topic": "Access Control",
+    "Sub-Topic": "RBAC Constraints",
+    "Tags": ["RBAC", "constraints", "security"]
+  },
+  {
+    "Question": "What is the difference between confidentiality, privacy, and secrecy?",
+    "Answer": "One is about restricting access to data, another focuses on individuals, and the last concerns organizations.",
+    "Module": "Networks and Security",
+    "Topic": "Privacy and Anonymity",
+    "Sub-Topic": "Definitions",
+    "Tags": ["confidentiality", "privacy", "secrecy"]
+  },
+  {
+    "Question": "What are the four groups of harmful activities in Solove's taxonomy of privacy?",
+    "Answer": "Information collection, information processing, information dissemination, and invasion.",
+    "Module": "Networks and Security",
+    "Topic": "Privacy and Anonymity",
+    "Sub-Topic": "Solove's Taxonomy",
+    "Tags": ["privacy", "taxonomy", "Solove"]
+  },
+  {
+    "Question": "How does aggregation in information processing threaten privacy?",
+    "Answer": "By combining multiple data points to reveal more about an individual than each piece alone.",
+    "Module": "Networks and Security",
+    "Topic": "Privacy and Anonymity",
+    "Sub-Topic": "Information Processing",
+    "Tags": ["privacy", "aggregation", "information processing"]
+  },
+  {
+    "Question": "What is the main function of privacy enhancing technologies (PETs)?",
+    "Answer": "To mitigate privacy concerns by providing tools and mechanisms for protecting personal data.",
+    "Module": "Networks and Security",
+    "Topic": "Privacy and Anonymity",
+    "Sub-Topic": "Privacy Enhancing Technologies",
+    "Tags": ["PET", "privacy", "technology"]
+  },
+  {
+    "Question": "How does a VPN differ from a proxy in terms of privacy and security?",
+    "Answer": "One encrypts all traffic and hides the user's IP, while the other only forwards requests and may not provide encryption.",
+    "Module": "Networks and Security",
+    "Topic": "Privacy and Anonymity",
+    "Sub-Topic": "VPN vs Proxy",
+    "Tags": ["VPN", "proxy", "privacy", "encryption"]
+  },
+  {
+    "Question": "What is the purpose of onion routing in anonymous communication?",
+    "Answer": "To layer encryption and route traffic through multiple relays, making it difficult to trace the source or destination.",
+    "Module": "Networks and Security",
+    "Topic": "Privacy and Anonymity",
+    "Sub-Topic": "Onion Routing",
+    "Tags": ["onion routing", "anonymity", "encryption"]
+  },
+  {
+    "Question": "How do hidden services in Tor provide two-way anonymity?",
+    "Answer": "By using special addresses and circuits so that neither client nor server knows the other's real IP.",
+    "Module": "Networks and Security",
+    "Topic": "Privacy and Anonymity",
+    "Sub-Topic": "Tor Hidden Services",
+    "Tags": ["Tor", "hidden services", "anonymity"]
+  },
+  {
+    "Question": "What is the main advantage of multi-factor authentication over single-factor methods?",
+    "Answer": "It increases security by requiring evidence from two or more independent categories.",
+    "Module": "Networks and Security",
+    "Topic": "User Authentication",
+    "Sub-Topic": "Multi-Factor Authentication",
+    "Tags": ["authentication", "multi-factor", "security"]
+  },
+  {
+    "Question": "Why are biometric authentication systems susceptible to both false positives and false negatives?",
+    "Answer": "Because pattern recognition can sometimes incorrectly match or fail to match users.",
+    "Module": "Networks and Security",
+    "Topic": "User Authentication",
+    "Sub-Topic": "Biometric Authentication",
+    "Tags": ["biometrics", "authentication", "accuracy"]
+  },
+  {
+    "Question": "How does a challenge-response mechanism prevent replay attacks?",
+    "Answer": "By using a random challenge each time, making previous responses useless.",
+    "Module": "Networks and Security",
+    "Topic": "User Authentication",
+    "Sub-Topic": "Challenge-Response",
+    "Tags": ["authentication", "challenge-response", "replay attack"]
+  },
+  {
+    "Question": "What is the main risk of using tokens for authentication?",
+    "Answer": "They can be lost or stolen, potentially allowing unauthorized access.",
+    "Module": "Networks and Security",
+    "Topic": "User Authentication",
+    "Sub-Topic": "Token-Based Authentication",
+    "Tags": ["token", "authentication", "risk"]
+  },
+  {
+    "Question": "Why are long and complex passwords recommended for security?",
+    "Answer": "Because they increase the number of possible combinations, making brute-force attacks harder.",
+    "Module": "Networks and Security",
+    "Topic": "User Authentication",
+    "Sub-Topic": "Password Security",
+    "Tags": ["password", "security", "brute-force"]
+  },
+  {
+    "Question": "How does password salting defend against rainbow table attacks?",
+    "Answer": "By adding unique random data to each password before hashing, making precomputed tables ineffective.",
+    "Module": "Networks and Security",
+    "Topic": "User Authentication",
+    "Sub-Topic": "Password Salting",
+    "Tags": ["password", "salting", "rainbow table"]
+  },
+  {
+    "Question": "What is the main purpose of a digital certificate in public key infrastructure?",
+    "Answer": "To bind a public key to an entity's identity, enabling secure communication and authentication.",
+    "Module": "Networks and Security",
+    "Topic": "Public Key Infrastructure",
+    "Sub-Topic": "Digital Certificates",
+    "Tags": ["PKI", "digital certificate", "authentication"]
+  },
+  {
+    "Question": "How does a Certification Authority (CA) ensure the authenticity of a digital certificate?",
+    "Answer": "By signing the certificate with its private key, allowing others to verify it using the CA's public key.",
+    "Module": "Networks and Security",
+    "Topic": "Public Key Infrastructure",
+    "Sub-Topic": "Certification Authority",
+    "Tags": ["PKI", "CA", "certificate", "signature"]
+  },
+  {
+    "Question": "What is the role of a Registration Authority (RA) in PKI?",
+    "Answer": "To verify the identity of entities requesting certificates before forwarding requests to the CA.",
+    "Module": "Networks and Security",
+    "Topic": "Public Key Infrastructure",
+    "Sub-Topic": "Registration Authority",
+    "Tags": ["PKI", "RA", "identity verification"]
+  },
+  {
+    "Question": "Why are certificate revocation lists (CRLs) important in PKI?",
+    "Answer": "They allow parties to check whether a certificate is still valid or has been revoked.",
+    "Module": "Networks and Security",
+    "Topic": "Public Key Infrastructure",
+    "Sub-Topic": "Certificate Revocation",
+    "Tags": ["PKI", "CRL", "certificate revocation"]
+  },
+  {
+    "Question": "What is the main limitation of using CRLs for certificate revocation?",
+    "Answer": "They may not be updated frequently enough, allowing revoked certificates to be abused.",
+    "Module": "Networks and Security",
+    "Topic": "Public Key Infrastructure",
+    "Sub-Topic": "CRL Limitations",
+    "Tags": ["PKI", "CRL", "limitations"]
+  },
+  {
+    "Question": "How can fraudulent certificates undermine the trust in PKI systems?",
+    "Answer": "By allowing attackers to impersonate legitimate services and intercept sensitive data.",
+    "Module": "Networks and Security",
+    "Topic": "Public Key Infrastructure",
+    "Sub-Topic": "PKI Attacks",
+    "Tags": ["PKI", "fraudulent certificate", "attack"]
+  },
+  {
+    "Question": "What is the CIA triad in information security?",
+    "Answer": "It stands for confidentiality, integrity, and availability.",
+    "Module": "Networks and Security",
+    "Topic": "Basics of Security",
+    "Sub-Topic": "CIA Triad",
+    "Tags": ["CIA triad", "security", "confidentiality", "integrity", "availability"]
+  },
+  {
+    "Question": "How does nonrepudiation support accountability in security systems?",
+    "Answer": "By ensuring that actions can be traced to entities, preventing denial of actions.",
+    "Module": "Networks and Security",
+    "Topic": "Basics of Security",
+    "Sub-Topic": "Accountability",
+    "Tags": ["nonrepudiation", "accountability", "security"]
+  },
+  {
+    "Question": "What is the difference between active and passive cyber attacks?",
+    "Answer": "One attempts to alter assets or operations, while the other tries to learn information without affecting assets.",
+    "Module": "Networks and Security",
+    "Topic": "Basics of Security",
+    "Sub-Topic": "Attack Classification",
+    "Tags": ["cyber attack", "active", "passive"]
+  },
+  {
+    "Question": "What is the first stage in the cyber attack life cycle?",
+    "Answer": "Reconnaissance, where attackers gather information about the target.",
+    "Module": "Networks and Security",
+    "Topic": "Cyber Attack Life Cycle",
+    "Sub-Topic": "Reconnaissance",
+    "Tags": ["cyber attack", "reconnaissance", "life cycle"]
+  },
+  {
+    "Question": "How do attackers use weaponization in the cyber attack life cycle?",
+    "Answer": "By developing or acquiring tools and malware needed for the attack.",
+    "Module": "Networks and Security",
+    "Topic": "Cyber Attack Life Cycle",
+    "Sub-Topic": "Weaponization",
+    "Tags": ["cyber attack", "weaponization", "malware"]
+  },
+  {
+    "Question": "What is lateral movement in a multi-step cyber attack?",
+    "Answer": "The process of expanding control within a network after initial access.",
+    "Module": "Networks and Security",
+    "Topic": "Cyber Attack Life Cycle",
+    "Sub-Topic": "Lateral Movement",
+    "Tags": ["cyber attack", "lateral movement", "network"]
+  },
+  {
+    "Question": "How do botnets contribute to DDoS attacks?",
+    "Answer": "By coordinating large numbers of compromised devices to flood a target with traffic.",
+    "Module": "Networks and Security",
+    "Topic": "Cyber Attacks",
+    "Sub-Topic": "DDoS",
+    "Tags": ["botnet", "DDoS", "attack"]
+  },
+  {
+    "Question": "What is the main goal of a supply chain attack?",
+    "Answer": "To compromise a target by exploiting vulnerabilities in its suppliers or partners.",
+    "Module": "Networks and Security",
+    "Topic": "Cyber Attacks",
+    "Sub-Topic": "Supply Chain Attacks",
+    "Tags": ["supply chain", "attack", "vulnerability"]
+  },
+  {
+    "Question": "Why is social engineering effective in bypassing technical security controls?",
+    "Answer": "Because it exploits human behavior and trust rather than technical vulnerabilities.",
+    "Module": "Networks and Security",
+    "Topic": "Social Engineering",
+    "Sub-Topic": "Overview",
+    "Tags": ["social engineering", "human factor", "security"]
+  },
+  {
+    "Question": "What is phishing and how does it work?",
+    "Answer": "It involves sending deceptive messages to trick users into revealing sensitive information.",
+    "Module": "Networks and Security",
+    "Topic": "Social Engineering",
+    "Sub-Topic": "Phishing",
+    "Tags": ["phishing", "social engineering", "attack"]
+  },
+  {
+    "Question": "How can tailgating be used to bypass physical security?",
+    "Answer": "By following authorized personnel into restricted areas without proper credentials.",
+    "Module": "Networks and Security",
+    "Topic": "Social Engineering",
+    "Sub-Topic": "Tailgating",
+    "Tags": ["tailgating", "physical security", "social engineering"]
+  },
+  {
+    "Question": "What is the main risk of dumpster diving for organizations?",
+    "Answer": "Sensitive information can be retrieved from improperly discarded documents.",
+    "Module": "Networks and Security",
+    "Topic": "Social Engineering",
+    "Sub-Topic": "Dumpster Diving",
+    "Tags": ["dumpster diving", "information gathering", "risk"]
+  }
+]
