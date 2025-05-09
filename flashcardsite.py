@@ -81,16 +81,16 @@ def index():
 @app.route('/get_filters', methods=['POST'])
 def get_filters():
     selected_module = request.json.get('module')
-    selected_topic = request.json.get('topic')
+    selected_topics = request.json.get('topics', [])
     
-    # Return all available topics for the selected module
+    # Get all topics for the selected module
     topics = sorted(list(set(card['Topic'] for card in FLASHCARDS 
                           if not selected_module or card['Module'] == selected_module)))
     
-    # Return all available subtopics for the selected module and topic
+    # Get subtopics for all selected topics
     subtopics = sorted(list(set(card['Sub-Topic'] for card in FLASHCARDS 
                               if (not selected_module or card['Module'] == selected_module) and
-                                 (not selected_topic or card['Topic'] == selected_topic))))
+                                 (not selected_topics or card['Topic'] in selected_topics))))
     
     return jsonify({
         'topics': topics,
@@ -100,21 +100,14 @@ def get_filters():
 @app.route('/get_question', methods=['POST'])
 def get_question():
     selected_module = request.json.get('module')
-    selected_topic = request.json.get('topic')
-    selected_subtopic = request.json.get('subtopic')
-    selected_tags = request.json.get('tags', [])
+    selected_topics = request.json.get('topics', [])
+    selected_subtopics = request.json.get('subtopics', [])
     
     # Filter cards based on selections
     filtered_cards = [card for card in FLASHCARDS 
                      if (not selected_module or card['Module'] == selected_module) and
-                        (not selected_topic or card['Topic'] == selected_topic) and
-                        (not selected_subtopic or card['Sub-Topic'] == selected_subtopic)]
-    
-    if not filtered_cards:
-        # If no cards match all filters, try with just module and topic
-        filtered_cards = [card for card in FLASHCARDS 
-                         if (not selected_module or card['Module'] == selected_module) and
-                            (not selected_topic or card['Topic'] == selected_topic)]
+                        (not selected_topics or card['Topic'] in selected_topics) and
+                        (not selected_subtopics or card['Sub-Topic'] in selected_subtopics)]
     
     if not filtered_cards:
         return jsonify({'error': 'No cards match the selected filters'})
