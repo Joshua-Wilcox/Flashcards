@@ -1,9 +1,37 @@
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, session, redirect, url_for
+from flask_discord import DiscordOAuth2Session
 import json
 import random
 from collections import defaultdict
+import sqlite3
+from datetime import datetime
+from dotenv import load_dotenv
+import os
+import time
+
+load_dotenv()  # Load variables from .env
 
 app = Flask(__name__)
+
+# Discord OAuth2 Config
+app.secret_key = os.getenv("SECRET_KEY", "dev_secret_key")
+app.config["DISCORD_CLIENT_ID"] = os.getenv("DISCORD_CLIENT_ID")
+app.config["DISCORD_CLIENT_SECRET"] = os.getenv("DISCORD_CLIENT_SECRET")
+app.config["DISCORD_REDIRECT_URI"] = os.getenv("DISCORD_REDIRECT_URI")
+discord = DiscordOAuth2Session(app)
+
+# Database functions
+def get_db():
+    db = sqlite3.connect('flashcards.db')
+    db.row_factory = sqlite3.Row
+    return db
+
+def init_db():
+    with app.app_context():
+        db = get_db()
+        with app.open_resource('schema.sql', mode='r') as f:
+            db.cursor().executescript(f.read())
+        db.commit()
 
 # Load flashcards data
 with open('flashcards.json', 'r') as file:
@@ -132,5 +160,97 @@ def get_question():
         'tags': question_card['Tags']
     })
 
+@app.route("/login")
+def login():
+    return discord.create_session()
+
+@app.route("/callback")
+def callback():
+    try:
+        discord.callback()
+        user = discord.fetch_user()
+        session['user_id'] = user.id
+        session['username'] = f"{user.name}#{user.discriminator}"
+        
+        # Initialize user in database if not exists
+        db = get_db()
+        db.execute('''INSERT OR IGNORE INTO user_stats (user_id, username) 
+                      VALUES (?, ?)''', (user.id, session['username']))
+        db.commit()
+        
+        return redirect(url_for('index'))
+    except Exception as e:
+        return f"An error occurred: {str(e)}"
+
+@app.route("/logout")
+def logout():
+    discord.revoke()
+    session.clear()
+    return redirect(url_for('index'))
+
+@app.route('/check_answer', methods=['POST'])
+def check_answer():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Not logged in'})
+        
+    data = request.json
+    correct = data.get('correct', False)
+    
+    db = get_db()
+    now_ts = int(time.time())
+    db.execute('''UPDATE user_stats 
+                  SET correct_answers = correct_answers + ?,
+                      total_answers = total_answers + 1,
+                      last_answer_time = ?
+                  WHERE user_id = ?''', 
+               (1 if correct else 0, now_ts, session['user_id']))
+    db.commit()
+    
+    return jsonify({'success': True})
+
+@app.route('/leaderboard')
+def leaderboard():
+    sort = request.args.get('sort', 'correct_answers')
+    order = request.args.get('order', 'desc')
+    # Only allow certain columns to be sorted
+    allowed = {
+        'correct_answers': 'correct_answers',
+        'total_answers': 'total_answers',
+        'accuracy': '(CASE WHEN total_answers > 0 THEN 1.0 * correct_answers / total_answers ELSE 0 END)'
+    }
+    sort_col = allowed.get(sort, 'correct_answers')
+    order_sql = 'DESC' if order == 'desc' else 'ASC'
+    db = get_db()
+    users = db.execute(f'''
+        SELECT user_id, username, correct_answers, total_answers,
+            (CASE WHEN total_answers > 0 THEN 1.0 * correct_answers / total_answers ELSE 0 END) as accuracy
+        FROM user_stats
+        ORDER BY {sort_col} {order_sql}, total_answers DESC
+        LIMIT 50
+    ''').fetchall()
+    leaderboard = [dict(row) for row in users]
+    return render_template('leaderboard.html', leaderboard=leaderboard, sort=sort, order=order)
+
+@app.route('/user_stats/<user_id>')
+def user_stats(user_id):
+    db = get_db()
+    stats = db.execute('''SELECT * FROM user_stats WHERE user_id = ?''', (user_id,)).fetchone()
+    stats_dict = dict(stats) if stats else {}
+    return render_template('stats.html', stats=stats_dict, is_other_user=True)
+
+@app.route('/stats')
+def stats():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+        
+    db = get_db()
+    stats = db.execute('''SELECT * FROM user_stats WHERE user_id = ?''', 
+                      (session['user_id'],)).fetchone()
+    stats_dict = dict(stats) if stats else {}
+    return render_template('stats.html', stats=stats_dict, is_other_user=False)
+
 if __name__ == '__main__':
-    app.run(debug=True, port=2456)
+    init_db()
+    # Enable HTTP for local development
+    os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+    app.run(host='127.0.0.1', debug=True, port=2456)

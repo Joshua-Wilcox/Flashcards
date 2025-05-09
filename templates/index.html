@@ -1,19 +1,21 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Flashcards</title>
+    <title>ECS Y1S2 Flashcards</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"> <!-- Added for mobile scaling -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
     <style>
         .answer-btn {
             margin: 5px 0;
             white-space: normal;
             word-wrap: break-word;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 10px;
+            padding: 18px 10px;
             height: 100%;
-            font-size: clamp(14px, 2vw, 24px);  /* Responsive text size */
+            font-size: clamp(18px, 4vw, 28px);  /* Larger text for mobile */
+            min-height: 60px;
+            border-radius: 16px;
+            transition: background 0.2s, color 0.2s;
         }
         .disabled {
             opacity: 0.5;
@@ -28,13 +30,13 @@
             font-size: 0.9em;
         }
         #question-container {
-            min-height: 150px;  /* Reduced to give more space to answers */
+            min-height: 150px;
             margin-bottom: 10px;
         }
 
         .content-wrapper {
             min-height: 100vh;
-            display: flexd;
+            display: flex;
             flex-direction: column;
         }
 
@@ -46,15 +48,11 @@
         }
 
         #answers-container {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+            /* Removed flex styles that cause overlap */
         }
 
         #answers-container > div {
-            flex: 1;
-            min-height: 0;  /* Allows proper flex shrinking */
+            /* Removed flex styles that cause overlap */
         }
 
         /* Adjust footer to stay at bottom */
@@ -63,31 +61,137 @@
             padding: 10px 0;
         }
 
-        /* Add new mobile-friendly styles */
+        /* Responsive: mobile-friendly styles */
         @media (max-width: 768px) {
+            html, body {
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            .content-wrapper {
+                min-height: 100vh;
+                height: 100vh;
+            }
+            .container {
+                padding-left: 4px;
+                padding-right: 4px;
+            }
             .select-container {
-                margin-bottom: 15px;
+                margin-bottom: 10px;
             }
-            
+            .form-select {
+                font-size: 1.1em;
+                min-height: 48px;
+            }
             .form-select[multiple] {
-                size: 5;  /* Smaller size on mobile */
+                min-height: 120px;
+                font-size: 1em;
             }
-            
             #question-container {
-                padding: 15px !important;
+                padding: 12px !important;
+                font-size: 1.1em;
             }
-            
             .answer-btn {
-                font-size: 0.9em;
+                font-size: 1.1em;
+                min-height: 60px;
+                padding: 18px 10px;
             }
+            #qa-section {
+                flex: 1 1 auto;
+                display: flex;
+                flex-direction: column;
+                justify-content: stretch;
+                min-height: 60vh;
+            }
+            #answers-container {
+                /* Removed flex styles that cause overlap */
+            }
+            #answers-container > div {
+                /* Removed flex styles that cause overlap */
+            }
+            .welcome-section {
+                min-height: 180px;
+                margin-top: 20px;
+                margin-bottom: 20px;
+            }
+        }
+
+        /* Force answer buttons to fill vertical space on mobile */
+        @media (max-width: 576px) {
+            #qa-section {
+                min-height: 70vh;
+            }
+            #answers-container {
+                /* Removed gap, spacing will be handled by mb-2 */
+            }
+            .answer-btn {
+                font-size: 1.2em;
+                min-height: 60px;
+                padding: 20px 8px;
+            }
+        }
+
+        /* Welcome section styling */
+        .welcome-section {
+            min-height: 250px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            margin-top: 40px;
+            margin-bottom: 40px;
+        }
+        .welcome-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #0d6efd;
+        }
+        .welcome-desc {
+            font-size: 1.2rem;
+            color: #555;
+            margin-top: 10px;
+            margin-bottom: 0;
+        }
+
+        /* Custom styles for multi-select dropdowns */
+        .dropdown-menu-multiselect {
+            max-height: 260px;
+            overflow-y: auto;
+            min-width: 220px;
+        }
+        .dropdown-item-checkbox {
+            cursor: pointer;
+            user-select: none;
+        }
+        .dropdown-item-checkbox input[type="checkbox"] {
+            margin-right: 8px;
+        }
+        .dropdown-toggle-multiselect {
+            text-align: left;
+            white-space: normal;
         }
     </style>
 </head>
 <body>
     <div class="content-wrapper">
         <div class="container mt-4">
+            <!-- Add navigation bar -->
+            <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+                <div class="container-fluid">
+                    <span class="navbar-brand">ECS Y1S2 Flashcards</span>
+                    <div class="navbar-nav ms-auto">
+                        <a class="nav-link" href="{{ url_for('leaderboard') }}">Leaderboard</a>
+                        {% if not session.user_id %}
+                            <a class="nav-link" href="{{ url_for('login') }}">Login with Discord</a>
+                        {% else %}
+                            <a class="nav-link" href="{{ url_for('stats') }}">My Stats</a>
+                            <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </nav>
             <div class="row">
-                <!-- Changed column classes for better stacking -->
                 <div class="col-12 col-md-4 select-container">
                     <label for="module-select">Module:</label>
                     <select id="module-select" class="form-select">
@@ -98,22 +202,43 @@
                     </select>
                 </div>
                 <div class="col-12 col-md-4 select-container">
-                    <label for="topic-select">Topics (hold Ctrl/Cmd to select multiple):</label>
-                    <select id="topic-select" class="form-select" multiple size="8" disabled>
-                        <option value="">Select Topic</option>
-                    </select>
+                    <label for="topic-dropdown">Topics:</label>
+                    <div class="dropdown w-100">
+                        <button class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-multiselect w-100" type="button" id="topic-dropdown" data-bs-toggle="dropdown" aria-expanded="false" disabled>
+                            Select Topic
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-multiselect w-100" aria-labelledby="topic-dropdown" id="topic-dropdown-menu">
+                            <!-- Populated by JS -->
+                        </ul>
+                    </div>
                 </div>
                 <div class="col-12 col-md-4 select-container">
-                    <label for="subtopic-select">Subtopics (hold Ctrl/Cmd to select multiple):</label>
-                    <select id="subtopic-select" class="form-select" multiple size="8" disabled>
-                        <option value="">Select Subtopic</option>
-                    </select>
+                    <label for="subtopic-dropdown">Subtopics:</label>
+                    <div class="dropdown w-100">
+                        <button class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-multiselect w-100" type="button" id="subtopic-dropdown" data-bs-toggle="dropdown" aria-expanded="false" disabled>
+                            Select Subtopic
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-multiselect w-100" aria-labelledby="subtopic-dropdown" id="subtopic-dropdown-menu">
+                            <!-- Populated by JS -->
+                        </ul>
+                    </div>
                 </div>
             </div>
 
-            <div class="answers-section">
+            <!-- Welcome section, shown only if no module is selected -->
+            <div id="welcome-section" class="welcome-section">
+                <div class="welcome-title">Welcome to Flashcards.OneHundredAndTwelveMillion.xyz!</div>
+                <p class="welcome-desc">
+                    Select a module to begin practicing.<br>
+                    Use the filters above to narrow down your questions.<br>
+                    Your progress will be tracked if you log in.
+                </p>
+            </div>
+
+            <!-- Question and answers section, hidden until a module is selected -->
+            <div id="qa-section" class="answers-section" style="display: none;">
                 <div id="question-container" class="p-4 bg-light rounded">
-                    <h4 id="question-text">Select filters to start</h4>
+                    <h4 id="question-text"></h4>
                     <div id="question-info" class="small text-muted mt-2">
                         <span id="module-info"></span> |
                         <span id="topic-info"></span> |
@@ -122,30 +247,42 @@
                     <div id="tags-container" class="mt-2"></div>
                 </div>
 
-                <div id="answers-container" class="row g-2">
-                    <div class="col-12"><button class="btn btn-primary w-100 answer-btn" disabled></button></div>
-                    <div class="col-12"><button class="btn btn-primary w-100 answer-btn" disabled></button></div>
-                    <div class="col-12"><button class="btn btn-primary w-100 answer-btn" disabled></button></div>
+                <div id="answers-container" class="row g-2" style="height: 100%;">
+                    <div class="col-12 mb-2"><button class="btn btn-primary w-100 answer-btn" disabled></button></div>
+                    <div class="col-12 mb-2"><button class="btn btn-primary w-100 answer-btn" disabled></button></div>
+                    <div class="col-12 mb-2"><button class="btn btn-primary w-100 answer-btn" disabled></button></div>
                     <div class="col-12"><button class="btn btn-primary w-100 answer-btn" disabled></button></div>
                 </div>
             </div>
         </div>
 
         <footer class="text-center">
-            <p>made with ❤️ by <a href="https://github.com/Joshua-Wilcox">Josh Wilcox</a></p>
+            <p>made with ❤️ by <a href="https://github.com/Josh-Wilcox">Josh Wilcox</a></p>
+            <p>if this has helped you more than a coffee, consider <a href="https://www.paypal.me/joshmwilcox">supporting</a></p>
         </footer>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         let currentCorrectAnswer = '';
-        // Add state management variables
         let currentSelections = {
             module: '',
-            topics: [],    // Changed to array
-            subtopics: [], // Changed to array
+            topics: [],
+            subtopics: [],
             tags: []
         };
+
+        // Helper: update dropdown button label
+        function updateDropdownLabel($btn, selected, defaultLabel) {
+            if (selected.length === 0) {
+                $btn.text(defaultLabel);
+            } else if (selected.length === 1) {
+                $btn.text(selected[0]);
+            } else {
+                $btn.text(selected.length + " selected");
+            }
+        }
 
         function updateFilters() {
             const data = {
@@ -160,25 +297,37 @@
                 contentType: 'application/json',
                 data: JSON.stringify(data),
                 success: function(response) {
-                    // Update topic select
-                    $('#topic-select').html('<option value="">Select Topic</option>');
+                    // Populate topics dropdown
+                    const $topicMenu = $('#topic-dropdown-menu');
+                    $topicMenu.empty();
                     response.topics.forEach(topic => {
-                        $('#topic-select').append(`<option value="${topic}">${topic}</option>`);
+                        const checked = currentSelections.topics.includes(topic) ? 'checked' : '';
+                        $topicMenu.append(
+                            `<li>
+                                <label class="dropdown-item dropdown-item-checkbox">
+                                    <input type="checkbox" value="${topic}" ${checked}>${topic}
+                                </label>
+                            </li>`
+                        );
                     });
-                    $('#topic-select').prop('disabled', !data.module);
-                    if (currentSelections.topics.length) {
-                        $('#topic-select').val(currentSelections.topics);
-                    }
+                    $('#topic-dropdown').prop('disabled', !data.module);
+                    updateDropdownLabel($('#topic-dropdown'), currentSelections.topics, "Select Topic");
 
-                    // Update subtopic select
-                    $('#subtopic-select').html('<option value="">Select Subtopic</option>');
+                    // Populate subtopics dropdown
+                    const $subtopicMenu = $('#subtopic-dropdown-menu');
+                    $subtopicMenu.empty();
                     response.subtopics.forEach(subtopic => {
-                        $('#subtopic-select').append(`<option value="${subtopic}">${subtopic}</option>`);
+                        const checked = currentSelections.subtopics.includes(subtopic) ? 'checked' : '';
+                        $subtopicMenu.append(
+                            `<li>
+                                <label class="dropdown-item dropdown-item-checkbox">
+                                    <input type="checkbox" value="${subtopic}" ${checked}>${subtopic}
+                                </label>
+                            </li>`
+                        );
                     });
-                    $('#subtopic-select').prop('disabled', !data.topics.length);
-                    if (currentSelections.subtopics.length) {
-                        $('#subtopic-select').val(currentSelections.subtopics);
-                    }
+                    $('#subtopic-dropdown').prop('disabled', !response.topics.length || !currentSelections.topics.length);
+                    updateDropdownLabel($('#subtopic-dropdown'), currentSelections.subtopics, "Select Subtopic");
                 }
             });
         }
@@ -201,6 +350,10 @@
                 success: function(response) {
                     if (response.error) {
                         $('#question-text').text(response.error);
+                        // Hide answer buttons if no cards
+                        $('#answers-container .answer-btn').each(function() {
+                            $(this).text('').prop('disabled', true).hide();
+                        });
                         return;
                     }
 
@@ -208,7 +361,7 @@
                     $('#module-info').text(response.module);
                     $('#topic-info').text(response.topic);
                     $('#subtopic-info').text(response.subtopic);
-                    
+
                     // Update tags
                     $('#tags-container').empty();
                     response.tags.forEach(tag => {
@@ -218,10 +371,18 @@
                     // Reset and update answer buttons
                     $('.answer-btn').removeClass('btn-success btn-danger disabled')
                         .addClass('btn-primary')
-                        .prop('disabled', false);
-                    
+                        .prop('disabled', false)
+                        .show();
+
                     response.answers.forEach((answer, index) => {
                         $('.answer-btn').eq(index).text(answer);
+                    });
+
+                    // Hide unused buttons
+                    $('.answer-btn').each(function(idx) {
+                        if (idx >= response.answers.length) {
+                            $(this).hide();
+                        }
                     });
 
                     currentCorrectAnswer = response.correct_answer;
@@ -231,7 +392,23 @@
 
         $('.answer-btn').click(function() {
             const selectedAnswer = $(this).text();
-            if (selectedAnswer === currentCorrectAnswer) {
+            const isCorrect = selectedAnswer === currentCorrectAnswer;
+
+            $.ajax({
+                url: '/check_answer',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    correct: isCorrect
+                }),
+                error: function(xhr) {
+                    if (xhr.status === 401) {
+                        window.location.href = "{{ url_for('login') }}";
+                    }
+                }
+            });
+
+            if (isCorrect) {
                 $(this).removeClass('btn-primary').addClass('btn-success');
                 setTimeout(getNewQuestion, 1000);
             } else {
@@ -241,25 +418,50 @@
 
         $('#module-select').change(function() {
             currentSelections.module = $(this).val();
-            currentSelections.topics = [];     // Clear to array
-            currentSelections.subtopics = [];  // Clear to array
-            $('#topic-select').val([]);        // Clear selections
-            $('#subtopic-select').val([]);     // Clear selections
+            currentSelections.topics = [];
+            currentSelections.subtopics = [];
+            updateFilters();
+
+            // Show/hide welcome and QA sections
+            if (currentSelections.module) {
+                $('#welcome-section').hide();
+                $('#qa-section').show();
+                getNewQuestion();
+            } else {
+                $('#qa-section').hide();
+                $('#welcome-section').show();
+            }
+        });
+
+        // Handle topic dropdown checkbox selection
+        $(document).on('change', '#topic-dropdown-menu input[type="checkbox"]', function() {
+            const selected = [];
+            $('#topic-dropdown-menu input[type="checkbox"]:checked').each(function() {
+                selected.push($(this).val());
+            });
+            currentSelections.topics = selected;
+            currentSelections.subtopics = [];
             updateFilters();
             getNewQuestion();
         });
 
-        $('#topic-select').change(function() {
-            currentSelections.topics = $(this).val() || [];
-            currentSelections.subtopics = [];  // Clear subtopic selections
-            $('#subtopic-select').val([]);     // Clear subtopic dropdown
-            updateFilters();
+        // Handle subtopic dropdown checkbox selection
+        $(document).on('change', '#subtopic-dropdown-menu input[type="checkbox"]', function() {
+            const selected = [];
+            $('#subtopic-dropdown-menu input[type="checkbox"]:checked').each(function() {
+                selected.push($(this).val());
+            });
+            currentSelections.subtopics = selected;
+            updateDropdownLabel($('#subtopic-dropdown'), selected, "Select Subtopic");
             getNewQuestion();
         });
 
-        $('#subtopic-select').change(function() {
-            currentSelections.subtopics = $(this).val() || [];
-            getNewQuestion();
+        // Update dropdown labels on open (in case of programmatic changes)
+        $('#topic-dropdown').on('show.bs.dropdown', function() {
+            updateDropdownLabel($(this), currentSelections.topics, "Select Topic");
+        });
+        $('#subtopic-dropdown').on('show.bs.dropdown', function() {
+            updateDropdownLabel($(this), currentSelections.subtopics, "Select Subtopic");
         });
 
         // Initialize selections from URL parameters if present
@@ -269,6 +471,12 @@
                 currentSelections.module = urlParams.get('module');
                 $('#module-select').val(currentSelections.module);
                 updateFilters();
+                $('#welcome-section').hide();
+                $('#qa-section').show();
+                getNewQuestion();
+            } else {
+                $('#qa-section').hide();
+                $('#welcome-section').show();
             }
         });
     </script>

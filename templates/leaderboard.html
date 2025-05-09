@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Leaderboard - Flashcards</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"> <!-- Added for mobile scaling -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .leaderboard-table {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .leaderboard-table th, .leaderboard-table td {
+            vertical-align: middle;
+        }
+        .rank-badge {
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        .username-link {
+            text-decoration: none;
+            color: #0d6efd;
+        }
+        .username-link:hover {
+            text-decoration: underline;
+        }
+        .sort-btn {
+            border: none;
+            background: none;
+            color: #0d6efd;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 0 4px;
+        }
+        .sort-btn.active {
+            text-decoration: underline;
+        }
+        .sort-arrow {
+            font-size: 0.9em;
+        }
+        footer {
+            margin-top: 40px;
+            padding: 10px 0;
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding-left: 4px;
+                padding-right: 4px;
+            }
+            .leaderboard-table th, .leaderboard-table td {
+                font-size: 1em;
+                padding: 8px 4px;
+            }
+            .rank-badge {
+                font-size: 1em;
+            }
+            h1 {
+                font-size: 1.5rem;
+            }
+        }
+        @media (max-width: 576px) {
+            .leaderboard-table th, .leaderboard-table td {
+                font-size: 0.95em;
+                padding: 6px 2px;
+            }
+            .rank-badge {
+                font-size: 0.95em;
+            }
+            .table-responsive {
+                font-size: 0.95em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+            <div class="container-fluid">
+                <span class="navbar-brand">Flashcards</span>
+                <div class="navbar-nav ms-auto">
+                    <a class="nav-link" href="{{ url_for('index') }}">Back to Flashcards</a>
+                    <a class="nav-link" href="{{ url_for('leaderboard') }}">Leaderboard</a>
+                    {% if session.user_id %}
+                        <a class="nav-link" href="{{ url_for('stats') }}">My Stats</a>
+                        <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                    {% else %}
+                        <a class="nav-link" href="{{ url_for('login') }}">Login with Discord</a>
+                    {% endif %}
+                </div>
+            </div>
+        </nav>
+        <h1 class="text-center mb-4">Leaderboard</h1>
+        <div class="table-responsive">
+            <table class="table leaderboard-table table-striped align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Rank</th>
+                        <th>User</th>
+                        <th>
+                            <form method="get" style="display:inline;">
+                                <input type="hidden" name="sort" value="correct_answers">
+                                <input type="hidden" name="order" value="{{ 'asc' if sort == 'correct_answers' and order == 'desc' else 'desc' }}">
+                                <button type="submit" class="sort-btn{% if sort == 'correct_answers' %} active{% endif %}">
+                                    Correct Answers
+                                    {% if sort == 'correct_answers' %}
+                                        <span class="sort-arrow">{{ '▲' if order == 'asc' else '▼' }}</span>
+                                    {% endif %}
+                                </button>
+                            </form>
+                        </th>
+                        <th>
+                            <form method="get" style="display:inline;">
+                                <input type="hidden" name="sort" value="total_answers">
+                                <input type="hidden" name="order" value="{{ 'asc' if sort == 'total_answers' and order == 'desc' else 'desc' }}">
+                                <button type="submit" class="sort-btn{% if sort == 'total_answers' %} active{% endif %}">
+                                    Total Answers
+                                    {% if sort == 'total_answers' %}
+                                        <span class="sort-arrow">{{ '▲' if order == 'asc' else '▼' }}</span>
+                                    {% endif %}
+                                </button>
+                            </form>
+                        </th>
+                        <th>
+                            <form method="get" style="display:inline;">
+                                <input type="hidden" name="sort" value="accuracy">
+                                <input type="hidden" name="order" value="{{ 'asc' if sort == 'accuracy' and order == 'desc' else 'desc' }}">
+                                <button type="submit" class="sort-btn{% if sort == 'accuracy' %} active{% endif %}">
+                                    Accuracy
+                                    {% if sort == 'accuracy' %}
+                                        <span class="sort-arrow">{{ '▲' if order == 'asc' else '▼' }}</span>
+                                    {% endif %}
+                                </button>
+                            </form>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in leaderboard %}
+                    <tr>
+                        <td class="rank-badge">{{ loop.index }}</td>
+                        <td>
+                            <a class="username-link" href="{{ url_for('user_stats', user_id=user['user_id']) }}">
+                                {{ user['username'] }}
+                            </a>
+                        </td>
+                        <td>{{ user['correct_answers'] }}</td>
+                        <td>{{ user['total_answers'] }}</td>
+                        <td>
+                            {% if user['total_answers'] > 0 %}
+                                {{ "%.1f"|format(user['accuracy'] * 100) }}%
+                            {% else %}
+                                0%
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <footer class="text-center">
+            <p>made with ❤️ by <a href="https://github.com/Josh-Wilcox">Josh Wilcox</a></p>
+        </footer>
+    </div>
+</body>
+</html>
