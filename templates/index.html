@@ -68,6 +68,10 @@
         </div>
     </div>
 
+    <footer class="text-center mt-4 mb-4">
+        <p>made with ❤️ by <a href="https://github.com/Joshua-Wilcox">Josh Wilcox</a></p>
+    </footer>
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         let currentCorrectAnswer = '';
@@ -173,23 +177,22 @@
 
         $('#module-select').change(function() {
             currentSelections.module = $(this).val();
-            currentSelections.topic = '';
-            currentSelections.subtopic = '';
-            currentSelections.tags = [];
             updateFilters();
             getNewQuestion();
         });
 
         $('#topic-select').change(function() {
             currentSelections.topic = $(this).val();
-            currentSelections.subtopic = '';
+            if (!$(this).val()) {
+                currentSelections.subtopic = '';
+                $('#subtopic-select').val('');
+            }
             updateFilters();
             getNewQuestion();
         });
 
         $('#subtopic-select').change(function() {
             currentSelections.subtopic = $(this).val();
-            updateFilters();
             getNewQuestion();
         });
 

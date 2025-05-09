@@ -82,20 +82,19 @@ def index():
 def get_filters():
     selected_module = request.json.get('module')
     selected_topic = request.json.get('topic')
-    selected_subtopic = request.json.get('subtopic')
     
-    filtered_cards = FLASHCARDS
+    # Return all available topics for the selected module
+    topics = sorted(list(set(card['Topic'] for card in FLASHCARDS 
+                          if not selected_module or card['Module'] == selected_module)))
     
-    if selected_module:
-        filtered_cards = [card for card in filtered_cards if card['Module'] == selected_module]
-    if selected_topic:
-        filtered_cards = [card for card in filtered_cards if card['Topic'] == selected_topic]
-    if selected_subtopic:
-        filtered_cards = [card for card in filtered_cards if card['Sub-Topic'] == selected_subtopic]
+    # Return all available subtopics for the selected module and topic
+    subtopics = sorted(list(set(card['Sub-Topic'] for card in FLASHCARDS 
+                              if (not selected_module or card['Module'] == selected_module) and
+                                 (not selected_topic or card['Topic'] == selected_topic))))
     
     return jsonify({
-        'topics': sorted(list(set(card['Topic'] for card in filtered_cards))),
-        'subtopics': sorted(list(set(card['Sub-Topic'] for card in filtered_cards)))
+        'topics': topics,
+        'subtopics': subtopics
     })
 
 @app.route('/get_question', methods=['POST'])
@@ -106,18 +105,16 @@ def get_question():
     selected_tags = request.json.get('tags', [])
     
     # Filter cards based on selections
-    filtered_cards = FLASHCARDS
-    if selected_module:
-        filtered_cards = [card for card in filtered_cards if card['Module'] == selected_module]
-    if selected_topic:
-        filtered_cards = [card for card in filtered_cards if card['Topic'] == selected_topic]
-    if selected_subtopic:
-        filtered_cards = [card for card in filtered_cards if card['Sub-Topic'] == selected_subtopic]
-    if selected_tags:
-        filtered_cards = [
-            card for card in filtered_cards 
-            if any(tag in card['Tags'] for tag in selected_tags)
-        ]
+    filtered_cards = [card for card in FLASHCARDS 
+                     if (not selected_module or card['Module'] == selected_module) and
+                        (not selected_topic or card['Topic'] == selected_topic) and
+                        (not selected_subtopic or card['Sub-Topic'] == selected_subtopic)]
+    
+    if not filtered_cards:
+        # If no cards match all filters, try with just module and topic
+        filtered_cards = [card for card in FLASHCARDS 
+                         if (not selected_module or card['Module'] == selected_module) and
+                            (not selected_topic or card['Topic'] == selected_topic)]
     
     if not filtered_cards:
         return jsonify({'error': 'No cards match the selected filters'})
@@ -143,4 +140,4 @@ def get_question():
     })
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0",debug=True, port=2456)
+    app.run(debug=True, port=2456)
