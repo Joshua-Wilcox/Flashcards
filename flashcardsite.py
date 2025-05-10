@@ -18,6 +18,7 @@ app.secret_key = os.getenv("SECRET_KEY", "dev_secret_key")
 app.config["DISCORD_CLIENT_ID"] = os.getenv("DISCORD_CLIENT_ID")
 app.config["DISCORD_CLIENT_SECRET"] = os.getenv("DISCORD_CLIENT_SECRET")
 app.config["DISCORD_REDIRECT_URI"] = os.getenv("DISCORD_REDIRECT_URI")
+app.config["DISCORD_OAUTH2_SCOPE"] = ["identify"]
 discord = DiscordOAuth2Session(app)
 
 # Database functions
@@ -162,7 +163,7 @@ def get_question():
 
 @app.route("/login")
 def login():
-    return discord.create_session()
+    return discord.create_session(scope=["identify"])
 
 @app.route("/callback")
 def callback():
