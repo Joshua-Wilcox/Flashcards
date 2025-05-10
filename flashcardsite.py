@@ -11,6 +11,7 @@ import time
 import secrets  # For generating secure tokens
 import hashlib  # For creating secure hashes
 import threading
+import difflib
 
 load_dotenv()  # Load variables from .env
 
@@ -197,33 +198,42 @@ def get_question():
     question_row = random.choice(rows)
     question_card = question_row_to_dict(question_row)
 
-    # Get similar answers (from DB)
+    # Get similar answers (from DB) with similarity check
     def get_similar_answers_db(correct_card, count=3):
-        # Find other questions in the same module
         module_rows = db.execute('SELECT * FROM questions WHERE module = ? AND id != ?', (correct_card['Module'], correct_card['id'])).fetchall()
-        # Try matching by tags
-        tag_matches = []
-        for row in module_rows:
-            card = question_row_to_dict(row)
-            common_tags = set(card['Tags']) & set(correct_card['Tags'])
-            if common_tags:
-                tag_matches.append((len(common_tags), card))
-        # Subtopic
+        # Helper to filter by similarity
+        def filter_by_similarity(candidates, already, max_count):
+            filtered = []
+            for card in candidates:
+                ans = card['Answer']
+                if all(difflib.SequenceMatcher(None, ans, x).ratio() < 0.8 for x in already):
+                    filtered.append(card)
+                if len(filtered) == max_count:
+                    break
+            return filtered
+        # 1. Tag matches
+        tag_matches = [question_row_to_dict(row) for row in module_rows if set(question_row_to_dict(row)['Tags']) & set(correct_card['Tags'])]
+        tag_matches = filter_by_similarity(tag_matches, [correct_card['Answer']], count)
+        # 2. Subtopic matches (excluding already chosen)
         if len(tag_matches) < count:
-            subtopic_matches = [question_row_to_dict(row) for row in module_rows if question_row_to_dict(row)['Sub-Topic'] == correct_card['Sub-Topic'] and question_row_to_dict(row) not in [m[1] for m in tag_matches]]
-            tag_matches.extend((0, card) for card in subtopic_matches)
-        # Topic
+            subtopic_matches = [question_row_to_dict(row) for row in module_rows if question_row_to_dict(row)['Sub-Topic'] == correct_card['Sub-Topic'] and question_row_to_dict(row) not in tag_matches]
+            subtopic_matches = filter_by_similarity(subtopic_matches, [correct_card['Answer']] + [c['Answer'] for c in tag_matches], count - len(tag_matches))
+            tag_matches.extend(subtopic_matches)
+        # 3. Topic matches (excluding already chosen)
         if len(tag_matches) < count:
-            topic_matches = [question_row_to_dict(row) for row in module_rows if question_row_to_dict(row)['Topic'] == correct_card['Topic'] and question_row_to_dict(row) not in [m[1] for m in tag_matches] and question_row_to_dict(row) not in subtopic_matches]
-            tag_matches.extend((0, card) for card in topic_matches)
-        tag_matches.sort(key=lambda x: x[0], reverse=True)
-        similar_answers = [m[1]['Answer'] for m in tag_matches[:count]]
-        # Fill with randoms if needed
-        while len(similar_answers) < count and module_rows:
+            topic_matches = [question_row_to_dict(row) for row in module_rows if question_row_to_dict(row)['Topic'] == correct_card['Topic'] and question_row_to_dict(row) not in tag_matches and question_row_to_dict(row) not in subtopic_matches]
+            topic_matches = filter_by_similarity(topic_matches, [correct_card['Answer']] + [c['Answer'] for c in tag_matches], count - len(tag_matches))
+            tag_matches.extend(topic_matches)
+        # 4. Fill with randoms if needed
+        attempts = 0
+        while len(tag_matches) < count and attempts < 20 and module_rows:
             random_card = question_row_to_dict(random.choice(module_rows))
-            if random_card['Answer'] not in similar_answers and random_card['id'] != correct_card['id']:
-                similar_answers.append(random_card['Answer'])
-        return similar_answers
+            ans = random_card['Answer']
+            if random_card not in tag_matches and ans != correct_card['Answer']:
+                if all(difflib.SequenceMatcher(None, ans, x).ratio() < 0.8 for x in [correct_card['Answer']] + [c['Answer'] for c in tag_matches]):
+                    tag_matches.append(random_card)
+            attempts += 1
+        return [c['Answer'] for c in tag_matches[:count]]
 
     wrong_answers = get_similar_answers_db(question_card)
     all_answers = wrong_answers + [question_card['Answer']]
