@@ -2,3 +2,4 @@
 /venv
 flashcards.db
 .env
+whitelist.json

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Report a Question - Flashcards</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body, html { min-height: 100vh; }
+        .content-wrapper { min-height: 100vh; display: flex; flex-direction: column; }
+        .report-card { max-width: 600px; margin: 40px auto; box-shadow: 0 4px 16px rgba(0,0,0,0.08); border-radius: 12px; }
+        .welcome-title { font-size: 2.2rem; font-weight: 700; color: #0d6efd; }
+        .welcome-desc { font-size: 1.1rem; color: #555; margin-top: 10px; }
+        footer { margin-top: auto; padding: 10px 0; }
+        .question-box { background: #f8f9fa; border-radius: 8px; padding: 12px; margin-bottom: 16px; }
+    </style>
+</head>
+<body>
+    <div class="content-wrapper">
+        <div class="container mt-4">
+            <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+                <div class="container-fluid">
+                    <span class="navbar-brand">Flashcards</span>
+                    <div class="navbar-nav ms-auto">
+                        <a class="nav-link" href="{{ url_for('index') }}">Back to Flashcards</a>
+                        <a class="nav-link" href="{{ url_for('leaderboard') }}">Leaderboard</a>
+                        {% if session.user_id %}
+                            <a class="nav-link" href="{{ url_for('stats') }}">My Stats</a>
+                            <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                        {% else %}
+                            <a class="nav-link" href="{{ url_for('login') }}">Login with Discord</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </nav>
+            <div class="report-card card p-4">
+                <div class="text-center mb-3">
+                    <div class="welcome-title">Report a Question</div>
+                    <div class="welcome-desc">If you notice a problem with a question, please let us know below.</div>
+                </div>
+                <form method="post">
+                    <div class="mb-3">
+                        <label class="form-label">Question:</label>
+                        <div class="question-box">{{ question }}</div>
+                        <input type="hidden" name="question_text" value="{{ question }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Answer:</label>
+                        <div class="question-box">{{ answer }}</div>
+                        <input type="hidden" name="answer_text" value="{{ answer }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="message" class="form-label">Describe the problem (optional):</label>
+                        <textarea class="form-control" id="message" name="message" rows="3" placeholder="E.g. low quality answer, text in button makes it obvious it's the answer, unclear question, typo, etc."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-danger w-100">Submit Report</button>
+                </form>
+            </div>
+        </div>
+        <footer class="text-center">
+            <p>made with ❤️ by <a href="https://github.com/joshua-wilcox">Josh Wilcox</a></p>
+            <p>if this has helped you more than a coffee, consider <a href="https://buymeacoffee.com/jmwcx">supporting</a></p>
+        </footer>
+    </div>
+</body>
+</html>

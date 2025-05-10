@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>ECS Y1S2 Flashcards</title>
+    <title>flashcards dot one hundred and twelve million dot x y z  </title>
     <meta name="viewport" content="width=device-width, initial-scale=1"> <!-- Added for mobile scaling -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
@@ -171,6 +171,16 @@
             text-align: left;
             white-space: normal;
         }
+
+        .btn-report {
+            background-color: #d35400 !important;
+            color: #fff !important;
+            border: none;
+        }
+        .btn-report:hover, .btn-report:focus {
+            background-color: #b34700 !important;
+            color: #fff !important;
+        }
     </style>
 </head>
 <body>
@@ -179,7 +189,7 @@
             <!-- Add navigation bar -->
             <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
                 <div class="container-fluid">
-                    <span class="navbar-brand">ECS Y1S2 Flashcards</span>
+                    <span class="navbar-brand">Flashcards Dot One Hundred and Twelve Million Dot x y z  </span>
                     <div class="navbar-nav ms-auto">
                         <a class="nav-link" href="{{ url_for('leaderboard') }}">Leaderboard</a>
                         {% if not session.user_id %}
@@ -227,7 +237,7 @@
 
             <!-- Welcome section, shown only if no module is selected -->
             <div id="welcome-section" class="welcome-section">
-                <div class="welcome-title">Welcome to Flashcards.OneHundredAndTwelveMillion.xyz!</div>
+                <div class="welcome-title">Flashcards.112000000.xyz</div>
                 <p class="welcome-desc">
                     Select a module to begin practicing.<br>
                     Use the filters above to narrow down your questions.<br>
@@ -245,6 +255,14 @@
                         <span id="subtopic-info"></span>
                     </div>
                     <div id="tags-container" class="mt-2"></div>
+                    <!-- Related PDFs Dropdown -->
+                    <div class="dropdown mt-2" id="pdfs-dropdown-container" style="display:none;">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" id="pdfsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            Related PDFs
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="pdfsDropdown" id="pdfs-dropdown-list">
+                        </ul>
+                    </div>
                 </div>
 
                 <div id="answers-container" class="row g-2" style="height: 100%;">
@@ -253,25 +271,29 @@
                     <div class="col-12 mb-2"><button class="btn btn-primary w-100 answer-btn" disabled></button></div>
                     <div class="col-12"><button class="btn btn-primary w-100 answer-btn" disabled></button></div>
                 </div>
+                <div class="mt-3 text-center d-flex justify-content-center gap-2">
+                    <button id="new-question-btn" class="btn btn-primary" style="display:none;">New Question</button>
+                    <button id="report-question-btn" class="btn btn-report" style="display:none;">Report Question</button>
+                </div>
             </div>
         </div>
 
         <footer class="text-center">
             <p>made with ❤️ by <a href="https://github.com/joshua-wilcox">Josh Wilcox</a></p>
-            <p>if this has helped you more than a coffee, consider <a href="https://www.paypal.me/joshmwilcox">supporting</a></p>
+            <p>if this has helped you more than a coffee, consider <a href="https://buymeacoffee.com/jmwcx">supporting</a></p>
         </footer>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        let currentCorrectAnswer = '';
         let currentSelections = {
             module: '',
             topics: [],
             subtopics: [],
             tags: []
         };
+        let currentQuestionToken = null; // Store the token for the current question
 
         // Helper: update dropdown button label
         function updateDropdownLabel($btn, selected, defaultLabel) {
@@ -332,6 +354,15 @@
             });
         }
 
+        // Show/hide Report button with New Question button
+        function showReportButton(show) {
+            if (show) {
+                $('#report-question-btn').show();
+            } else {
+                $('#report-question-btn').hide();
+            }
+        }
+
         function getNewQuestion() {
             const data = {
                 module: currentSelections.module,
@@ -354,6 +385,11 @@
                         $('#answers-container .answer-btn').each(function() {
                             $(this).text('').prop('disabled', true).hide();
                         });
+                        $('#pdfs-dropdown-list').empty();
+                        $('#pdfs-dropdown-container').hide();
+                        $('#new-question-btn').hide();
+                        showReportButton(false);
+                        currentQuestionToken = null;
                         return;
                     }
 
@@ -367,6 +403,23 @@
                     response.tags.forEach(tag => {
                         $('#tags-container').append(`<span class="tag">${tag}</span>`);
                     });
+
+                    // Update PDFs dropdown
+                    $('#pdfs-dropdown-list').empty();
+                    if (response.pdfs && response.pdfs.length > 0) {
+                        response.pdfs.forEach(pdf => {
+                            let name = pdf.name || pdf;
+                            let url = pdf.url || pdf;
+                            if (!/^https?:\/\//.test(url)) {
+                                // Use /pdf/ route for access control
+                                url = '/pdf/' + url.replace(/^\/*/, '');
+                            }
+                            $('#pdfs-dropdown-list').append(`<li><a class="dropdown-item" href="${url}" target="_blank">${name}</a></li>`);
+                        });
+                        $('#pdfs-dropdown-container').show();
+                    } else {
+                        $('#pdfs-dropdown-container').hide();
+                    }
 
                     // Reset and update answer buttons
                     $('.answer-btn').removeClass('btn-success btn-danger disabled')
@@ -385,34 +438,60 @@
                         }
                     });
 
-                    currentCorrectAnswer = response.correct_answer;
+                    // Store the token for this question
+                    currentQuestionToken = response.token || null;
+
+                    $('#new-question-btn').hide();
+                    showReportButton(false);
                 }
             });
         }
 
-        $('.answer-btn').click(function() {
-            const selectedAnswer = $(this).text();
-            const isCorrect = selectedAnswer === currentCorrectAnswer;
+        // Only show report button after correct answer
+        $('.answer-btn').off('click').on('click', function() {
+            const $btn = $(this);
+            const selectedAnswer = $btn.text();
 
+            // Send the token with the answer
             $.ajax({
                 url: '/check_answer',
                 method: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify({
-                    correct: isCorrect
+                    answer: selectedAnswer,
+                    token: currentQuestionToken
                 }),
+                success: function(response) {
+                    if (response.correct) {
+                        $btn.removeClass('btn-primary').addClass('btn-success');
+                        $('.answer-btn').prop('disabled', true);
+                        $('#new-question-btn').show();
+                        showReportButton(true);
+                    } else {
+                        $btn.removeClass('btn-primary').addClass('btn-danger disabled').prop('disabled', true);
+                        // Do not show the New Question button, allow more attempts
+                    }
+                },
                 error: function(xhr) {
                     if (xhr.status === 401) {
                         window.location.href = "{{ url_for('login') }}";
                     }
                 }
             });
+        });
 
-            if (isCorrect) {
-                $(this).removeClass('btn-primary').addClass('btn-success');
-                setTimeout(getNewQuestion, 1000);
-            } else {
-                $(this).removeClass('btn-primary').addClass('btn-danger disabled');
+        // Hide report button on new question
+        $('#new-question-btn').off('click').on('click', function() {
+            getNewQuestion();
+            showReportButton(false);
+        });
+
+        // Report Question button click
+        $('#report-question-btn').off('click').on('click', function() {
+            const questionText = $('#question-text').text();
+            const answerText = $('.btn-success').text();
+            if (questionText) {
+                window.location.href = '/report_question?question=' + encodeURIComponent(questionText) + '&answer=' + encodeURIComponent(answerText);
             }
         });
 

@@ -1608,7 +1608,7 @@
   },
   {
     "Question": "During which phase of the Lockheed Martin model might attackers use techniques like phishing emails or malicious PDFs to deliver their payload?",
-    "Answer": "Delivery",
+    "Answer": "The Delivery phase",
     "Module": "Networks and Security",
     "Topic": "Cyber Attack Life Cycle",
     "Sub-Topic": "Delivery",
@@ -3047,7 +3047,7 @@
   },
   {
     "Question": "Which layer of the TCP/IP model is responsible for the physical transmission of data on the network?",
-    "Answer": "The Link Layer is responsible for the physical transmission of data on the network, including protocols like Ethernet and Wi-Fi.",
+    "Answer": "The Link Layer, including protocols like Ethernet and Wi-Fi.",
     "Module": "Networks and Security",
     "Topic": "Internet Architecture",
     "Sub-Topic": "TCP/IP Model",
@@ -5319,126 +5319,6 @@
     }
   },
   {
-    "Question": "Which LaTeX package is commonly used for including syntax-highlighted code listings in presentations, and what is a key configuration option for improving readability?",
-    "Answer": "The 'minted' package is used for syntax-highlighted code listings, and setting the 'frame=single' option improves readability by adding a border around code blocks.",
-    "Module": "Networks and Security",
-    "Topic": "Technical Writing and Presentation Tools",
-    "Sub-Topic": "LaTeX for Network Documentation",
-    "Tags": [
-      "latex",
-      "minted",
-      "syntax highlighting",
-      "presentation",
-      "code listings"
-    ],
-    "TexMeta": {
-      "title": "Routing",
-      "RelatedPDFs": [
-        "Revision/Networks/Routing/routing.pdf"
-      ]
-    }
-  },
-  {
-    "Question": "In a Beamer presentation, what is the effect of using the 'Warsaw' theme in combination with the 'dove' color theme?",
-    "Answer": "The 'Warsaw' theme provides a structured slide layout, while the 'dove' color theme applies a neutral, professional color palette to the presentation.",
-    "Module": "Networks and Security",
-    "Topic": "Technical Writing and Presentation Tools",
-    "Sub-Topic": "Beamer Themes and Customization",
-    "Tags": [
-      "beamer",
-      "theme",
-      "warsaw",
-      "dove",
-      "presentation design"
-    ],
-    "TexMeta": {
-      "title": "Routing",
-      "RelatedPDFs": [
-        "Revision/Networks/Routing/routing.pdf"
-      ]
-    }
-  },
-  {
-    "Question": "What is the purpose of the 'geometry' package in a LaTeX Beamer document, and how does setting 'paperwidth=210mm, paperheight=297mm' affect the output?",
-    "Answer": "The 'geometry' package allows customization of the slide size; setting 'paperwidth=210mm, paperheight=297mm' configures the slides to A4 size, which is useful for printing or specific display requirements.",
-    "Module": "Networks and Security",
-    "Topic": "Technical Writing and Presentation Tools",
-    "Sub-Topic": "Document Layout and Formatting",
-    "Tags": [
-      "geometry",
-      "a4",
-      "latex",
-      "beamer",
-      "slide size"
-    ],
-    "TexMeta": {
-      "title": "Routing",
-      "RelatedPDFs": [
-        "Revision/Networks/Routing/routing.pdf"
-      ]
-    }
-  },
-  {
-    "Question": "How can you automatically display the current section, subsection, or subsubsection as the frame title in a Beamer presentation?",
-    "Answer": "By defining a custom command that checks the current sectioning counters and sets the frame title accordingly, you can automate dynamic frame titles in Beamer.",
-    "Module": "Networks and Security",
-    "Topic": "Technical Writing and Presentation Tools",
-    "Sub-Topic": "Beamer Automation and Macros",
-    "Tags": [
-      "beamer",
-      "frame title",
-      "automation",
-      "macros",
-      "latex"
-    ],
-    "TexMeta": {
-      "title": "Routing",
-      "RelatedPDFs": [
-        "Revision/Networks/Routing/routing.pdf"
-      ]
-    }
-  },
-  {
-    "Question": "What is the benefit of customizing the footline in a Beamer presentation, and what information is typically included?",
-    "Answer": "Customizing the footline allows you to consistently display important metadata such as author, date, and title on every slide, enhancing professionalism and clarity.",
-    "Module": "Networks and Security",
-    "Topic": "Technical Writing and Presentation Tools",
-    "Sub-Topic": "Beamer Customization",
-    "Tags": [
-      "beamer",
-      "footline",
-      "customization",
-      "metadata",
-      "presentation"
-    ],
-    "TexMeta": {
-      "title": "Routing",
-      "RelatedPDFs": [
-        "Revision/Networks/Routing/routing.pdf"
-      ]
-    }
-  },
-  {
-    "Question": "Why might you use the 'tcolorbox' package in a Beamer presentation, and how does it enhance the display of content like tables of contents?",
-    "Answer": "The 'tcolorbox' package allows for visually distinct, colored boxes that can highlight or separate content such as tables of contents, making navigation and structure clearer for the audience.",
-    "Module": "Networks and Security",
-    "Topic": "Technical Writing and Presentation Tools",
-    "Sub-Topic": "Visual Enhancement in Presentations",
-    "Tags": [
-      "tcolorbox",
-      "beamer",
-      "visual enhancement",
-      "table of contents",
-      "presentation"
-    ],
-    "TexMeta": {
-      "title": "Routing",
-      "RelatedPDFs": [
-        "Revision/Networks/Routing/routing.pdf"
-      ]
-    }
-  },
-  {
     "Question": "Which of the following is NOT a function provided by the IPv6 Neighbour Discovery Protocol (NDP)?",
     "Answer": "Packet fragmentation and reassembly.",
     "Module": "Networks and Security",
@@ -6519,26 +6399,6 @@
       "title": "Recursion in Java",
       "RelatedPDFs": [
         "Lectures/Java/Control Flow/Recursion/recursion.pdf"
-      ]
-    }
-  },
-  {
-    "Question": "Which of the following best describes the primary benefit of using design patterns in software development?",
-    "Answer": "They provide reusable, general solutions to common problems, improving maintainability, scalability, and flexibility of code.",
-    "Module": "Programming II",
-    "Topic": "Design Patterns",
-    "Sub-Topic": "General Principles",
-    "Tags": [
-      "design patterns",
-      "software engineering",
-      "reusability",
-      "maintainability",
-      "flexibility"
-    ],
-    "TexMeta": {
-      "title": "Design Pattern",
-      "RelatedPDFs": [
-        "Lectures/Java/Control Flow/Design Pattern/design pattern.pdf"
       ]
     }
   },
