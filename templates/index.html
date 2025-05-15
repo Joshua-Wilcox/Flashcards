@@ -204,7 +204,7 @@
             <div class="row">
                 <div class="col-12 col-md-4 select-container">
                     <label for="module-select">Module:</label>
-                    <select id="module-select" class="form-select">
+                    <select id="module-select" class="form-select" {% if not session.user_id %}disabled{% endif %}>
                         <option value="">Select Module</option>
                         {% for module in modules %}
                         <option value="{{ module }}">{{ module }}</option>
@@ -239,9 +239,13 @@
             <div id="welcome-section" class="welcome-section">
                 <div class="welcome-title">Flashcards.112000000.xyz</div>
                 <p class="welcome-desc">
+                    {% if session.user_id %}
                     Select a module to begin practicing.<br>
-                    Use the filters above to narrow down your questions.<br>
-                    Your progress will be tracked if you log in.
+                    Use the filters above to narrow down your questions.
+                    {% else %}
+                    You must be logged in to use the flashcards.<br>
+                    Click "Login with Discord" to begin.
+                    {% endif %}
                 </p>
             </div>
 
@@ -255,13 +259,16 @@
                         <span id="subtopic-info"></span>
                     </div>
                     <div id="tags-container" class="mt-2"></div>
-                    <!-- Related PDFs Dropdown -->
-                    <div class="dropdown mt-2" id="pdfs-dropdown-container" style="display:none;">
-                        <button class="btn btn-secondary dropdown-toggle" type="button" id="pdfsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                            Related PDFs
-                        </button>
-                        <ul class="dropdown-menu" aria-labelledby="pdfsDropdown" id="pdfs-dropdown-list">
-                        </ul>
+                    <!-- Button group: Related PDFs, Next Question, Report Question -->
+                    <div class="d-flex flex-wrap gap-2 mt-2 align-items-center">
+                        <div class="dropdown" id="pdfs-dropdown-container" style="display:none;">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" id="pdfsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                Related PDFs
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="pdfsDropdown" id="pdfs-dropdown-list"></ul>
+                        </div>
+                        <button id="new-question-btn" class="btn btn-primary">Next Question</button>
+                        <button id="report-question-btn" class="btn btn-report">Report Question</button>
                     </div>
                 </div>
 
@@ -271,15 +278,12 @@
                     <div class="col-12 mb-2"><button class="btn btn-primary w-100 answer-btn" disabled></button></div>
                     <div class="col-12"><button class="btn btn-primary w-100 answer-btn" disabled></button></div>
                 </div>
-                <div class="mt-3 text-center d-flex justify-content-center gap-2">
-                    <button id="new-question-btn" class="btn btn-primary" style="display:none;">New Question</button>
-                    <button id="report-question-btn" class="btn btn-report" style="display:none;">Report Question</button>
-                </div>
             </div>
         </div>
 
         <footer class="text-center">
             <p>made with ❤️ by <a href="https://github.com/joshua-wilcox">Josh Wilcox</a></p>
+            <p>I accidentally deleted the leaderboard functionality for a lil bit - big apologies but ur stats might be slightly wrong!</p>
             <p>if this has helped you more than a coffee, consider <a href="https://buymeacoffee.com/jmwcx">supporting</a></p>
         </footer>
     </div>
@@ -294,6 +298,8 @@
             tags: []
         };
         let currentQuestionToken = null; // Store the token for the current question
+        let isAdmin = false;
+        let currentQuestionId = null;
 
         // Helper: update dropdown button label
         function updateDropdownLabel($btn, selected, defaultLabel) {
@@ -354,22 +360,17 @@
             });
         }
 
-        // Show/hide Report button with New Question button
-        function showReportButton(show) {
-            if (show) {
-                $('#report-question-btn').show();
-            } else {
-                $('#report-question-btn').hide();
-            }
-        }
-
-        function getNewQuestion() {
+        function getNewQuestion(specificQuestionId = null) {
             const data = {
                 module: currentSelections.module,
                 topics: currentSelections.topics,
                 subtopics: currentSelections.subtopics,
                 tags: currentSelections.tags
             };
+
+            if (specificQuestionId) {
+                data.question_id = specificQuestionId;
+            }
 
             if (!data.module) return;
 
@@ -381,54 +382,66 @@
                 success: function(response) {
                     if (response.error) {
                         $('#question-text').text(response.error);
-                        // Hide answer buttons if no cards
                         $('#answers-container .answer-btn').each(function() {
                             $(this).text('').prop('disabled', true).hide();
                         });
                         $('#pdfs-dropdown-list').empty();
                         $('#pdfs-dropdown-container').hide();
                         $('#new-question-btn').hide();
-                        showReportButton(false);
                         currentQuestionToken = null;
                         return;
                     }
 
+                    // Store the token immediately
+                    currentQuestionToken = response.token;
+                    isAdmin = response.is_admin || false;
+                    currentQuestionId = response.question_id || null;
+
+                    // Update question display
                     $('#question-text').text(response.question);
                     $('#module-info').text(response.module);
                     $('#topic-info').text(response.topic);
                     $('#subtopic-info').text(response.subtopic);
 
-                    // Update tags
-                    $('#tags-container').empty();
-                    response.tags.forEach(tag => {
-                        $('#tags-container').append(`<span class="tag">${tag}</span>`);
-                    });
-
-                    // Update PDFs dropdown
-                    $('#pdfs-dropdown-list').empty();
-                    if (response.pdfs && response.pdfs.length > 0) {
-                        response.pdfs.forEach(pdf => {
-                            let name = pdf.name || pdf;
-                            let url = pdf.url || pdf;
-                            if (!/^https?:\/\//.test(url)) {
-                                // Use /pdf/ route for access control
-                                url = '/pdf/' + url.replace(/^\/*/, '');
-                            }
-                            $('#pdfs-dropdown-list').append(`<li><a class="dropdown-item" href="${url}" target="_blank">${name}</a></li>`);
-                        });
-                        $('#pdfs-dropdown-container').show();
-                    } else {
-                        $('#pdfs-dropdown-container').hide();
-                    }
-
-                    // Reset and update answer buttons
+                    // Reset buttons state
                     $('.answer-btn').removeClass('btn-success btn-danger disabled')
                         .addClass('btn-primary')
                         .prop('disabled', false)
                         .show();
 
+                    // Update answers while maintaining order for edits
+                    let $existingButtons = $('.answer-btn:visible');
+                    let existingAnswers = [];
+                    // If this is a refresh after edit, get existing button order
+                    if (specificQuestionId) {
+                        $existingButtons.each(function() {
+                            existingAnswers.push($(this).text());
+                        });
+                    }
+
+                    // === NEW: Store answer_ids for each button ===
+                    // response.answer_ids is an array of question IDs for each answer
                     response.answers.forEach((answer, index) => {
-                        $('.answer-btn').eq(index).text(answer);
+                        const $btn = $('.answer-btn').eq(index);
+                        let finalAnswer = answer;
+                        // For edited questions, try to maintain the same position
+                        if (specificQuestionId && existingAnswers.length > 0) {
+                            if (existingAnswers[index] === finalAnswer) {
+                                // Same position, no change needed
+                            } else if (answer === response.answers[0]) {
+                                const oldCorrectIndex = existingAnswers.indexOf(response.answers[0]);
+                                if (oldCorrectIndex !== -1) {
+                                    finalAnswer = existingAnswers[index];
+                                }
+                            }
+                        }
+                        $btn.text(finalAnswer)
+                            .data('question-id', response.answer_ids ? response.answer_ids[index] : currentQuestionId)
+                            .removeClass('disabled btn-success btn-danger')
+                            .addClass('btn-primary')
+                            .prop('disabled', false)
+                            .show()
+                            .unwrap('.answer-row');
                     });
 
                     // Hide unused buttons
@@ -438,20 +451,54 @@
                         }
                     });
 
-                    // Store the token for this question
-                    currentQuestionToken = response.token || null;
+                    // Update edit buttons for admins
+                    $('.edit-answer-btn').remove();
+                    if (isAdmin) {
+                        $('.answer-btn:visible').each(function(idx) {
+                            if (!$(this).parent().hasClass('answer-row')) {
+                                $(this).wrap('<div class="d-flex align-items-center answer-row" style="gap:8px;"></div>');
+                            }
+                            if ($(this).siblings('.edit-answer-btn').length === 0) {
+                                $(this).after(`<button class="btn btn-outline-warning edit-answer-btn" style="min-width:60px; font-size:1em; font-weight:500;" data-idx="${idx}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                                        <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                                        <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a 1.5 1.5 0 0 0 1.5-1.5v-11A1.5 1.5 0 0 0 13.5 1h-11A1.5 1.5 0 0 0 1 2.5v11zm1.5-.5a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 .5.5v11a.5.5 0 0 1-.5.5h-11z"/>
+                                    </svg> Edit</button>`);
+                            }
+                        });
+                    }
 
                     $('#new-question-btn').hide();
-                    showReportButton(false);
+
+                    // Update PDFs and tags last since they're less critical
+                    $('#tags-container').empty();
+                    response.tags.forEach(tag => {
+                        $('#tags-container').append(`<span class="tag">${tag}</span>`);
+                    });
+
+                    $('#pdfs-dropdown-list').empty();
+                    if (response.pdfs && response.pdfs.length > 0) {
+                        response.pdfs.forEach(pdf => {
+                            let name = pdf.name || pdf;
+                            let url = pdf.url || pdf;
+                            if (!/^https?:\/\//.test(url)) {
+                                url = '/pdf/' + url.replace(/^\/*/, '');
+                            }
+                            $('#pdfs-dropdown-list').append(`<li><a class="dropdown-item" href="${url}" target="_blank">${name}</a></li>`);
+                        });
+                        $('#pdfs-dropdown-container').show();
+                    } else {
+                        $('#pdfs-dropdown-container').hide();
+                    }
                 }
             });
         }
 
-        // Only show report button after correct answer
-        $('.answer-btn').off('click').on('click', function() {
+        // --- Answer button logic ---
+        $(document).off('click', '.answer-btn').on('click', '.answer-btn', function() {
             const $btn = $(this);
+            if ($btn.prop('disabled')) return;
             const selectedAnswer = $btn.text();
-
             // Send the token with the answer
             $.ajax({
                 url: '/check_answer',
@@ -465,11 +512,14 @@
                     if (response.correct) {
                         $btn.removeClass('btn-primary').addClass('btn-success');
                         $('.answer-btn').prop('disabled', true);
-                        $('#new-question-btn').show();
-                        showReportButton(true);
+                        // Auto-advance after 1 second
+                        setTimeout(function() {
+                            getNewQuestion();
+                        }, 1000);
                     } else {
+                        // Only disable and mark the clicked button as incorrect
                         $btn.removeClass('btn-primary').addClass('btn-danger disabled').prop('disabled', true);
-                        // Do not show the New Question button, allow more attempts
+                        // Let other buttons remain clickable for more attempts
                     }
                 },
                 error: function(xhr) {
@@ -480,16 +530,114 @@
             });
         });
 
-        // Hide report button on new question
-        $('#new-question-btn').off('click').on('click', function() {
-            getNewQuestion();
-            showReportButton(false);
+        // --- Edit answer button logic (admin only) ---
+        function cleanupEditForms() {
+            $('.edit-answer-form').each(function() {
+                const $form = $(this);
+                const $row = $form.closest('.answer-row');
+                $row.find('.answer-btn').show();
+                $row.find('.edit-answer-btn').show();
+                $form.remove();
+            });
+            // Re-enable all buttons
+            $('.edit-answer-btn, .answer-btn').each(function() {
+                const $btn = $(this);
+                if (!$btn.hasClass('btn-danger')) {
+                    $btn.prop('disabled', false);
+                }
+            });
+        }
+
+        $(document).off('click', '.edit-answer-btn').on('click', '.edit-answer-btn', function(e) {
+            e.preventDefault();
+            
+            // First cleanup any existing edit forms
+            cleanupEditForms();
+            
+            const idx = $(this).data('idx');
+            const $answerBtn = $('.answer-btn').eq(idx);
+            const $editBtn = $(this);
+            const currentText = $answerBtn.text();
+            
+            // Disable all edit and answer buttons while editing
+            $('.edit-answer-btn, .answer-btn').prop('disabled', true);
+            
+            // Show the edit form
+            $answerBtn.hide();
+            $editBtn.hide();
+            const formHtml = `
+                <form class="edit-answer-form d-flex align-items-center w-100" style="gap:8px;">
+                    <input type="text" class="form-control form-control-sm" value="${currentText}" style="flex:1; min-width:120px;">
+                    <button type="submit" class="btn btn-success btn-sm">Save</button>
+                    <button type="button" class="btn btn-secondary btn-sm cancel-edit-btn">Cancel</button>
+                </form>
+            `;
+            $editBtn.after(formHtml);
+            
+            // Focus the input field
+            $editBtn.siblings('.edit-answer-form').find('input').focus();
+        });
+        // Save edited answer
+        $(document).off('submit', '.edit-answer-form').on('submit', '.edit-answer-form', function(e) {
+            e.preventDefault();
+            const $form = $(this);
+            const $submitBtn = $form.find('button[type="submit"]');
+            const $cancelBtn = $form.find('.cancel-edit-btn');
+            // Disable form buttons and show loading state
+            $submitBtn.prop('disabled', true);
+            $cancelBtn.prop('disabled', true);
+            $submitBtn.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...');
+            const $answerBtn = $form.closest('.answer-row').find('.answer-btn');
+            const questionId = $answerBtn.data('question-id'); // Use the button's question ID
+            const newText = $form.find('input').val();
+            $.ajax({
+                url: '/edit_answer',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    question_id: questionId, // Use the correct question ID
+                    new_text: newText
+                }),
+                success: function(resp) {
+                    if (resp.success) {
+                        cleanupEditForms();
+                        getNewQuestion(currentQuestionId);
+                    } else {
+                        alert('Failed to update answer.');
+                        $submitBtn.prop('disabled', false);
+                        $cancelBtn.prop('disabled', false);
+                        $submitBtn.html('Save');
+                        $('.edit-answer-btn').prop('disabled', false);
+                    }
+                },
+                error: function() {
+                    alert('Error updating answer.');
+                    $submitBtn.prop('disabled', false);
+                    $cancelBtn.prop('disabled', false);
+                    $submitBtn.html('Save');
+                    $('.edit-answer-btn').prop('disabled', false);
+                }
+            });
+        });
+        // Cancel edit
+        $(document).off('click', '.cancel-edit-btn').on('click', '.cancel-edit-btn', function() {
+            cleanupEditForms();
         });
 
-        // Report Question button click
+        $('#new-question-btn').off('click').on('click', function() {
+            getNewQuestion();
+        });
+
+        // Report Question button always visible
         $('#report-question-btn').off('click').on('click', function() {
             const questionText = $('#question-text').text();
-            const answerText = $('.btn-success').text();
+            let answerText = '';
+            // Try to get the correct answer (if already answered correctly)
+            $('.answer-btn').each(function() {
+                if ($(this).hasClass('btn-success')) answerText = $(this).text();
+            });
+            // If not found, just use the first answer button's text
+            if (!answerText) answerText = $('.answer-btn').first().text();
             if (questionText) {
                 window.location.href = '/report_question?question=' + encodeURIComponent(questionText) + '&answer=' + encodeURIComponent(answerText);
             }
@@ -535,7 +683,7 @@
             getNewQuestion();
         });
 
-        // Update dropdown labels on open (in case of programmatic changes)
+        // Update dropdown labels on show (in case of programmatic changes)
         $('#topic-dropdown').on('show.bs.dropdown', function() {
             updateDropdownLabel($(this), currentSelections.topics, "Select Topic");
         });
@@ -546,6 +694,7 @@
         // Initialize selections from URL parameters if present
         $(document).ready(function() {
             const urlParams = new URLSearchParams(window.location.search);
+            {% if session.user_id %}
             if (urlParams.has('module')) {
                 currentSelections.module = urlParams.get('module');
                 $('#module-select').val(currentSelections.module);
@@ -557,6 +706,10 @@
                 $('#qa-section').hide();
                 $('#welcome-section').show();
             }
+            {% else %}
+            $('#qa-section').hide();
+            $('#welcome-section').show();
+            {% endif %}
         });
     </script>
 </body>

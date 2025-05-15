@@ -5,6 +5,7 @@ import random
 from collections import defaultdict
 import sqlite3
 from datetime import datetime
+import pytz
 from dotenv import load_dotenv
 import os
 import time
@@ -25,7 +26,7 @@ app.config["DISCORD_REDIRECT_URI"] = os.getenv("DISCORD_REDIRECT_URI")
 app.config["DISCORD_OAUTH2_SCOPE"] = ["identify, guilds"]
 discord = DiscordOAuth2Session(app)
 
-SESSION_VERSION = 2  # Increment this when you change scopes or session structure
+SESSION_VERSION = 3  # Increment this when you change scopes or session structure
 
 
 # Database functions
@@ -174,160 +175,129 @@ def get_filters():
 @app.route('/get_question', methods=['POST'])
 def get_question():
     if 'user_id' not in session:
-        return jsonify({'error': 'Not logged in'}), 401
+        return jsonify({'error': 'You must be logged in'}), 401
 
-    selected_module = request.json.get('module')
-    selected_topics = request.json.get('topics', [])
-    selected_subtopics = request.json.get('subtopics', [])
+    data = request.get_json()
+    module = data.get('module')
+    topics = data.get('topics', [])
+    subtopics = data.get('subtopics', [])
+    question_id = data.get('question_id')  # New parameter for specific question requests
 
     db = get_db()
-    query = 'SELECT * FROM questions WHERE 1=1'
-    params = []
-    if selected_module:
-        query += ' AND module = ?'
-        params.append(selected_module)
-    if selected_topics:
-        query += ' AND topic IN (%s)' % (','.join(['?']*len(selected_topics)))
-        params.extend(selected_topics)
-    if selected_subtopics:
-        query += ' AND subtopic IN (%s)' % (','.join(['?']*len(selected_subtopics)))
-        params.extend(selected_subtopics)
+    query = '''SELECT * FROM questions WHERE module = ?'''
+    params = [module]
+
+    if topics:
+        query += ' AND topic IN (' + ','.join('?' * len(topics)) + ')'
+        params.extend(topics)
+
+    if subtopics:
+        query += ' AND subtopic IN (' + ','.join('?' * len(subtopics)) + ')'
+        params.extend(subtopics)
+
+    # If a specific question is requested, add it to the query
+    if question_id:
+        query += ' AND id = ?'
+        params.append(question_id)
+    
+    # Get matching questions
     rows = db.execute(query, params).fetchall()
     if not rows:
-        return jsonify({'error': 'No cards match the selected filters'})
-    question_row = random.choice(rows)
-    question_card = question_row_to_dict(question_row)
+        return jsonify({'error': 'No questions found matching these criteria'})
 
-    # Get similar answers (from DB) with similarity check
-    def get_similar_answers_db(correct_card, count=3):
-        module_rows = db.execute('SELECT * FROM questions WHERE module = ? AND id != ?', (correct_card['Module'], correct_card['id'])).fetchall()
-        # Helper to filter by similarity
-        def filter_by_similarity(candidates, already, max_count):
-            filtered = []
-            for card in candidates:
-                ans = card['Answer']
-                if all(difflib.SequenceMatcher(None, ans, x).ratio() < 0.8 for x in already):
-                    filtered.append(card)
-                if len(filtered) == max_count:
-                    break
-            return filtered
-        # 1. Tag matches
-        tag_matches = [question_row_to_dict(row) for row in module_rows if set(question_row_to_dict(row)['Tags']) & set(correct_card['Tags'])]
-        tag_matches = filter_by_similarity(tag_matches, [correct_card['Answer']], count)
-        # 2. Subtopic matches (excluding already chosen)
-        if len(tag_matches) < count:
-            subtopic_matches = [question_row_to_dict(row) for row in module_rows if question_row_to_dict(row)['Sub-Topic'] == correct_card['Sub-Topic'] and question_row_to_dict(row) not in tag_matches]
-            subtopic_matches = filter_by_similarity(subtopic_matches, [correct_card['Answer']] + [c['Answer'] for c in tag_matches], count - len(tag_matches))
-            tag_matches.extend(subtopic_matches)
-        # 3. Topic matches (excluding already chosen)
-        if len(tag_matches) < count:
-            topic_matches = [question_row_to_dict(row) for row in module_rows if question_row_to_dict(row)['Topic'] == correct_card['Topic'] and question_row_to_dict(row) not in tag_matches and question_row_to_dict(row) not in subtopic_matches]
-            topic_matches = filter_by_similarity(topic_matches, [correct_card['Answer']] + [c['Answer'] for c in tag_matches], count - len(tag_matches))
-            tag_matches.extend(topic_matches)
-        # 4. Fill with randoms if needed
-        attempts = 0
-        while len(tag_matches) < count and attempts < 20 and module_rows:
-            random_card = question_row_to_dict(random.choice(module_rows))
-            ans = random_card['Answer']
-            if random_card not in tag_matches and ans != correct_card['Answer']:
-                if all(difflib.SequenceMatcher(None, ans, x).ratio() < 0.8 for x in [correct_card['Answer']] + [c['Answer'] for c in tag_matches]):
-                    tag_matches.append(random_card)
-            attempts += 1
-        return [c['Answer'] for c in tag_matches[:count]]
-
-    wrong_answers = get_similar_answers_db(question_card)
-    all_answers = wrong_answers + [question_card['Answer']]
-    random.shuffle(all_answers)
-
-    # Generate a secure token for this question attempt
-    question_hash = question_card['id']
-    token, token_hash = generate_question_token(question_hash, session['user_id'])
-
-    # Store the token in the database
-    db.execute(
-        'INSERT INTO question_tokens (token_hash, user_id, question_id, created_at) VALUES (?, ?, ?, ?)',
-        (token_hash, session['user_id'], question_hash, int(time.time()))
-    )
-    db.commit()
-
-    # Store the current question in the session for answer validation
-    session['current_question'] = {
-        'question': question_card['Question'],
-        'answer': question_card['Answer'],
-        'module': question_card['Module'],
-        'topic': question_card['Topic'],
-        'subtopic': question_card['Sub-Topic'],
+    # Pick either the requested question or a random one
+    row = rows[0] if question_id else random.choice(rows)
+    
+    # Create list of answers (correct + distractors)
+    correct_answer = row['answer']
+    answers = [correct_answer]
+    answer_ids = [row['id']]
+    # Get distractors for both new questions and specific questions
+    similar_rows = db.execute(
+        '''SELECT id, answer FROM questions 
+           WHERE module = ? AND answer != ? 
+           ORDER BY RANDOM() LIMIT 3''', 
+        [module, correct_answer]
+    ).fetchall()
+    for r in similar_rows:
+        answers.append(r['answer'])
+        answer_ids.append(r['id'])
+    # Only shuffle for new questions, maintain order for edited ones
+    if not question_id:
+        combined = list(zip(answers, answer_ids))
+        random.shuffle(combined)
+        answers, answer_ids = zip(*combined)
+        answers = list(answers)
+        answer_ids = list(answer_ids)
+    # Generate token and store it along with the correct answer
+    token, token_hash = generate_question_token(row['id'], session['user_id'])
+    session[f'answer_{token}'] = correct_answer
+    response = {
+        'question': row['question'],
+        'answers': answers,
+        'answer_ids': answer_ids,
+        'module': row['module'],
+        'topic': row['topic'],
+        'subtopic': row['subtopic'],
+        'tags': json.loads(row['tags']) if row['tags'] else [],
+        'pdfs': json.loads(row['pdfs']) if row['pdfs'] else [],
         'token': token,
-        'id': question_card['id']
+        'question_id': row['id'],
+        'is_admin': is_user_admin(session.get('user_id')) if 'user_id' in session else False
     }
-
-    return jsonify({
-        'question': question_card['Question'],
-        'answers': all_answers,
-        'module': question_card['Module'],
-        'topic': question_card['Topic'],
-        'subtopic': question_card['Sub-Topic'],
-        'tags': question_card['Tags'],
-        'pdfs': question_card.get('PDFs', []),
-        'token': token
-    })
+    return jsonify(response)
 
 @app.route('/check_answer', methods=['POST'])
 def check_answer():
     if 'user_id' not in session:
-        return jsonify({'error': 'Not logged in'}), 401
+        return jsonify({'error': 'You must be logged in'}), 401
 
-    current = session.get('current_question')
-    if not current:
-        return jsonify({'error': 'No active question'}), 400
+    data = request.get_json()
+    token = data.get('token')
+    submitted_answer = data.get('answer')
 
-    user_answer = request.json.get('answer')
-    token = request.json.get('token')  # Get the token from the request
+    if not token or not submitted_answer:
+        return jsonify({'error': 'Missing token or answer'}), 400
+
+    # Get the correct answer from the session
+    session_key = f'answer_{token}'
+    correct_answer = session.get(session_key)
     
-    if user_answer is None or token is None:
-        return jsonify({'error': 'Missing answer or token'}), 400
+    if not correct_answer:
+        return jsonify({'error': 'Invalid or expired token'}), 400
 
-    # Verify the token
-    if token != current.get('token'):
-        return jsonify({'error': 'Invalid token'}), 400
+    is_correct = submitted_answer == correct_answer
 
-    # Generate the token hash to look up in the database
-    question_hash = current['id']
-    hash_input = f"{token}:{question_hash}:{session['user_id']}".encode('utf-8')
-    token_hash = hashlib.sha256(hash_input).hexdigest()
-
-    # Check if token is valid and unused
+    user_id = session['user_id']
     db = get_db()
-    token_record = db.execute(
-        'SELECT used FROM question_tokens WHERE token_hash = ? AND user_id = ? AND used = 0',
-        (token_hash, session['user_id'])
-    ).fetchone()
-
-    if not token_record:
-        return jsonify({'error': 'Invalid or already used token'}), 400
-
-    is_correct = (user_answer == current['answer'])
-
-    # Only mark the token as used if the answer is correct
-    if is_correct:
-        db.execute('UPDATE question_tokens SET used = 1 WHERE token_hash = ?', (token_hash,))
-        db.execute('''UPDATE user_stats 
-                    SET correct_answers = correct_answers + 1,
-                        total_answers = total_answers + 1,
-                        last_answer_time = ?
-                    WHERE user_id = ?''', 
-                (int(time.time()), session['user_id']))
-        db.commit()
-        session.pop('current_question', None)  # Only pop if correct
+    # Always increment total_answers
+    stats = db.execute('SELECT correct_answers, total_answers, current_streak FROM user_stats WHERE user_id = ?', (user_id,)).fetchone()
+    if stats:
+        correct = stats['correct_answers'] or 0
+        total = stats['total_answers'] or 0
+        streak = stats['current_streak'] if 'current_streak' in stats.keys() else 0
     else:
-        db.execute('''UPDATE user_stats 
-                    SET total_answers = total_answers + 1,
-                        last_answer_time = ?
-                    WHERE user_id = ?''', 
-                (int(time.time()), session['user_id']))
-        db.commit()
-        # Do NOT mark token as used or pop current_question if incorrect
+        correct = 0
+        total = 0
+        streak = 0
+    total += 1
+    # Use Europe/London timezone for last_answer_time
+    london_tz = pytz.timezone('Europe/London')
+    now_london = datetime.now(london_tz)
+    last_answer_time = int(now_london.timestamp())
+    if is_correct:
+        correct += 1
+        streak += 1
+    else:
+        streak = 0
+    db.execute('''UPDATE user_stats SET correct_answers = ?, total_answers = ?, last_answer_time = ?, current_streak = ? WHERE user_id = ?''',
+               (correct, total, last_answer_time, streak, user_id))
+    db.commit()
 
+    # Only clean up the session token if the answer was correct
+    if is_correct and session_key in session:
+        session.pop(session_key)
+    
     return jsonify({'correct': is_correct})
 
 @app.route("/login")
@@ -366,13 +336,15 @@ def leaderboard():
     allowed = {
         'correct_answers': 'correct_answers',
         'total_answers': 'total_answers',
-        'accuracy': '(CASE WHEN total_answers > 0 THEN 1.0 * correct_answers / total_answers ELSE 0 END)'
+        'accuracy': '(CASE WHEN total_answers > 0 THEN 1.0 * correct_answers / total_answers ELSE 0 END)',
+        'current_streak': 'current_streak',
+        'last_answer_time': 'last_answer_time'
     }
     sort_col = allowed.get(sort, 'correct_answers')
     order_sql = 'DESC' if order == 'desc' else 'ASC'
     db = get_db()
     users = db.execute(f'''
-        SELECT user_id, username, correct_answers, total_answers,
+        SELECT user_id, username, correct_answers, total_answers, current_streak, last_answer_time,
             (CASE WHEN total_answers > 0 THEN 1.0 * correct_answers / total_answers ELSE 0 END) as accuracy
         FROM user_stats
         ORDER BY {sort_col} {order_sql}, total_answers DESC
@@ -432,12 +404,40 @@ def report_question():
         return redirect(url_for('index'))
     return render_template('report_question.html', question=question, answer=answer)
 
+@app.route('/edit_answer', methods=['POST'])
+def edit_answer():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    if not is_user_admin(session['user_id']):
+        return jsonify({'error': 'Unauthorized'}), 403
+
+    data = request.get_json()
+    question_id = data.get('question_id')
+    new_text = data.get('new_text')
+    if not question_id or new_text is None:
+        return jsonify({'error': 'Missing required data'}), 400
+
+    db = get_db()
+    try:
+        db.execute('UPDATE questions SET answer = ? WHERE id = ?', (new_text, question_id))
+        db.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        db.rollback()
+        return jsonify({'error': str(e)}), 500
+
 @app.before_request
 def enforce_session_version():
     if 'session_version' not in session or session['session_version'] != SESSION_VERSION:
         session.clear()
         # Only clear once, then set version to avoid infinite loop
         session['session_version'] = SESSION_VERSION
+
+def is_user_admin(user_id):
+    with open('whitelist.json', 'r') as f:
+        whitelist = json.load(f)
+    return int(user_id) in whitelist.get('admin_ids', [])
 
 
 if __name__ == '__main__':

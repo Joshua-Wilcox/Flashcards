@@ -97,40 +97,29 @@
                         <th>Rank</th>
                         <th>User</th>
                         <th>
-                            <form method="get" style="display:inline;">
-                                <input type="hidden" name="sort" value="correct_answers">
-                                <input type="hidden" name="order" value="{{ 'asc' if sort == 'correct_answers' and order == 'desc' else 'desc' }}">
-                                <button type="submit" class="sort-btn{% if sort == 'correct_answers' %} active{% endif %}">
-                                    Correct Answers
-                                    {% if sort == 'correct_answers' %}
-                                        <span class="sort-arrow">{{ '▲' if order == 'asc' else '▼' }}</span>
-                                    {% endif %}
-                                </button>
-                            </form>
+                            <button class="sort-btn{% if sort == 'correct_answers' %} active{% endif %}" onclick="window.location='?sort=correct_answers&order={{ 'asc' if sort == 'correct_answers' and order == 'desc' else 'desc' }}'">Correct
+                                {% if sort == 'correct_answers' %}<span class="sort-arrow">{{ '↑' if order == 'asc' else '↓' }}</span>{% endif %}
+                            </button>
                         </th>
                         <th>
-                            <form method="get" style="display:inline;">
-                                <input type="hidden" name="sort" value="total_answers">
-                                <input type="hidden" name="order" value="{{ 'asc' if sort == 'total_answers' and order == 'desc' else 'desc' }}">
-                                <button type="submit" class="sort-btn{% if sort == 'total_answers' %} active{% endif %}">
-                                    Total Answers
-                                    {% if sort == 'total_answers' %}
-                                        <span class="sort-arrow">{{ '▲' if order == 'asc' else '▼' }}</span>
-                                    {% endif %}
-                                </button>
-                            </form>
+                            <button class="sort-btn{% if sort == 'total_answers' %} active{% endif %}" onclick="window.location='?sort=total_answers&order={{ 'asc' if sort == 'total_answers' and order == 'desc' else 'desc' }}'">Total
+                                {% if sort == 'total_answers' %}<span class="sort-arrow">{{ '↑' if order == 'asc' else '↓' }}</span>{% endif %}
+                            </button>
                         </th>
                         <th>
-                            <form method="get" style="display:inline;">
-                                <input type="hidden" name="sort" value="accuracy">
-                                <input type="hidden" name="order" value="{{ 'asc' if sort == 'accuracy' and order == 'desc' else 'desc' }}">
-                                <button type="submit" class="sort-btn{% if sort == 'accuracy' %} active{% endif %}">
-                                    Accuracy
-                                    {% if sort == 'accuracy' %}
-                                        <span class="sort-arrow">{{ '▲' if order == 'asc' else '▼' }}</span>
-                                    {% endif %}
-                                </button>
-                            </form>
+                            <button class="sort-btn{% if sort == 'accuracy' %} active{% endif %}" onclick="window.location='?sort=accuracy&order={{ 'asc' if sort == 'accuracy' and order == 'desc' else 'desc' }}'">Accuracy
+                                {% if sort == 'accuracy' %}<span class="sort-arrow">{{ '↑' if order == 'asc' else '↓' }}</span>{% endif %}
+                            </button>
+                        </th>
+                        <th>
+                            <button class="sort-btn{% if sort == 'current_streak' %} active{% endif %}" onclick="window.location='?sort=current_streak&order={{ 'asc' if sort == 'current_streak' and order == 'desc' else 'desc' }}'">Streak
+                                {% if sort == 'current_streak' %}<span class="sort-arrow">{{ '↑' if order == 'asc' else '↓' }}</span>{% endif %}
+                            </button>
+                        </th>
+                        <th>
+                            <button class="sort-btn{% if sort == 'last_answer_time' %} active{% endif %}" onclick="window.location='?sort=last_answer_time&order={{ 'asc' if sort == 'last_answer_time' and order == 'desc' else 'desc' }}'">Last Answered
+                                {% if sort == 'last_answer_time' %}<span class="sort-arrow">{{ '↑' if order == 'asc' else '↓' }}</span>{% endif %}
+                            </button>
                         </th>
                     </tr>
                 </thead>
@@ -152,6 +141,8 @@
                                 0%
                             {% endif %}
                         </td>
+                        <td>{{ user['current_streak'] or 0 }}</td>
+                        <td><span class="last-answered" data-timestamp="{{ user['last_answer_time'] or '' }}"></span></td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -164,3 +155,41 @@
     </div>
 </body>
 </html>
+<script>
+function formatRelativeTime(ts) {
+    if (!ts) return "Never";
+    // Europe/London time
+    const now = Math.floor((new Date()).getTime() / 1000);
+    let diff = now - ts;
+    if (diff < 60) return "Just now";
+    const units = [
+        { name: "year",   secs: 31536000 },
+        { name: "month",  secs: 2592000 },
+        { name: "day",    secs: 86400 },
+        { name: "hour",   secs: 3600 },
+        { name: "minute", secs: 60 }
+    ];
+    for (const unit of units) {
+        if (diff >= unit.secs) {
+            const value = Math.floor(diff / unit.secs);
+            if (window.Intl && Intl.RelativeTimeFormat) {
+                const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
+                return rtf.format(-value, unit.name);
+            } else {
+                return value + ' ' + unit.name + (value !== 1 ? 's' : '') + ' ago';
+            }
+        }
+    }
+    return "Just now";
+}
+document.addEventListener("DOMContentLoaded", function() {
+    document.querySelectorAll('.last-answered').forEach(function(el) {
+        const ts = el.getAttribute('data-timestamp');
+        if (ts && !isNaN(ts)) {
+            el.textContent = formatRelativeTime(Number(ts));
+        } else {
+            el.textContent = "Never";
+        }
+    });
+});
+</script>

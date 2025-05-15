@@ -84,45 +84,34 @@
                     <h1 class="text-center mb-4">Statistics for {{ stats['username'] }}</h1>
                     
                     <div class="row g-4">
-                        <!-- Correct Answers Card -->
-                        <div class="col-md-6">
-                            <div class="card stats-card h-100">
-                                <div class="card-body text-center">
-                                    <div class="stat-value">{{ stats['correct_answers'] }}</div>
-                                    <div class="stat-label">Correct Answers</div>
-                                </div>
+                        <div class="col-12 col-md-6">
+                            <div class="card stats-card p-3 mb-3">
+                                <div class="stat-value">{{ stats['correct_answers'] or 0 }}</div>
+                                <div class="stat-label">Correct Answers</div>
                             </div>
                         </div>
-                        
-                        <!-- Total Answers Card -->
-                        <div class="col-md-6">
-                            <div class="card stats-card h-100">
-                                <div class="card-body text-center">
-                                    <div class="stat-value">{{ stats['total_answers'] }}</div>
-                                    <div class="stat-label">Total Answers</div>
-                                </div>
+                        <div class="col-12 col-md-6">
+                            <div class="card stats-card p-3 mb-3">
+                                <div class="stat-value">{{ stats['total_answers'] or 0 }}</div>
+                                <div class="stat-label">Total Answers</div>
                             </div>
                         </div>
-                        
-                        <!-- Accuracy Card -->
-                        <div class="col-md-6">
-                            <div class="card stats-card h-100">
-                                <div class="card-body text-center">
-                                    <div class="stat-value">{{ "%.1f"|format(stats['correct_answers'] / stats['total_answers'] * 100) if stats['total_answers'] > 0 else 0 }}%</div>
-                                    <div class="stat-label">Accuracy</div>
-                                </div>
+                        <div class="col-12 col-md-6">
+                            <div class="card stats-card p-3 mb-3">
+                                <div class="stat-value">{{ '%.1f%%' % ((stats['correct_answers'] or 0) / (stats['total_answers'] or 1) * 100) }}</div>
+                                <div class="stat-label">Accuracy</div>
                             </div>
                         </div>
-                        
-                        <!-- Last Answer Card -->
-                        <div class="col-md-6">
-                            <div class="card stats-card h-100">
-                                <div class="card-body text-center">
-                                    <div class="stat-value" style="font-size: 1.5rem">
-                                        <span id="last-answer-time" data-timestamp="{{ stats['last_answer_time'] if stats['last_answer_time'] else '' }}"></span>
-                                    </div>
-                                    <div class="stat-label">Last Answer</div>
-                                </div>
+                        <div class="col-12 col-md-6">
+                            <div class="card stats-card p-3 mb-3">
+                                <div class="stat-value">{{ stats['current_streak'] or 0 }}</div>
+                                <div class="stat-label">Current Streak</div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <div class="card stats-card p-3 mb-3">
+                                <div class="stat-value" id="last-answer-time" data-timestamp="{{ stats['last_answer_time'] or '' }}"></div>
+                                <div class="stat-label">Last Answer</div>
                             </div>
                         </div>
                     </div>
@@ -139,7 +128,9 @@
         // Relative time formatter using Intl.RelativeTimeFormat if available, fallback otherwise
         function formatRelativeTime(timestamp) {
             if (!timestamp) return "Never";
-            const now = Date.now() / 1000;
+            // Convert timestamp to Europe/London time for display
+            const londonOffset = new Date().toLocaleString('en-GB', { timeZone: 'Europe/London' });
+            const now = Math.floor((new Date(londonOffset)).getTime() / 1000);
             let diff = Math.floor(now - timestamp);
 
             if (diff < 60) return "Just now";
@@ -154,10 +145,10 @@
                 if (diff >= unit.secs) {
                     const value = Math.floor(diff / unit.secs);
                     if (window.Intl && Intl.RelativeTimeFormat) {
-                        const rtf = new Intl.RelativeTimeFormat(navigator.language, { numeric: "auto" });
+                        const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
                         return rtf.format(-value, unit.name);
                     } else {
-                        return value + " " + unit.name + (value > 1 ? "s" : "") + " ago";
+                        return value + ' ' + unit.name + (value !== 1 ? 's' : '') + ' ago';
                     }
                 }
             }
