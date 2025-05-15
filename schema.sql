@@ -38,12 +38,9 @@ CREATE TABLE IF NOT EXISTS reported_questions (
     FOREIGN KEY (question_id) REFERENCES questions(id)
 );
 
-CREATE TABLE IF NOT EXISTS question_tokens (
-    token_hash TEXT PRIMARY KEY,
-    user_id TEXT NOT NULL,
-    question_id TEXT NOT NULL,  -- hash of the question content
-    created_at INTEGER NOT NULL,
-    used INTEGER DEFAULT 0,
-    FOREIGN KEY (user_id) REFERENCES user_stats(user_id),
-    FOREIGN KEY (question_id) REFERENCES questions(id)
+CREATE TABLE IF NOT EXISTS used_tokens (
+    user_id TEXT,
+    token TEXT,
+    used_at INTEGER,
+    PRIMARY KEY (user_id, token)
 );
