@@ -28,7 +28,7 @@ app.config["DISCORD_REDIRECT_URI"] = os.getenv("DISCORD_REDIRECT_URI")
 app.config["DISCORD_OAUTH2_SCOPE"] = ["identify, guilds"]
 discord = DiscordOAuth2Session(app)
 
-SESSION_VERSION = 3  # Increment this when you change scopes or session structure
+SESSION_VERSION = 4  # Increment this when you change scopes or session structure
 
 
 # Database functions
@@ -88,6 +88,36 @@ def init_db():
             pass  # Already exists
         db.commit()
         populate_questions_table()  # Populate questions table on first run
+
+        # --- Initialize module_stats for users where it is NULL or empty ---
+        modules = get_all_modules()
+        num_modules = len(modules) if modules else 1
+        users = db.execute('SELECT user_id, correct_answers, total_answers, current_streak, last_answer_time, module_stats FROM user_stats').fetchall()
+        for user in users:
+            # Only initialize if module_stats is NULL or empty string
+            if not user['module_stats']:
+                correct = user['correct_answers'] or 0
+                total = user['total_answers'] or 0
+                streak = user['current_streak'] or 0
+                last_time = user['last_answer_time'] or None
+                module_stats = {}
+                for m in modules:
+                    module_stats[m] = {
+                        "last_answered_time": last_time,
+                        "number_answered": total // num_modules,
+                        "number_correct": correct // num_modules,
+                        "current_streak": streak // num_modules
+                    }
+                # Distribute any remainder to the first modules
+                for i, m in enumerate(modules):
+                    if i < (total % num_modules):
+                        module_stats[m]["number_answered"] += 1
+                    if i < (correct % num_modules):
+                        module_stats[m]["number_correct"] += 1
+                    if i < (streak % num_modules):
+                        module_stats[m]["current_streak"] += 1
+                db.execute('UPDATE user_stats SET module_stats = ? WHERE user_id = ?', (json.dumps(module_stats), user['user_id']))
+        db.commit()
 
 def get_all_modules():
     db = get_db()
@@ -352,27 +382,43 @@ def callback():
         session['session_version'] = SESSION_VERSION
         db = get_db()
         row = db.execute('SELECT * FROM user_stats WHERE user_id = ?', (user.id,)).fetchone()
+        modules = get_all_modules()
+        num_modules = len(modules) if modules else 1
         if not row:
-            modules = get_all_modules()
+            # New user: evenly distribute zeros (all stats zero)
             module_stats = {}
             for m in modules:
                 module_stats[m] = {
                     "last_answered_time": None,
                     "number_answered": 0,
-                    "number_correct": 0
+                    "number_correct": 0,
+                    "current_streak": 0
                 }
             db.execute('''INSERT INTO user_stats (user_id, username, module_stats) 
                           VALUES (?, ?, ?)''', (user.id, session['username'], json.dumps(module_stats)))
         else:
             if not row['module_stats']:
-                modules = get_all_modules()
+                # Existing user with stats but no module_stats: distribute their stats evenly
+                correct = row['correct_answers'] or 0
+                total = row['total_answers'] or 0
+                streak = row['current_streak'] or 0
+                last_time = row['last_answer_time'] or None
                 module_stats = {}
                 for m in modules:
                     module_stats[m] = {
-                        "last_answered_time": None,
-                        "number_answered": 0,
-                        "number_correct": 0
+                        "last_answered_time": last_time,
+                        "number_answered": total // num_modules,
+                        "number_correct": correct // num_modules,
+                        "current_streak": streak // num_modules
                     }
+                # Distribute any remainder to the first modules
+                for i, m in enumerate(modules):
+                    if i < (total % num_modules):
+                        module_stats[m]["number_answered"] += 1
+                    if i < (correct % num_modules):
+                        module_stats[m]["number_correct"] += 1
+                    if i < (streak % num_modules):
+                        module_stats[m]["current_streak"] += 1
                 db.execute('UPDATE user_stats SET module_stats = ? WHERE user_id = ?', (json.dumps(module_stats), user.id))
         db.commit()
         return redirect(url_for('index'))

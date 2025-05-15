@@ -225,9 +225,8 @@
         // Relative time formatter using Intl.RelativeTimeFormat if available, fallback otherwise
         function formatRelativeTime(timestamp) {
             if (!timestamp) return "Never";
-            // Convert timestamp to Europe/London time for display
-            const londonOffset = new Date().toLocaleString('en-GB', { timeZone: 'Europe/London' });
-            const now = Math.floor((new Date(londonOffset)).getTime() / 1000);
+            // Use UTC time for consistency with leaderboard
+            const now = Math.floor(Date.now() / 1000);
             let diff = Math.floor(now - timestamp);
 
             if (diff < 60) return "Just now";
@@ -262,7 +261,8 @@
             }
             document.querySelectorAll('.last-answered').forEach(function(el) {
                 const ts = el.getAttribute('data-timestamp');
-                if (ts && !isNaN(ts)) {
+                // Only show a time if the timestamp is a valid, non-empty, non-null, non-0 value
+                if (ts && !isNaN(ts) && Number(ts) > 0) {
                     el.textContent = formatRelativeTime(Number(ts));
                 } else {
                     el.textContent = "Never";
