@@ -13,6 +13,8 @@ import secrets  # For generating secure tokens
 import hashlib  # For creating secure hashes
 import threading
 import difflib
+import base64
+import hmac
 
 load_dotenv()  # Load variables from .env
 
@@ -73,6 +75,13 @@ def init_db():
         db = get_db()
         with app.open_resource('schema.sql', mode='r') as f:
             db.cursor().executescript(f.read())
+        # Ensure used_tokens table exists for replay protection
+        db.execute('''CREATE TABLE IF NOT EXISTS used_tokens (
+            user_id TEXT,
+            token TEXT,
+            used_at INTEGER,
+            PRIMARY KEY (user_id, token)
+        )''')
         db.commit()
         populate_questions_table()  # Populate questions table on first run
 
@@ -229,9 +238,11 @@ def get_question():
         answers, answer_ids = zip(*combined)
         answers = list(answers)
         answer_ids = list(answer_ids)
-    # Generate token and store it along with the correct answer
-    token, token_hash = generate_question_token(row['id'], session['user_id'])
-    session[f'answer_{token}'] = correct_answer
+    # Generate signed token for this question attempt
+    token = generate_signed_token(row['id'], session['user_id'])
+    # Store a blacklist of used tokens in session to prevent re-use after correct answer
+    if 'used_tokens' not in session:
+        session['used_tokens'] = []
     response = {
         'question': row['question'],
         'answers': answers,
@@ -255,21 +266,26 @@ def check_answer():
     data = request.get_json()
     token = data.get('token')
     submitted_answer = data.get('answer')
-
     if not token or not submitted_answer:
         return jsonify({'error': 'Missing token or answer'}), 400
-
-    # Get the correct answer from the session
-    session_key = f'answer_{token}'
-    correct_answer = session.get(session_key)
-    
-    if not correct_answer:
-        return jsonify({'error': 'Invalid or expired token'}), 400
-
-    is_correct = submitted_answer == correct_answer
-
     user_id = session['user_id']
     db = get_db()
+    # --- Token validation ---
+    # 1. Check if token is blacklisted (already used for a correct answer) in the DB, not session
+    row = db.execute('SELECT 1 FROM used_tokens WHERE user_id = ? AND token = ?', (user_id, token)).fetchone()
+    if row:
+        return jsonify({'error': 'Token already used for a correct answer'}), 400
+    # 2. Verify token signature and expiry
+    question_id, valid = verify_signed_token(token, user_id)
+    if not valid:
+        return jsonify({'error': 'Invalid or expired token'}), 400
+    # 3. Get the correct answer from the DB (no session storage needed)
+    qrow = db.execute('SELECT answer FROM questions WHERE id = ?', (question_id,)).fetchone()
+    if not qrow:
+        return jsonify({'error': 'Question not found'}), 400
+    correct_answer = qrow['answer']
+    is_correct = submitted_answer == correct_answer
+
     # Always increment total_answers
     stats = db.execute('SELECT correct_answers, total_answers, current_streak FROM user_stats WHERE user_id = ?', (user_id,)).fetchone()
     if stats:
@@ -288,16 +304,15 @@ def check_answer():
     if is_correct:
         correct += 1
         streak += 1
+        # Blacklist the token in the DB so it cannot be reused, even if the user resends the request
+        db.execute('INSERT OR IGNORE INTO used_tokens (user_id, token, used_at) VALUES (?, ?, ?)', (user_id, token, last_answer_time))
+        # This ensures the user can retry until correct, but cannot re-submit after correct (prevents replay/cheat)
     else:
         streak = 0
     db.execute('''UPDATE user_stats SET correct_answers = ?, total_answers = ?, last_answer_time = ?, current_streak = ? WHERE user_id = ?''',
                (correct, total, last_answer_time, streak, user_id))
     db.commit()
 
-    # Only clean up the session token if the answer was correct
-    if is_correct and session_key in session:
-        session.pop(session_key)
-    
     return jsonify({'correct': is_correct})
 
 @app.route("/login")
@@ -438,6 +453,39 @@ def is_user_admin(user_id):
     with open('whitelist.json', 'r') as f:
         whitelist = json.load(f)
     return int(user_id) in whitelist.get('admin_ids', [])
+
+
+# --- Token Signing Utilities ---
+SECRET_TOKEN_KEY = os.getenv('TOKEN_SECRET_KEY', 'dev_token_secret')
+TOKEN_EXPIRY_SECONDS = 600  # 10 minutes
+
+def generate_signed_token(question_id, user_id):
+    """Generate a signed token containing question_id, user_id, and timestamp."""
+    timestamp = int(time.time())
+    payload = f"{question_id}:{user_id}:{timestamp}"
+    signature = hmac.new(SECRET_TOKEN_KEY.encode(), payload.encode(), hashlib.sha256).hexdigest()
+    token = base64.urlsafe_b64encode(f"{payload}:{signature}".encode()).decode()
+    return token
+
+def verify_signed_token(token, user_id):
+    """Verify the token's signature and expiry. Returns (question_id, valid)"""
+    try:
+        decoded = base64.urlsafe_b64decode(token.encode()).decode()
+        parts = decoded.split(":")
+        if len(parts) != 4:
+            return None, False
+        question_id, token_user_id, timestamp, signature = parts
+        if str(user_id) != token_user_id:
+            return None, False
+        payload = f"{question_id}:{token_user_id}:{timestamp}"
+        expected_sig = hmac.new(SECRET_TOKEN_KEY.encode(), payload.encode(), hashlib.sha256).hexdigest()
+        if not hmac.compare_digest(signature, expected_sig):
+            return None, False
+        if int(time.time()) - int(timestamp) > TOKEN_EXPIRY_SECONDS:
+            return None, False
+        return question_id, True
+    except Exception:
+        return None, False
 
 
 if __name__ == '__main__':
