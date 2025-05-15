@@ -70,6 +70,23 @@
                 font-size: 0.95em;
             }
         }
+        #module-pills-container {
+            scrollbar-width: thin;
+            scrollbar-color: #0d6efd #e9ecef;
+            padding-bottom: 4px;
+        }
+        #module-pills-container::-webkit-scrollbar {
+            height: 6px;
+        }
+        #module-pills-container::-webkit-scrollbar-thumb {
+            background: #0d6efd;
+            border-radius: 4px;
+        }
+        .module-pill.active, .module-pill:active, .module-pill:focus {
+            background-color: #0d6efd !important;
+            color: #fff !important;
+            border-color: #0d6efd !important;
+        }
     </style>
 </head>
 <body>
@@ -90,6 +107,18 @@
             </div>
         </nav>
         <h1 class="text-center mb-4">Leaderboard</h1>
+        <!-- Module filter pills -->
+        <div class="mb-3">
+            <div class="d-flex flex-nowrap overflow-auto" id="module-pills-container" style="gap: 8px;">
+                {% for module in modules %}
+                <button class="btn btn-outline-primary module-pill{% if active_module == module %} active{% endif %}" 
+                        style="border-radius: 999px; min-width: 120px; white-space: nowrap;"
+                        data-module="{{ module }}">
+                    {{ module }}
+                </button>
+                {% endfor %}
+            </div>
+        </div>
         <div class="table-responsive">
             <table class="table leaderboard-table table-striped align-middle">
                 <thead class="table-light">
@@ -141,7 +170,13 @@
                                 0%
                             {% endif %}
                         </td>
-                        <td>{{ user['current_streak'] or 0 }}</td>
+                        <td>
+                            {% if active_module %}
+                                {{ user['current_streak'] or 0 }}
+                            {% else %}
+                                {{ user['current_streak'] or 0 }}
+                            {% endif %}
+                        </td>
                         <td><span class="last-answered" data-timestamp="{{ user['last_answer_time'] or '' }}"></span></td>
                     </tr>
                     {% endfor %}
@@ -153,12 +188,9 @@
             <p>if this has helped you more than a coffee, consider <a href="https://buymeacoffee.com/jmwcx">supporting</a></p>
         </footer>
     </div>
-</body>
-</html>
 <script>
 function formatRelativeTime(ts) {
     if (!ts) return "Never";
-    // Europe/London time
     const now = Math.floor((new Date()).getTime() / 1000);
     let diff = now - ts;
     if (diff < 60) return "Just now";
@@ -191,5 +223,20 @@ document.addEventListener("DOMContentLoaded", function() {
             el.textContent = "Never";
         }
     });
+    // Module pill filter logic
+    document.querySelectorAll('.module-pill').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const module = btn.getAttribute('data-module');
+            const url = new URL(window.location.href);
+            if (btn.classList.contains('active')) {
+                url.searchParams.delete('module');
+            } else {
+                url.searchParams.set('module', module);
+            }
+            window.location = url.toString();
+        });
+    });
 });
 </script>
+</body>
+</html>

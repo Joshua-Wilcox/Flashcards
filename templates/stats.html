@@ -59,6 +59,23 @@
                 padding-right: 4px;
             }
         }
+        #module-pills-container {
+            scrollbar-width: thin;
+            scrollbar-color: #0d6efd #e9ecef;
+            padding-bottom: 4px;
+        }
+        #module-pills-container::-webkit-scrollbar {
+            height: 6px;
+        }
+        #module-pills-container::-webkit-scrollbar-thumb {
+            background: #0d6efd;
+            border-radius: 4px;
+        }
+        .module-pill.active, .module-pill:active, .module-pill:focus {
+            background-color: #0d6efd !important;
+            color: #fff !important;
+            border-color: #0d6efd !important;
+        }
     </style>
 </head>
 <body>
@@ -78,45 +95,125 @@
                 </div>
             </nav>
 
+            <!-- Module filter pills -->
+            <div class="mb-3">
+                <div class="d-flex flex-nowrap overflow-auto" id="module-pills-container" style="gap: 8px;">
+                    {% for module in modules %}
+                    <button class="btn btn-outline-primary module-pill{% if stats.active_module == module %} active{% endif %}" 
+                            style="border-radius: 999px; min-width: 120px; white-space: nowrap;"
+                            data-module="{{ module }}">
+                        {{ module }}
+                    </button>
+                    {% endfor %}
+                </div>
+            </div>
+
             <!-- Stats content -->
             <div class="row justify-content-center">
                 <div class="col-12 col-md-8">
                     <h1 class="text-center mb-4">Statistics for {{ stats['username'] }}</h1>
-                    
                     <div class="row g-4">
                         <div class="col-12 col-md-6">
                             <div class="card stats-card p-3 mb-3">
-                                <div class="stat-value">{{ stats['correct_answers'] or 0 }}</div>
+                                <div class="stat-value">
+                                    {% if stats.active_module and stats.module_stats[stats.active_module] %}
+                                        {{ stats.module_stats[stats.active_module].number_correct or 0 }}
+                                    {% else %}
+                                        {{ stats['correct_answers'] or 0 }}
+                                    {% endif %}
+                                </div>
                                 <div class="stat-label">Correct Answers</div>
                             </div>
                         </div>
                         <div class="col-12 col-md-6">
                             <div class="card stats-card p-3 mb-3">
-                                <div class="stat-value">{{ stats['total_answers'] or 0 }}</div>
+                                <div class="stat-value">
+                                    {% if stats.active_module and stats.module_stats[stats.active_module] %}
+                                        {{ stats.module_stats[stats.active_module].number_answered or 0 }}
+                                    {% else %}
+                                        {{ stats['total_answers'] or 0 }}
+                                    {% endif %}
+                                </div>
                                 <div class="stat-label">Total Answers</div>
                             </div>
                         </div>
                         <div class="col-12 col-md-6">
                             <div class="card stats-card p-3 mb-3">
-                                <div class="stat-value">{{ '%.1f%%' % ((stats['correct_answers'] or 0) / (stats['total_answers'] or 1) * 100) }}</div>
+                                <div class="stat-value">
+                                    {% if stats.active_module and stats.module_stats[stats.active_module] %}
+                                        {{ '%.1f%%' % ((stats.module_stats[stats.active_module].number_correct or 0) / (stats.module_stats[stats.active_module].number_answered or 1) * 100) }}
+                                    {% else %}
+                                        {{ '%.1f%%' % ((stats['correct_answers'] or 0) / (stats['total_answers'] or 1) * 100) }}
+                                    {% endif %}
+                                </div>
                                 <div class="stat-label">Accuracy</div>
                             </div>
                         </div>
                         <div class="col-12 col-md-6">
                             <div class="card stats-card p-3 mb-3">
-                                <div class="stat-value">{{ stats['current_streak'] or 0 }}</div>
+                                <div class="stat-value">
+                                    {% if stats.active_module and stats.module_stats[stats.active_module] %}
+                                        {{ stats.module_stats[stats.active_module].current_streak or 0 }}
+                                    {% else %}
+                                        {{ stats['current_streak'] or 0 }}
+                                    {% endif %}
+                                </div>
                                 <div class="stat-label">Current Streak</div>
                             </div>
                         </div>
                         <div class="col-12 col-md-6">
                             <div class="card stats-card p-3 mb-3">
-                                <div class="stat-value" id="last-answer-time" data-timestamp="{{ stats['last_answer_time'] or '' }}"></div>
+                                <div class="stat-value" id="last-answer-time" data-timestamp="{% if stats.active_module and stats.module_stats[stats.active_module] %}{{ stats.module_stats[stats.active_module].last_answered_time or '' }}{% else %}{{ stats['last_answer_time'] or '' }}{% endif %}"></div>
                                 <div class="stat-label">Last Answer</div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+            <!-- Per-module stats table -->
+            {% if stats.module_stats %}
+            <div class="row justify-content-center mt-4">
+                <div class="col-12 col-md-8">
+                    <h3 class="text-center mb-3">Per-Module Stats</h3>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Module</th>
+                                    <th>Answered</th>
+                                    <th>Correct</th>
+                                    <th>Accuracy</th>
+                                    <th>Last Answered</th>
+                                    <th>Streak</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for module, modstats in stats.module_stats.items() %}
+                                <tr>
+                                    <td>{{ module }}</td>
+                                    <td>{{ modstats.number_answered or 0 }}</td>
+                                    <td>{{ modstats.number_correct or 0 }}</td>
+                                    <td>
+                                        {% if modstats.number_answered %}
+                                            {{ "%.1f"|format((modstats.number_correct or 0) / (modstats.number_answered or 1) * 100) }}%
+                                        {% else %}
+                                            0%
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="last-answered" data-timestamp="{{ modstats.last_answered_time or '' }}"></span>
+                                    </td>
+                                    <td>
+                                        {{ modstats.current_streak or 0 }}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
         </div>
 
         <footer class="text-center">
@@ -163,6 +260,27 @@
             } else {
                 el.textContent = "Never";
             }
+            document.querySelectorAll('.last-answered').forEach(function(el) {
+                const ts = el.getAttribute('data-timestamp');
+                if (ts && !isNaN(ts)) {
+                    el.textContent = formatRelativeTime(Number(ts));
+                } else {
+                    el.textContent = "Never";
+                }
+            });
+            // Module pill filter logic
+            document.querySelectorAll('.module-pill').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    const module = btn.getAttribute('data-module');
+                    const url = new URL(window.location.href);
+                    if (btn.classList.contains('active')) {
+                        url.searchParams.delete('module');
+                    } else {
+                        url.searchParams.set('module', module);
+                    }
+                    window.location = url.toString();
+                });
+            });
         });
     </script>
 </body>

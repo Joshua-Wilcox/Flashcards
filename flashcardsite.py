@@ -75,15 +75,24 @@ def init_db():
         db = get_db()
         with app.open_resource('schema.sql', mode='r') as f:
             db.cursor().executescript(f.read())
-        # Ensure used_tokens table exists for replay protection
         db.execute('''CREATE TABLE IF NOT EXISTS used_tokens (
             user_id TEXT,
             token TEXT,
             used_at INTEGER,
             PRIMARY KEY (user_id, token)
         )''')
+        # --- Add module_stats column if missing ---
+        try:
+            db.execute('ALTER TABLE user_stats ADD COLUMN module_stats TEXT')
+        except sqlite3.OperationalError:
+            pass  # Already exists
         db.commit()
         populate_questions_table()  # Populate questions table on first run
+
+def get_all_modules():
+    db = get_db()
+    rows = db.execute('SELECT DISTINCT module FROM questions').fetchall()
+    return sorted([row[0] for row in rows if row[0]])
 
 def get_unique_values(key):
     db = get_db()
@@ -271,46 +280,60 @@ def check_answer():
     user_id = session['user_id']
     db = get_db()
     # --- Token validation ---
-    # 1. Check if token is blacklisted (already used for a correct answer) in the DB, not session
     row = db.execute('SELECT 1 FROM used_tokens WHERE user_id = ? AND token = ?', (user_id, token)).fetchone()
     if row:
         return jsonify({'error': 'Token already used for a correct answer'}), 400
-    # 2. Verify token signature and expiry
     question_id, valid = verify_signed_token(token, user_id)
     if not valid:
         return jsonify({'error': 'Invalid or expired token'}), 400
-    # 3. Get the correct answer from the DB (no session storage needed)
-    qrow = db.execute('SELECT answer FROM questions WHERE id = ?', (question_id,)).fetchone()
+    qrow = db.execute('SELECT answer, module FROM questions WHERE id = ?', (question_id,)).fetchone()
     if not qrow:
         return jsonify({'error': 'Question not found'}), 400
     correct_answer = qrow['answer']
+    module = qrow['module']
     is_correct = submitted_answer == correct_answer
 
     # Always increment total_answers
-    stats = db.execute('SELECT correct_answers, total_answers, current_streak FROM user_stats WHERE user_id = ?', (user_id,)).fetchone()
+    stats = db.execute('SELECT correct_answers, total_answers, current_streak, module_stats FROM user_stats WHERE user_id = ?', (user_id,)).fetchone()
     if stats:
         correct = stats['correct_answers'] or 0
         total = stats['total_answers'] or 0
         streak = stats['current_streak'] if 'current_streak' in stats.keys() else 0
+        module_stats = json.loads(stats['module_stats']) if stats['module_stats'] else {}
     else:
         correct = 0
         total = 0
         streak = 0
+        module_stats = {}
     total += 1
     # Use Europe/London timezone for last_answer_time
     london_tz = pytz.timezone('Europe/London')
     now_london = datetime.now(london_tz)
     last_answer_time = int(now_london.timestamp())
+    # --- Update per-module stats ---
+    if module not in module_stats:
+        module_stats[module] = {
+            "last_answered_time": None,
+            "number_answered": 0,
+            "number_correct": 0,
+            "current_streak": 0
+        }
+    # Ensure current_streak key exists for all modules
+    if "current_streak" not in module_stats[module]:
+        module_stats[module]["current_streak"] = 0
+    module_stats[module]["last_answered_time"] = last_answer_time
+    module_stats[module]["number_answered"] = module_stats[module].get("number_answered", 0) + 1
     if is_correct:
         correct += 1
         streak += 1
-        # Blacklist the token in the DB so it cannot be reused, even if the user resends the request
+        module_stats[module]["number_correct"] = module_stats[module].get("number_correct", 0) + 1
+        module_stats[module]["current_streak"] = module_stats[module].get("current_streak", 0) + 1
         db.execute('INSERT OR IGNORE INTO used_tokens (user_id, token, used_at) VALUES (?, ?, ?)', (user_id, token, last_answer_time))
-        # This ensures the user can retry until correct, but cannot re-submit after correct (prevents replay/cheat)
     else:
         streak = 0
-    db.execute('''UPDATE user_stats SET correct_answers = ?, total_answers = ?, last_answer_time = ?, current_streak = ? WHERE user_id = ?''',
-               (correct, total, last_answer_time, streak, user_id))
+        module_stats[module]["current_streak"] = 0
+    db.execute('''UPDATE user_stats SET correct_answers = ?, total_answers = ?, last_answer_time = ?, current_streak = ?, module_stats = ? WHERE user_id = ?''',
+               (correct, total, last_answer_time, streak, json.dumps(module_stats), user_id))
     db.commit()
 
     return jsonify({'correct': is_correct})
@@ -326,13 +349,32 @@ def callback():
         user = discord.fetch_user()
         session['user_id'] = user.id
         session['username'] = f"{user.name}"
-        session['session_version'] = SESSION_VERSION  # Set version on login
-        # Initialize user in database if not exists
+        session['session_version'] = SESSION_VERSION
         db = get_db()
-        db.execute('''INSERT OR IGNORE INTO user_stats (user_id, username) 
-                      VALUES (?, ?)''', (user.id, session['username']))
+        row = db.execute('SELECT * FROM user_stats WHERE user_id = ?', (user.id,)).fetchone()
+        if not row:
+            modules = get_all_modules()
+            module_stats = {}
+            for m in modules:
+                module_stats[m] = {
+                    "last_answered_time": None,
+                    "number_answered": 0,
+                    "number_correct": 0
+                }
+            db.execute('''INSERT INTO user_stats (user_id, username, module_stats) 
+                          VALUES (?, ?, ?)''', (user.id, session['username'], json.dumps(module_stats)))
+        else:
+            if not row['module_stats']:
+                modules = get_all_modules()
+                module_stats = {}
+                for m in modules:
+                    module_stats[m] = {
+                        "last_answered_time": None,
+                        "number_answered": 0,
+                        "number_correct": 0
+                    }
+                db.execute('UPDATE user_stats SET module_stats = ? WHERE user_id = ?', (json.dumps(module_stats), user.id))
         db.commit()
-        
         return redirect(url_for('index'))
     except Exception as e:
         return f"An error occurred: {str(e)}"
@@ -347,7 +389,7 @@ def logout():
 def leaderboard():
     sort = request.args.get('sort', 'correct_answers')
     order = request.args.get('order', 'desc')
-    # Only allow certain columns to be sorted
+    module_filter = request.args.get('module', None)
     allowed = {
         'correct_answers': 'correct_answers',
         'total_answers': 'total_answers',
@@ -360,31 +402,72 @@ def leaderboard():
     db = get_db()
     users = db.execute(f'''
         SELECT user_id, username, correct_answers, total_answers, current_streak, last_answer_time,
-            (CASE WHEN total_answers > 0 THEN 1.0 * correct_answers / total_answers ELSE 0 END) as accuracy
+            (CASE WHEN total_answers > 0 THEN 1.0 * correct_answers / total_answers ELSE 0 END) as accuracy,
+            module_stats
         FROM user_stats
         ORDER BY {sort_col} {order_sql}, total_answers DESC
         LIMIT 50
     ''').fetchall()
-    leaderboard = [dict(row) for row in users]
-    return render_template('leaderboard.html', leaderboard=leaderboard, sort=sort, order=order)
+    leaderboard = []
+    for row in users:
+        user = dict(row)
+        # If module filter is active, override stats with per-module
+        if module_filter and user.get('module_stats'):
+            try:
+                ms = json.loads(user['module_stats'])
+                modstats = ms.get(module_filter, {})
+                user['correct_answers'] = modstats.get('number_correct', 0)
+                user['total_answers'] = modstats.get('number_answered', 0)
+                user['accuracy'] = (modstats.get('number_correct', 0) / modstats.get('number_answered', 1)) if modstats.get('number_answered', 0) else 0
+                user['current_streak'] = modstats.get('current_streak', 0)
+                user['last_answer_time'] = modstats.get('last_answered_time', None)
+            except Exception:
+                user['correct_answers'] = 0
+                user['total_answers'] = 0
+                user['accuracy'] = 0
+                user['current_streak'] = 0
+                user['last_answer_time'] = None
+        leaderboard.append(user)
+    modules = get_all_modules()
+    return render_template('leaderboard.html', leaderboard=leaderboard, sort=sort, order=order, modules=modules, active_module=module_filter)
 
 @app.route('/user_stats/<user_id>')
 def user_stats(user_id):
+    module_filter = request.args.get('module', None)
     db = get_db()
     stats = db.execute('''SELECT * FROM user_stats WHERE user_id = ?''', (user_id,)).fetchone()
     stats_dict = dict(stats) if stats else {}
-    return render_template('stats.html', stats=stats_dict, is_other_user=True)
+    if stats and stats['module_stats']:
+        stats_dict['module_stats'] = json.loads(stats['module_stats'])
+        # Ensure current_streak key exists for all modules
+        for m in stats_dict['module_stats'].values():
+            if "current_streak" not in m:
+                m["current_streak"] = 0
+    else:
+        stats_dict['module_stats'] = {}
+    modules = get_all_modules()
+    stats_dict['active_module'] = module_filter
+    return render_template('stats.html', stats=stats_dict, is_other_user=True, modules=modules)
 
 @app.route('/stats')
 def stats():
     if 'user_id' not in session:
         return redirect(url_for('login'))
-        
+    module_filter = request.args.get('module', None)
     db = get_db()
     stats = db.execute('''SELECT * FROM user_stats WHERE user_id = ?''', 
                       (session['user_id'],)).fetchone()
     stats_dict = dict(stats) if stats else {}
-    return render_template('stats.html', stats=stats_dict, is_other_user=False)
+    if stats and stats['module_stats']:
+        stats_dict['module_stats'] = json.loads(stats['module_stats'])
+        for m in stats_dict['module_stats'].values():
+            if "current_streak" not in m:
+                m["current_streak"] = 0
+    else:
+        stats_dict['module_stats'] = {}
+    modules = get_all_modules()
+    stats_dict['active_module'] = module_filter
+    return render_template('stats.html', stats=stats_dict, is_other_user=False, modules=modules)
 
 @app.route('/report_question', methods=['GET', 'POST'])
 def report_question():

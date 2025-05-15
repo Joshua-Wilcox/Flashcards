@@ -4,6 +4,8 @@ CREATE TABLE IF NOT EXISTS user_stats (
     correct_answers INTEGER DEFAULT 0,
     total_answers INTEGER DEFAULT 0,
     last_answer_time INTEGER  -- store as Unix timestamp (seconds)
+    current_streak INTEGER DEFAULT 0,
+    module_stats TEXT
 );
 
 CREATE TABLE IF NOT EXISTS requests_to_access (
