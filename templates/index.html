@@ -274,7 +274,9 @@
             color: #222 !important;
             font-weight: 700;
             border-radius: 999px !important;
-            box-shadow: 0 2px 8px rgba(255,183,0,0.18);
+            box-shadow: 0 2px 8px rgba(255,183,0,0.18), 0 0 0 4px #b3d1ff66;
+            /* Add a subtle glowing effect */
+            animation: submit-flashcard-glow 2.2s infinite alternate;
             transition: transform 0.15s, box-shadow 0.15s;
             position: relative;
             z-index: 2;
@@ -282,25 +284,32 @@
         .navbar-nav .submit-flashcard-btn:hover, .navbar-nav .submit-flashcard-btn:focus {
             background: #66a3fe !important;
             color: #222 !important;
-            box-shadow: 0 4px 16px rgba(255,183,0,0.22);
+            box-shadow: 0 4px 16px rgba(255,183,0,0.22), 0 0 0 6px #b3d1ff99;
             transform: scale(1.06);
         }
-        @keyframes wiggle {
-            0% { transform: rotate(0deg);}
-            10% { transform: rotate(-4deg);}
-            20% { transform: rotate(4deg);}
-            30% { transform: rotate(-3deg);}
-            40% { transform: rotate(3deg);}
-            50% { transform: rotate(-2deg);}
-            60% { transform: rotate(2deg);}
-            70% { transform: rotate(-1deg);}
-            80% { transform: rotate(1deg);}
-            90% { transform: rotate(0deg);}
-            100% { transform: rotate(0deg);}
+        @keyframes submit-flashcard-glow {
+            0% {
+                box-shadow: 0 2px 8px rgba(255,183,0,0.18), 0 0 0 4px #b3d1ff66;
+            }
+            100% {
+                box-shadow: 0 4px 16px rgba(255,183,0,0.22), 0 0 12px 8px #b3d1ff44;
+            }
         }
-        .wiggle {
-            animation: wiggle 0.7s;
+
+        /* Responsive adjustments for navbar */
+        @media (max-width: 576px) {
+            .navbar-nav .nav-link {
+                padding: 8px 16px !important;
+                font-size: 0.9em;
+            }
+            .navbar-nav .submit-flashcard-btn {
+                padding: 8px 16px !important;
+                font-size: 0.9em;
+            }
         }
+
+        /* Remove wiggle animation */
+        /* .wiggle { animation: wiggle 0.7s; } */
     </style>
 </head>
 <body>
@@ -412,7 +421,6 @@
 
         <footer class="text-center">
             <p>made with ❤️ by <a href="https://github.com/joshua-wilcox">Josh Wilcox</a></p>
-            <p>CURRENTLY IN *ACTIVE* DEVELOPMENT - I'M CODING RIGHT NOW - EXPECT BUGS AND ERRORS</p>
             <p>websites are not free! if this has helped you more than a coffee, consider <a href="https://buymeacoffee.com/jmwcx">supporting</a></p>
         </footer>
     </div>
@@ -905,22 +913,6 @@
             $('#qa-section').hide();
             $('#welcome-section').show();
             {% endif %}
-        });
-
-        // Wiggle animation for submit flashcard button
-        $(document).ready(function() {
-            function wiggleBtn() {
-                var $btn = $('#submit-flashcard-navbar-btn');
-                if ($btn.length) {
-                    $btn.addClass('wiggle');
-                    setTimeout(function() {
-                        $btn.removeClass('wiggle');
-                    }, 800);
-                }
-            }
-            setInterval(wiggleBtn, 3500);
-            // Optionally, wiggle once on page load
-            setTimeout(wiggleBtn, 800);
         });
     </script>
 </body>
