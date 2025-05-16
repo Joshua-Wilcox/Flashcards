@@ -247,6 +247,60 @@
                 width: 36px;
             }
         }
+
+        /* Pill style for all navbar links */
+        .navbar-nav .nav-link {
+            border-radius: 999px !important;
+            padding: 8px 22px !important;
+            margin-left: 6px;
+            margin-right: 6px;
+            font-weight: 600;
+            transition: background 0.15s, color 0.15s, box-shadow 0.15s, transform 0.15s;
+            background: #f8f9fa !important;
+            color: #444 !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            position: relative;
+            z-index: 1;
+        }
+        .navbar-nav .nav-link:hover, .navbar-nav .nav-link:focus {
+            background: #e2e6ea !important;
+            color: #222 !important;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            transform: scale(1.04);
+        }
+        /* Highlighted button for submitting flashcards (must come after .nav-link for specificity) */
+        .navbar-nav .submit-flashcard-btn {
+            background: #94bfff !important;
+            color: #222 !important;
+            font-weight: 700;
+            border-radius: 999px !important;
+            box-shadow: 0 2px 8px rgba(255,183,0,0.18);
+            transition: transform 0.15s, box-shadow 0.15s;
+            position: relative;
+            z-index: 2;
+        }
+        .navbar-nav .submit-flashcard-btn:hover, .navbar-nav .submit-flashcard-btn:focus {
+            background: #66a3fe !important;
+            color: #222 !important;
+            box-shadow: 0 4px 16px rgba(255,183,0,0.22);
+            transform: scale(1.06);
+        }
+        @keyframes wiggle {
+            0% { transform: rotate(0deg);}
+            10% { transform: rotate(-4deg);}
+            20% { transform: rotate(4deg);}
+            30% { transform: rotate(-3deg);}
+            40% { transform: rotate(3deg);}
+            50% { transform: rotate(-2deg);}
+            60% { transform: rotate(2deg);}
+            70% { transform: rotate(-1deg);}
+            80% { transform: rotate(1deg);}
+            90% { transform: rotate(0deg);}
+            100% { transform: rotate(0deg);}
+        }
+        .wiggle {
+            animation: wiggle 0.7s;
+        }
     </style>
 </head>
 <body>
@@ -262,6 +316,10 @@
                             <a class="nav-link" href="{{ url_for('login') }}">Login with Discord</a>
                         {% else %}
                             <a class="nav-link" href="{{ url_for('stats') }}">My Stats</a>
+                            <a class="nav-link submit-flashcard-btn" id="submit-flashcard-navbar-btn" href="{{ url_for('submit_flashcard') }}">Submit Flashcards!</a>
+                            {% if session.user_id and is_user_admin(session.user_id) %}
+                                <a class="nav-link" href="{{ url_for('admin_review_flashcards') }}">Admin Dashboard</a>
+                            {% endif %}
                             <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
                         {% endif %}
                     </div>
@@ -329,7 +387,7 @@
                     <div class="d-flex flex-wrap gap-2 mt-2 align-items-center">
                         <div class="dropdown" id="pdfs-dropdown-container" style="display:none;">
                             <button class="btn btn-secondary dropdown-toggle" type="button" id="pdfsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                Related PDFs
+                                Relevant Lecture Notes
                             </button>
                             <ul class="dropdown-menu" aria-labelledby="pdfsDropdown" id="pdfs-dropdown-list"></ul>
                         </div>
@@ -847,6 +905,22 @@
             $('#qa-section').hide();
             $('#welcome-section').show();
             {% endif %}
+        });
+
+        // Wiggle animation for submit flashcard button
+        $(document).ready(function() {
+            function wiggleBtn() {
+                var $btn = $('#submit-flashcard-navbar-btn');
+                if ($btn.length) {
+                    $btn.addClass('wiggle');
+                    setTimeout(function() {
+                        $btn.removeClass('wiggle');
+                    }, 800);
+                }
+            }
+            setInterval(wiggleBtn, 3500);
+            // Optionally, wiggle once on page load
+            setTimeout(wiggleBtn, 800);
         });
     </script>
 </body>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Review Submitted Flashcard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .review-card { max-width: 800px; margin: 40px auto; box-shadow: 0 4px 16px rgba(0,0,0,0.08); border-radius: 12px; }
+        .welcome-title { font-size: 2.2rem; font-weight: 700; color: #0d6efd; }
+        .welcome-desc { font-size: 1.1rem; color: #555; margin-top: 10px; }
+        .mini-input { max-width: 100%; }
+        .btn-group { gap: 10px; }
+        footer { margin-top: auto; padding: 10px 0; }
+        .navbar-nav .nav-link {
+            border-radius: 999px !important;
+            padding: 8px 22px !important;
+            margin-left: 6px;
+            margin-right: 6px;
+            font-weight: 600;
+            transition: background 0.15s, color 0.15s, box-shadow 0.15s, transform 0.15s;
+            background: #f8f9fa !important;
+            color: #444 !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            position: relative;
+            z-index: 1;
+        }
+        .navbar-nav .nav-link:hover, .navbar-nav .nav-link:focus {
+            background: #e2e6ea !important;
+            color: #222 !important;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            transform: scale(1.04);
+        }
+        @media (max-width: 900px) {
+            .review-card { max-width: 98vw; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+            <div class="container-fluid">
+                <span class="navbar-brand">Flashcards Admin</span>
+                <div class="navbar-nav ms-auto">
+                    <a class="nav-link" href="{{ url_for('admin_review_flashcards') }}">Back to Review List</a>
+                    <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                </div>
+            </div>
+        </nav>
+        <div class="review-card card p-4">
+            <div class="text-center mb-3">
+                <div class="welcome-title">Review Flashcard Submission</div>
+                <div class="welcome-desc">Edit as needed, then approve or reject.</div>
+                <div class="mb-2 text-muted" style="font-size:1em;">
+                    Submitted by: <b>{{ submission['username'] or submission['user_id'] }}</b> at {{ submission['timestamp'] | datetimeformat }}
+                </div>
+            </div>
+            <form method="post" autocomplete="off">
+                <div class="mb-3">
+                    <label for="question" class="form-label">Question <span class="text-danger">*</span></label>
+                    <textarea class="form-control" id="question" name="question" rows="3" required>{{ submission['submitted_question'] }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="answer" class="form-label">Answer <span class="text-danger">*</span></label>
+                    <textarea class="form-control" id="answer" name="answer" rows="2" required>{{ submission['submitted_answer'] }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="module" class="form-label">Module <span class="text-danger">*</span></label>
+                    <select class="form-select" id="module" name="module" required>
+                        <option value="">Select Module</option>
+                        {% for m in modules %}
+                            <option value="{{ m }}" {% if submission['module'] == m %}selected{% endif %}>{{ m }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4 mb-2">
+                        <label for="topic" class="form-label">Topic <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control mini-input" id="topic" name="topic" maxlength="64" value="{{ submission['submitted_topic'] or '' }}" required>
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <label for="subtopic" class="form-label">Subtopic <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control mini-input" id="subtopic" name="subtopic" maxlength="64" value="{{ submission['submitted_subtopic'] or '' }}" required>
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <label for="tags" class="form-label d-flex justify-content-between align-items-center" style="white-space:nowrap;">
+                            <span>Tags <span class="text-danger">*</span></span>
+                            <span class="text-muted ms-2" style="font-size:0.95em;">(comma separated)</span>
+                        </label>
+                        <input type="text" class="form-control mini-input" id="tags" name="tags" maxlength="128" value="{{ submission['submitted_tags_comma_separated'] or '' }}" required>
+                    </div>
+                </div>
+                <div class="btn-group d-flex justify-content-between mt-4">
+                    <button type="submit" name="action" value="approve" class="btn btn-success w-50 me-2">Approve</button>
+                    <button type="submit" name="action" value="reject" class="btn btn-danger w-50 ms-2">Reject</button>
+                </div>
+            </form>
+        </div>
+        <footer class="text-center">
+            <p>made with ❤️ by <a href="https://github.com/joshua-wilcox">Josh Wilcox</a></p>
+        </footer>
+    </div>
+</body>
+</html>

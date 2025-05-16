@@ -46,3 +46,16 @@ CREATE TABLE IF NOT EXISTS used_tokens (
     used_at INTEGER,
     PRIMARY KEY (user_id, token)
 );
+
+CREATE TABLE IF NOT EXISTS submitted_flashcards (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id TEXT NOT NULL,
+    username TEXT,
+    timestamp INTEGER NOT NULL,
+    submitted_question TEXT NOT NULL,
+    submitted_answer TEXT NOT NULL,
+    module TEXT NOT NULL,
+    submitted_topic TEXT,
+    submitted_subtopic TEXT,
+    submitted_tags_comma_separated TEXT
+);

@@ -87,6 +87,25 @@
             color: #fff !important;
             border-color: #0d6efd !important;
         }
+        .navbar-nav .nav-link {
+            border-radius: 999px !important;
+            padding: 8px 22px !important;
+            margin-left: 6px;
+            margin-right: 6px;
+            font-weight: 600;
+            transition: background 0.15s, color 0.15s, box-shadow 0.15s, transform 0.15s;
+            background: #f8f9fa !important;
+            color: #444 !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            position: relative;
+            z-index: 1;
+        }
+        .navbar-nav .nav-link:hover, .navbar-nav .nav-link:focus {
+            background: #e2e6ea !important;
+            color: #222 !important;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            transform: scale(1.04);
+        }
     </style>
 </head>
 <body>
@@ -96,7 +115,6 @@
                 <span class="navbar-brand">Flashcards</span>
                 <div class="navbar-nav ms-auto">
                     <a class="nav-link" href="{{ url_for('index') }}">Back to Flashcards</a>
-                    <a class="nav-link" href="{{ url_for('leaderboard') }}">Leaderboard</a>
                     {% if session.user_id %}
                         <a class="nav-link" href="{{ url_for('stats') }}">My Stats</a>
                         <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>

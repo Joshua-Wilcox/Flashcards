@@ -86,6 +86,24 @@ def init_db():
             db.execute('ALTER TABLE user_stats ADD COLUMN module_stats TEXT')
         except sqlite3.OperationalError:
             pass  # Already exists
+        # --- Create submitted_flashcards table if missing ---
+        db.execute('''CREATE TABLE IF NOT EXISTS submitted_flashcards (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id TEXT NOT NULL,
+            username TEXT,
+            timestamp INTEGER NOT NULL,
+            submitted_question TEXT NOT NULL,
+            submitted_answer TEXT NOT NULL,
+            module TEXT NOT NULL,
+            submitted_topic TEXT,
+            submitted_subtopic TEXT,
+            submitted_tags_comma_separated TEXT
+        )''')
+        # Add username column if missing
+        try:
+            db.execute('ALTER TABLE submitted_flashcards ADD COLUMN username TEXT')
+        except sqlite3.OperationalError:
+            pass
         db.commit()
         populate_questions_table()  # Populate questions table on first run
 
@@ -608,6 +626,118 @@ def edit_answer():
         db.rollback()
         return jsonify({'error': str(e)}), 500
 
+@app.route('/submit_flashcard', methods=['GET', 'POST'])
+def submit_flashcard():
+    if not discord.authorized:
+        return redirect(url_for('login', next=request.url))
+    user = discord.fetch_user()
+    db = get_db()
+    modules = get_all_modules()
+    if request.method == 'POST':
+        question = request.form.get('question', '').strip()
+        answer = request.form.get('answer', '').strip()
+        module = request.form.get('module', '').strip()
+        topic = request.form.get('topic', '').strip()
+        subtopic = request.form.get('subtopic', '').strip()
+        tags = request.form.get('tags', '').strip()
+        # Require topic, subtopic, tags
+        if question and answer and module and topic and subtopic and tags:
+            db.execute('''INSERT INTO submitted_flashcards 
+                (user_id, username, timestamp, submitted_question, submitted_answer, module, submitted_topic, submitted_subtopic, submitted_tags_comma_separated)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+                (user.id, user.username, int(datetime.utcnow().timestamp()), question, answer, module, topic, subtopic, tags))
+            db.commit()
+            flash('Flashcard submitted for review! Thank you.')
+            return render_template('submit_flashcard.html', modules=modules, selected_module=module, clear_fields=True)
+        else:
+            flash('Please fill in all required fields (question, answer, module, topic, subtopic, tags).')
+            return render_template('submit_flashcard.html', modules=modules, selected_module=module, clear_fields=False,
+                                   prev_question=question, prev_answer=answer, prev_topic=topic, prev_subtopic=subtopic, prev_tags=tags)
+    return render_template('submit_flashcard.html', modules=modules, selected_module=None, clear_fields=False)
+
+@app.route('/admin_review_flashcards')
+def admin_review_flashcards():
+    if 'user_id' not in session or not is_user_admin(session['user_id']):
+        return redirect(url_for('index'))
+    db = get_db()
+    rows = db.execute('SELECT * FROM submitted_flashcards ORDER BY timestamp ASC').fetchall()
+    reports = db.execute('SELECT * FROM reported_questions ORDER BY timestamp ASC').fetchall()
+    pdf_requests = db.execute('SELECT * FROM requests_to_access ORDER BY timestamp ASC').fetchall()
+    return render_template('admin_review_flashcards.html', submissions=rows, reports=reports, pdf_requests=pdf_requests)
+
+@app.route('/admin_review_report/<int:report_id>', methods=['GET', 'POST'])
+def admin_review_report(report_id):
+    if 'user_id' not in session or not is_user_admin(session['user_id']):
+        return redirect(url_for('index'))
+    db = get_db()
+    report = db.execute('SELECT * FROM reported_questions WHERE id = ?', (report_id,)).fetchone()
+    if not report:
+        flash('Report not found.')
+        return redirect(url_for('admin_review_flashcards'))
+    # Try to get the original question row
+    question_row = None
+    if report['question_id']:
+        question_row = db.execute('SELECT * FROM questions WHERE id = ?', (report['question_id'],)).fetchone()
+    # If POST, handle update or discard
+    if request.method == 'POST':
+        action = request.form.get('action')
+        new_question = request.form.get('question', '').strip()
+        new_answer = request.form.get('answer', '').strip()
+        if action == 'discard':
+            db.execute('DELETE FROM reported_questions WHERE id = ?', (report_id,))
+            db.commit()
+            flash('Report discarded.')
+            return redirect(url_for('admin_review_flashcards'))
+        elif action == 'update':
+            if not question_row:
+                flash('Original question not found, cannot update.')
+                return redirect(url_for('admin_review_report', report_id=report_id))
+            db.execute('UPDATE questions SET question = ?, answer = ? WHERE id = ?', (new_question, new_answer, question_row['id']))
+            db.execute('DELETE FROM reported_questions WHERE id = ?', (report_id,))
+            db.commit()
+            flash('Question updated and report resolved.')
+            return redirect(url_for('admin_review_flashcards'))
+    return render_template('admin_review_report.html', report=report, question_row=question_row)
+
+@app.route('/admin_review_pdf_request/<int:request_id>', methods=['GET', 'POST'])
+def admin_review_pdf_request(request_id):
+    if 'user_id' not in session or not is_user_admin(session['user_id']):
+        return redirect(url_for('index'))
+    db = get_db()
+    req = db.execute('SELECT * FROM requests_to_access WHERE id = ?', (request_id,)).fetchone()
+    if not req:
+        flash('PDF access request not found.')
+        return redirect(url_for('admin_review_flashcards'))
+    if request.method == 'POST':
+        action = request.form.get('action')
+        discord_id = req['discord_id']
+        # Remove the request from the DB
+        db.execute('DELETE FROM requests_to_access WHERE id = ?', (request_id,))
+        db.commit()
+        if action == 'approve':
+            # Add to whitelist.json user_ids if not already present
+            whitelist_path = os.path.join(os.path.dirname(__file__), 'whitelist.json')
+            with open(whitelist_path, 'r') as f:
+                whitelist = json.load(f)
+            user_ids = set(whitelist.get('user_ids', []))
+            if int(discord_id) not in user_ids:
+                user_ids.add(int(discord_id))
+                whitelist['user_ids'] = list(user_ids)
+                with open(whitelist_path, 'w') as f:
+                    json.dump(whitelist, f, indent=2)
+            flash('Request approved and user added to whitelist.')
+        else:
+            flash('Request denied and deleted.')
+        return redirect(url_for('admin_review_flashcards'))
+    return render_template('admin_review_pdf_request.html', req=req)
+
+@app.template_filter('datetimeformat')
+def datetimeformat_filter(value):
+    try:
+        return datetime.utcfromtimestamp(int(value)).strftime('%Y-%m-%d %H:%M')
+    except Exception:
+        return value
+
 @app.before_request
 def enforce_session_version():
     if 'session_version' not in session or session['session_version'] != SESSION_VERSION:
@@ -620,6 +750,11 @@ def is_user_admin(user_id):
         whitelist = json.load(f)
     return int(user_id) in whitelist.get('admin_ids', [])
 
+
+# Add this after your is_user_admin definition (or anywhere after app = Flask(__name__))
+@app.context_processor
+def inject_is_user_admin():
+    return dict(is_user_admin=is_user_admin)
 
 # --- Token Signing Utilities ---
 SECRET_TOKEN_KEY = os.getenv('TOKEN_SECRET_KEY', 'dev_token_secret')
