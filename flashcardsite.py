@@ -446,14 +446,25 @@ def leaderboard():
     sort_col = allowed.get(sort, 'correct_answers')
     order_sql = 'DESC' if order == 'desc' else 'ASC'
     db = get_db()
-    users = db.execute(f'''
-        SELECT user_id, username, correct_answers, total_answers, current_streak, last_answer_time,
-            (CASE WHEN total_answers > 0 THEN 1.0 * correct_answers / total_answers ELSE 0 END) as accuracy,
-            module_stats
-        FROM user_stats
-        ORDER BY {sort_col} {order_sql}, total_answers DESC
-        LIMIT 50
-    ''').fetchall()
+    if not module_filter:
+        # Use SQL sorting for global stats
+        users = db.execute(f'''
+            SELECT user_id, username, correct_answers, total_answers, current_streak, last_answer_time,
+                (CASE WHEN total_answers > 0 THEN 1.0 * correct_answers / total_answers ELSE 0 END) as accuracy,
+                module_stats
+            FROM user_stats
+            ORDER BY {sort_col} {order_sql}, total_answers DESC
+            LIMIT 50
+        ''').fetchall()
+    else:
+        # No ORDER BY for per-module, will sort in Python
+        users = db.execute(f'''
+            SELECT user_id, username, correct_answers, total_answers, current_streak, last_answer_time,
+                (CASE WHEN total_answers > 0 THEN 1.0 * correct_answers / total_answers ELSE 0 END) as accuracy,
+                module_stats
+            FROM user_stats
+            LIMIT 50
+        ''').fetchall()
     leaderboard = []
     for row in users:
         user = dict(row)
@@ -474,6 +485,32 @@ def leaderboard():
                 user['current_streak'] = 0
                 user['last_answer_time'] = None
         leaderboard.append(user)
+    # --- Sort leaderboard in Python if module filter is active ---
+    if module_filter:
+        def sort_key(user):
+            if sort == 'accuracy':
+                return user['accuracy']
+            elif sort == 'last_answer_time':
+                val = user.get('last_answer_time')
+                if val is None:
+                    return 0 if order == 'asc' else float('-inf')
+                return val
+            return user.get(sort, 0)
+        leaderboard = sorted(
+            leaderboard,
+            key=sort_key,
+            reverse=(order == 'desc')
+        )
+        # For tie-breaking, sort by total_answers descending
+        if sort != 'total_answers':
+            leaderboard = sorted(
+                leaderboard,
+                key=lambda u: (sort_key(u), u.get('total_answers', 0)),
+                reverse=(order == 'desc')
+            )
+    else:
+        # Already sorted by SQL for global stats
+        pass
     modules = get_all_modules()
     return render_template('leaderboard.html', leaderboard=leaderboard, sort=sort, order=order, modules=modules, active_module=module_filter)
 

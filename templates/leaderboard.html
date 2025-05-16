@@ -126,27 +126,27 @@
                         <th>Rank</th>
                         <th>User</th>
                         <th>
-                            <button class="sort-btn{% if sort == 'correct_answers' %} active{% endif %}" onclick="window.location='?sort=correct_answers&order={{ 'asc' if sort == 'correct_answers' and order == 'desc' else 'desc' }}'">Correct
+                            <button class="sort-btn{% if sort == 'correct_answers' %} active{% endif %}" onclick="window.location='?sort=correct_answers&order={{ 'asc' if sort == 'correct_answers' and order == 'desc' else 'desc' }}{% if active_module %}&module={{ active_module }}{% endif %}'">Correct
                                 {% if sort == 'correct_answers' %}<span class="sort-arrow">{{ '↑' if order == 'asc' else '↓' }}</span>{% endif %}
                             </button>
                         </th>
                         <th>
-                            <button class="sort-btn{% if sort == 'total_answers' %} active{% endif %}" onclick="window.location='?sort=total_answers&order={{ 'asc' if sort == 'total_answers' and order == 'desc' else 'desc' }}'">Total
+                            <button class="sort-btn{% if sort == 'total_answers' %} active{% endif %}" onclick="window.location='?sort=total_answers&order={{ 'asc' if sort == 'total_answers' and order == 'desc' else 'desc' }}{% if active_module %}&module={{ active_module }}{% endif %}'">Total
                                 {% if sort == 'total_answers' %}<span class="sort-arrow">{{ '↑' if order == 'asc' else '↓' }}</span>{% endif %}
                             </button>
                         </th>
                         <th>
-                            <button class="sort-btn{% if sort == 'accuracy' %} active{% endif %}" onclick="window.location='?sort=accuracy&order={{ 'asc' if sort == 'accuracy' and order == 'desc' else 'desc' }}'">Accuracy
+                            <button class="sort-btn{% if sort == 'accuracy' %} active{% endif %}" onclick="window.location='?sort=accuracy&order={{ 'asc' if sort == 'accuracy' and order == 'desc' else 'desc' }}{% if active_module %}&module={{ active_module }}{% endif %}'">Accuracy
                                 {% if sort == 'accuracy' %}<span class="sort-arrow">{{ '↑' if order == 'asc' else '↓' }}</span>{% endif %}
                             </button>
                         </th>
                         <th>
-                            <button class="sort-btn{% if sort == 'current_streak' %} active{% endif %}" onclick="window.location='?sort=current_streak&order={{ 'asc' if sort == 'current_streak' and order == 'desc' else 'desc' }}'">Streak
+                            <button class="sort-btn{% if sort == 'current_streak' %} active{% endif %}" onclick="window.location='?sort=current_streak&order={{ 'asc' if sort == 'current_streak' and order == 'desc' else 'desc' }}{% if active_module %}&module={{ active_module }}{% endif %}'">Streak
                                 {% if sort == 'current_streak' %}<span class="sort-arrow">{{ '↑' if order == 'asc' else '↓' }}</span>{% endif %}
                             </button>
                         </th>
                         <th>
-                            <button class="sort-btn{% if sort == 'last_answer_time' %} active{% endif %}" onclick="window.location='?sort=last_answer_time&order={{ 'asc' if sort == 'last_answer_time' and order == 'desc' else 'desc' }}'">Last Answered
+                            <button class="sort-btn{% if sort == 'last_answer_time' %} active{% endif %}" onclick="window.location='?sort=last_answer_time&order={{ 'asc' if sort == 'last_answer_time' and order == 'desc' else 'desc' }}{% if active_module %}&module={{ active_module }}{% endif %}'">Last Answered
                                 {% if sort == 'last_answer_time' %}<span class="sort-arrow">{{ '↑' if order == 'asc' else '↓' }}</span>{% endif %}
                             </button>
                         </th>
@@ -185,7 +185,7 @@
         </div>
         <footer class="text-center">
             <p>made with ❤️ by <a href="https://github.com/joshua-wilcox">Josh Wilcox</a></p>
-            <p>if this has helped you more than a coffee, consider <a href="https://buymeacoffee.com/jmwcx">supporting</a></p>
+            <p>websites are not free! if this has helped you more than a coffee, consider <a href="https://buymeacoffee.com/jmwcx">supporting</a></p>
         </footer>
     </div>
 <script>
