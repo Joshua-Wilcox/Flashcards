@@ -731,6 +731,41 @@ def admin_review_pdf_request(request_id):
         return redirect(url_for('admin_review_flashcards'))
     return render_template('admin_review_pdf_request.html', req=req)
 
+@app.route('/admin_review_flashcard/<int:submission_id>', methods=['GET', 'POST'])
+def admin_review_flashcard(submission_id):
+    if 'user_id' not in session or not is_user_admin(session['user_id']):
+        return redirect(url_for('index'))
+    db = get_db()
+    submission = db.execute('SELECT * FROM submitted_flashcards WHERE id = ?', (submission_id,)).fetchone()
+    modules = get_all_modules()
+    if not submission:
+        flash('Submission not found.')
+        return redirect(url_for('admin_review_flashcards'))
+    if request.method == 'POST':
+        action = request.form.get('action')
+        question = request.form.get('question', '').strip()
+        answer = request.form.get('answer', '').strip()
+        module = request.form.get('module', '').strip()
+        topic = request.form.get('topic', '').strip()
+        subtopic = request.form.get('subtopic', '').strip()
+        tags = request.form.get('tags', '').strip()
+        if action == 'approve':
+            # Insert into questions table
+            question_id = hashlib.sha256(question.encode('utf-8')).hexdigest()
+            db.execute('''INSERT OR IGNORE INTO questions (id, question, answer, module, topic, subtopic, tags, pdfs)
+                          VALUES (?, ?, ?, ?, ?, ?, ?, ?)''',
+                       (question_id, question, answer, module, topic, subtopic, json.dumps([t.strip() for t in tags.split(',') if t.strip()]), json.dumps([])))
+            db.execute('DELETE FROM submitted_flashcards WHERE id = ?', (submission_id,))
+            db.commit()
+            flash('Flashcard approved and added to the database.')
+            return redirect(url_for('admin_review_flashcards'))
+        elif action == 'reject':
+            db.execute('DELETE FROM submitted_flashcards WHERE id = ?', (submission_id,))
+            db.commit()
+            flash('Flashcard submission rejected and removed.')
+            return redirect(url_for('admin_review_flashcards'))
+    return render_template('admin_review_flashcard.html', submission=submission, modules=modules)
+
 @app.template_filter('datetimeformat')
 def datetimeformat_filter(value):
     try:
