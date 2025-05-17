@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <title>flashcards dot one hundred and twelve million dot x y z  </title>
+    <title>flashcards dot one hundred and twelve million dot x y z </title>
     <meta name="viewport" content="width=device-width, initial-scale=1"> <!-- Added for mobile scaling -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
@@ -12,15 +13,18 @@
             word-wrap: break-word;
             padding: 18px 10px;
             height: 100%;
-            font-size: clamp(18px, 4vw, 28px);  /* Larger text for mobile */
+            font-size: clamp(18px, 4vw, 28px);
+            /* Larger text for mobile */
             min-height: 60px;
             border-radius: 16px;
             transition: background 0.2s, color 0.2s;
         }
+
         .disabled {
             opacity: 0.5;
             pointer-events: none;
         }
+
         .tag {
             display: inline-block;
             background-color: #e9ecef;
@@ -29,6 +33,7 @@
             border-radius: 12px;
             font-size: 0.9em;
         }
+
         #question-container {
             min-height: 150px;
             margin-bottom: 10px;
@@ -51,7 +56,7 @@
             /* Removed flex styles that cause overlap */
         }
 
-        #answers-container > div {
+        #answers-container>div {
             /* Removed flex styles that cause overlap */
         }
 
@@ -63,39 +68,49 @@
 
         /* Responsive: mobile-friendly styles */
         @media (max-width: 768px) {
-            html, body {
+
+            html,
+            body {
                 height: 100%;
                 margin: 0;
                 padding: 0;
             }
+
             .content-wrapper {
                 min-height: 100vh;
                 height: 100vh;
             }
+
             .container {
                 padding-left: 4px;
                 padding-right: 4px;
             }
+
             .select-container {
                 margin-bottom: 10px;
             }
+
             .form-select {
                 font-size: 1.1em;
                 min-height: 48px;
             }
+
             .form-select[multiple] {
                 min-height: 120px;
                 font-size: 1em;
             }
+
             #question-container {
                 padding: 12px !important;
                 font-size: 1.1em;
             }
+
             .answer-btn {
                 font-size: 1.1em;
                 min-height: 60px;
                 padding: 18px 10px;
             }
+
             #qa-section {
                 flex: 1 1 auto;
                 display: flex;
@@ -103,12 +118,15 @@
                 justify-content: stretch;
                 min-height: 60vh;
             }
+
             #answers-container {
                 /* Removed flex styles that cause overlap */
             }
-            #answers-container > div {
+
+            #answers-container>div {
                 /* Removed flex styles that cause overlap */
             }
+
             .welcome-section {
                 min-height: 180px;
                 margin-top: 20px;
@@ -121,9 +139,11 @@
             #qa-section {
                 min-height: 70vh;
             }
+
             #answers-container {
                 /* Removed gap, spacing will be handled by mb-2 */
             }
+
             .answer-btn {
                 font-size: 1.2em;
                 min-height: 60px;
@@ -142,11 +162,13 @@
             margin-top: 40px;
             margin-bottom: 40px;
         }
+
         .welcome-title {
             font-size: 2.2rem;
             font-weight: 700;
             color: #0d6efd;
         }
+
         .welcome-desc {
             font-size: 1.2rem;
             color: #555;
@@ -160,14 +182,16 @@
             overflow-y: auto;
             min-width: 260px;
             border-radius: 14px;
-            box-shadow: 0 4px 16px rgba(13,110,253,0.08), 0 1.5px 4px rgba(0,0,0,0.04);
+            box-shadow: 0 4px 16px rgba(13, 110, 253, 0.08), 0 1.5px 4px rgba(0, 0, 0, 0.04);
             border: 1px solid #e3eafc;
             padding: 6px 0;
             background: #f8faff;
             width: 100%;
             white-space: normal;
         }
-        .dropdown-item-checkbox, .dropdown-item-module {
+
+        .dropdown-item-checkbox,
+        .dropdown-item-module {
             cursor: pointer;
             user-select: none;
             display: block;
@@ -182,16 +206,23 @@
             word-break: break-word;
             overflow-wrap: break-word;
         }
-        .dropdown-item-checkbox.selected, .dropdown-item-module.selected {
+
+        .dropdown-item-checkbox.selected,
+        .dropdown-item-module.selected {
             background: #e7f1ff;
             color: #0d6efd;
         }
-        .dropdown-item-checkbox:hover, .dropdown-item-checkbox:focus-within,
-        .dropdown-item-module:hover, .dropdown-item-module:focus-within {
+
+        .dropdown-item-checkbox:hover,
+        .dropdown-item-checkbox:focus-within,
+        .dropdown-item-module:hover,
+        .dropdown-item-module:focus-within {
             background: #e7f1ff;
             color: #0d6efd;
         }
-        .dropdown-toggle-multiselect, .dropdown-toggle-module {
+
+        .dropdown-toggle-multiselect,
+        .dropdown-toggle-module {
             text-align: left;
             white-space: normal;
             border-radius: 14px !important;
@@ -200,28 +231,38 @@
             color: #222 !important;
             font-weight: 500;
             font-size: 1.07em;
-            box-shadow: 0 1.5px 4px rgba(13,110,253,0.04);
+            box-shadow: 0 1.5px 4px rgba(13, 110, 253, 0.04);
             transition: border 0.13s, box-shadow 0.13s;
         }
-        .dropdown-toggle-multiselect:focus, .dropdown-toggle-multiselect.active, .dropdown-toggle-multiselect[aria-expanded="true"],
-        .dropdown-toggle-module:focus, .dropdown-toggle-module.active, .dropdown-toggle-module[aria-expanded="true"] {
+
+        .dropdown-toggle-multiselect:focus,
+        .dropdown-toggle-multiselect.active,
+        .dropdown-toggle-multiselect[aria-expanded="true"],
+        .dropdown-toggle-module:focus,
+        .dropdown-toggle-module.active,
+        .dropdown-toggle-module[aria-expanded="true"] {
             border-color: #0d6efd !important;
             box-shadow: 0 0 0 2px #b3d1ff66;
             background: #e7f1ff !important;
             color: #0d6efd !important;
         }
-        .dropdown-toggle-multiselect[disabled], .dropdown-toggle-module[disabled] {
+
+        .dropdown-toggle-multiselect[disabled],
+        .dropdown-toggle-module[disabled] {
             background: #f1f3f7 !important;
             color: #b3b3b3 !important;
             border-color: #e0e0e0 !important;
             opacity: 0.7;
         }
+
         @media (max-width: 576px) {
             .dropdown-menu-multiselect {
                 min-width: 98vw;
                 font-size: 1em;
             }
-            .dropdown-item-checkbox, .dropdown-item-module {
+
+            .dropdown-item-checkbox,
+            .dropdown-item-module {
                 font-size: 1em;
                 padding: 10px 10px 10px 12px;
             }
@@ -232,7 +273,9 @@
             color: #fff !important;
             border: none;
         }
-        .btn-report:hover, .btn-report:focus {
+
+        .btn-report:hover,
+        .btn-report:focus {
             background-color: #b34700 !important;
             color: #fff !important;
         }
@@ -244,12 +287,13 @@
             border-radius: 18px;
             padding: 2px 10px 2px 10px;
             margin-left: 8px;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
             border: 1px solid #e0e0e0;
             height: 36px;
             min-width: 120px;
             max-width: 180px;
         }
+
         .delay-answers-label {
             font-size: 0.98em;
             color: #555;
@@ -257,6 +301,7 @@
             font-weight: 500;
             white-space: nowrap;
         }
+
         #delay-answers-input {
             width: 48px;
             min-width: 36px;
@@ -274,19 +319,23 @@
             -moz-appearance: textfield;
             appearance: textfield;
         }
+
         #delay-answers-input::-webkit-outer-spin-button,
         #delay-answers-input::-webkit-inner-spin-button {
             -webkit-appearance: none;
             margin: 0;
         }
+
         #delay-answers-input[type="number"]::-ms-input {
             appearance: textfield;
         }
+
         #delay-answers-input:focus {
             outline: none;
             border-color: #0d6efd;
-            box-shadow: 0 0 0 2px rgba(13,110,253,.15);
+            box-shadow: 0 0 0 2px rgba(13, 110, 253, .15);
         }
+
         /* Responsive tweaks */
         @media (max-width: 576px) {
             .delay-answers-group {
@@ -294,9 +343,11 @@
                 max-width: 120px;
                 padding: 2px 6px;
             }
+
             .delay-answers-label {
                 font-size: 0.95em;
             }
+
             #delay-answers-input {
                 font-size: 0.98em;
                 width: 36px;
@@ -313,41 +364,48 @@
             transition: background 0.15s, color 0.15s, box-shadow 0.15s, transform 0.15s;
             background: #f8f9fa !important;
             color: #444 !important;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
             position: relative;
             z-index: 1;
         }
-        .navbar-nav .nav-link:hover, .navbar-nav .nav-link:focus {
+
+        .navbar-nav .nav-link:hover,
+        .navbar-nav .nav-link:focus {
             background: #e2e6ea !important;
             color: #222 !important;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
             transform: scale(1.04);
         }
+
         /* Highlighted button for submitting flashcards (must come after .nav-link for specificity) */
         .navbar-nav .submit-flashcard-btn {
             background: #94bfff !important;
             color: #222 !important;
             font-weight: 700;
             border-radius: 999px !important;
-            box-shadow: 0 2px 8px rgba(255,183,0,0.18), 0 0 0 4px #b3d1ff66;
+            box-shadow: 0 2px 8px rgba(255, 183, 0, 0.18), 0 0 0 4px #b3d1ff66;
             /* Add a subtle glowing effect */
             animation: submit-flashcard-glow 2.2s infinite alternate;
             transition: transform 0.15s, box-shadow 0.15s;
             position: relative;
             z-index: 2;
         }
-        .navbar-nav .submit-flashcard-btn:hover, .navbar-nav .submit-flashcard-btn:focus {
+
+        .navbar-nav .submit-flashcard-btn:hover,
+        .navbar-nav .submit-flashcard-btn:focus {
             background: #66a3fe !important;
             color: #222 !important;
-            box-shadow: 0 4px 16px rgba(255,183,0,0.22), 0 0 0 6px #b3d1ff99;
+            box-shadow: 0 4px 16px rgba(255, 183, 0, 0.22), 0 0 0 6px #b3d1ff99;
             transform: scale(1.06);
         }
+
         @keyframes submit-flashcard-glow {
             0% {
-                box-shadow: 0 2px 8px rgba(255,183,0,0.18), 0 0 0 4px #b3d1ff66;
+                box-shadow: 0 2px 8px rgba(255, 183, 0, 0.18), 0 0 0 4px #b3d1ff66;
             }
+
             100% {
-                box-shadow: 0 4px 16px rgba(255,183,0,0.22), 0 0 12px 8px #b3d1ff44;
+                box-shadow: 0 4px 16px rgba(255, 183, 0, 0.22), 0 0 12px 8px #b3d1ff44;
             }
         }
 
@@ -357,6 +415,7 @@
                 padding: 8px 16px !important;
                 font-size: 0.9em;
             }
+
             .navbar-nav .submit-flashcard-btn {
                 padding: 8px 16px !important;
                 font-size: 0.9em;
@@ -367,6 +426,7 @@
         /* .wiggle { animation: wiggle 0.7s; } */
     </style>
 </head>
+
 <body>
     <div class="content-wrapper">
         <div class="container mt-4">
@@ -377,14 +437,15 @@
                     <div class="navbar-nav ms-auto">
                         <a class="nav-link" href="{{ url_for('leaderboard') }}">Leaderboard</a>
                         {% if not session.user_id %}
-                            <a class="nav-link" href="{{ url_for('login') }}">Login with Discord</a>
+                        <a class="nav-link" href="{{ url_for('login') }}">Login with Discord</a>
                         {% else %}
-                            <a class="nav-link" href="{{ url_for('stats') }}">My Stats</a>
-                            <a class="nav-link submit-flashcard-btn" id="submit-flashcard-navbar-btn" href="{{ url_for('submit_flashcard') }}">Submit Flashcards!</a>
-                            {% if session.user_id and is_user_admin(session.user_id) %}
-                                <a class="nav-link" href="{{ url_for('admin_review_flashcards') }}">Admin Dashboard</a>
-                            {% endif %}
-                            <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                        <a class="nav-link" href="{{ url_for('stats') }}">My Stats</a>
+                        <a class="nav-link submit-flashcard-btn" id="submit-flashcard-navbar-btn"
+                            href="{{ url_for('submit_flashcard') }}">Submit Flashcards!</a>
+                        {% if session.user_id and is_user_admin(session.user_id) %}
+                        <a class="nav-link" href="{{ url_for('admin_review_flashcards') }}">Admin Dashboard</a>
+                        {% endif %}
+                        <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
                         {% endif %}
                     </div>
                 </div>
@@ -393,10 +454,13 @@
                 <div class="col-12 col-md-4 select-container">
                     <label for="module-dropdown">Module:</label>
                     <div class="dropdown w-100">
-                        <button class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-module w-100" type="button" id="module-dropdown" data-bs-toggle="dropdown" aria-expanded="false" {% if not session.user_id %}disabled{% endif %}>
+                        <button class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-module w-100"
+                            type="button" id="module-dropdown" data-bs-toggle="dropdown" aria-expanded="false" {% if not
+                            session.user_id %}disabled{% endif %}>
                             Select Module
                         </button>
-                        <ul class="dropdown-menu dropdown-menu-multiselect w-100" aria-labelledby="module-dropdown" id="module-dropdown-menu">
+                        <ul class="dropdown-menu dropdown-menu-multiselect w-100" aria-labelledby="module-dropdown"
+                            id="module-dropdown-menu">
                             {% for module in modules %}
                             <li>
                                 <div class="dropdown-item-module" data-value="{{ module }}">{{ module }}</div>
@@ -408,10 +472,12 @@
                 <div class="col-12 col-md-4 select-container">
                     <label for="topic-dropdown">Topics:</label>
                     <div class="dropdown w-100">
-                        <button class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-multiselect w-100" type="button" id="topic-dropdown" data-bs-toggle="dropdown" aria-expanded="false" disabled>
+                        <button class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-multiselect w-100"
+                            type="button" id="topic-dropdown" data-bs-toggle="dropdown" aria-expanded="false" disabled>
                             Select Topic
                         </button>
-                        <ul class="dropdown-menu dropdown-menu-multiselect w-100" aria-labelledby="topic-dropdown" id="topic-dropdown-menu">
+                        <ul class="dropdown-menu dropdown-menu-multiselect w-100" aria-labelledby="topic-dropdown"
+                            id="topic-dropdown-menu">
                             <!-- Populated by JS -->
                         </ul>
                     </div>
@@ -419,10 +485,13 @@
                 <div class="col-12 col-md-4 select-container">
                     <label for="subtopic-dropdown">Subtopics:</label>
                     <div class="dropdown w-100">
-                        <button class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-multiselect w-100" type="button" id="subtopic-dropdown" data-bs-toggle="dropdown" aria-expanded="false" disabled>
+                        <button class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-multiselect w-100"
+                            type="button" id="subtopic-dropdown" data-bs-toggle="dropdown" aria-expanded="false"
+                            disabled>
                             Select Subtopic
                         </button>
-                        <ul class="dropdown-menu dropdown-menu-multiselect w-100" aria-labelledby="subtopic-dropdown" id="subtopic-dropdown-menu">
+                        <ul class="dropdown-menu dropdown-menu-multiselect w-100" aria-labelledby="subtopic-dropdown"
+                            id="subtopic-dropdown-menu">
                             <!-- Populated by JS -->
                         </ul>
                     </div>
@@ -456,7 +525,8 @@
                     <!-- Button group: Related PDFs, Next Question, Report Question, Delay Answers -->
                     <div class="d-flex flex-wrap gap-2 mt-2 align-items-center">
                         <div class="dropdown" id="pdfs-dropdown-container" style="display:none;">
-                            <button class="btn btn-secondary dropdown-toggle" type="button" id="pdfsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" id="pdfsDropdown"
+                                data-bs-toggle="dropdown" aria-expanded="false">
                                 Relevant Lecture Notes
                             </button>
                             <ul class="dropdown-menu" aria-labelledby="pdfsDropdown" id="pdfs-dropdown-list"></ul>
@@ -466,7 +536,9 @@
                         <!-- Delay Answers Input (restyled, no "sec" text) -->
                         <div class="delay-answers-group" title="Delay before showing answers (seconds)">
                             <span class="delay-answers-label">Delay answers</span>
-                            <input type="number" min="0" max="60" step="1" id="delay-answers-input" class="form-control form-control-sm" value="0" aria-label="Delay answers in seconds" inputmode="numeric" pattern="[0-9]*">
+                            <input type="number" min="0" max="60" step="1" id="delay-answers-input"
+                                class="form-control form-control-sm" value="0" aria-label="Delay answers in seconds"
+                                inputmode="numeric" pattern="[0-9]*">
                         </div>
                     </div>
                 </div>
@@ -482,7 +554,8 @@
 
         <footer class="text-center">
             <p>made with ❤️ by <a href="https://github.com/joshua-wilcox">Josh Wilcox</a></p>
-            <p>websites are not free! if this has helped you more than a coffee, consider <a href="https://ko-fi.com/joshwilcox">supporting</a></p>
+            <p>websites are not free! if this has helped you more than a coffee, consider <a
+                    href="https://ko-fi.com/joshwilcox">supporting</a></p>
         </footer>
     </div>
 
@@ -500,18 +573,19 @@
         let currentQuestionId = null;
         // --- Delay answers state ---
         let delayAnswersSeconds = 0;
+        let delayInterval = null;
         // Try to persist delay value in localStorage
         if (localStorage.getItem('delayAnswersSeconds')) {
             delayAnswersSeconds = parseInt(localStorage.getItem('delayAnswersSeconds')) || 0;
         }
 
         // Set input value on load
-        $(document).ready(function() {
+        $(document).ready(function () {
             $('#delay-answers-input').val(delayAnswersSeconds);
         });
 
         // Update delay value on change
-        $('#delay-answers-input').on('input', function() {
+        $('#delay-answers-input').on('input', function () {
             let val = parseInt($(this).val()) || 0;
             if (val < 0) val = 0;
             if (val > 60) val = 60;
@@ -522,6 +596,13 @@
 
         // Helper: show/hide answer buttons with delay
         function showAnswerButtonsWithDelay() {
+            // Always clear any previous countdown before starting a new one
+            if (delayInterval) {
+                clearInterval(delayInterval);
+                delayInterval = null;
+            }
+            $('#delay-countdown').remove();
+
             if (delayAnswersSeconds > 0) {
                 $('.answer-btn').hide();
                 let $container = $('#answers-container');
@@ -534,36 +615,38 @@
                 }
                 function renderCountdown() {
                     $countdownDiv.html(
-                        'Answers will appear in <span id="delay-countdown-seconds">' + countdown + '</span>s... ' +
-                        '<a href="#" id="pause-delay-btn" class="ms-2" style="font-size:1em;text-decoration:underline;cursor:pointer;">pause</a> ' +
-                        '<button id="skip-delay-btn" class="btn btn-link btn-sm p-0 ms-2" style="font-size:1em;vertical-align:baseline;text-decoration:underline;">continue</button>'
+                        `<span>Showing answers in <b>${countdown}</b> second${countdown !== 1 ? 's' : ''}...</span>
+                    <button id="pause-delay-btn" class="btn btn-sm btn-outline-secondary ms-2">Pause</button>
+                    <button id="skip-delay-btn" class="btn btn-sm btn-outline-primary ms-2">See answers now</button>`
                     );
+                    if (paused) {
+                        $countdownDiv.find('span').html(`<b>Paused</b>`);
+                    }
                 }
                 renderCountdown();
-                let interval = setInterval(function() {
+                delayInterval = setInterval(function () {
                     if (!paused) {
                         countdown--;
-                        if (countdown > 0) {
-                            renderCountdown();
-                        } else {
-                            clearInterval(interval);
+                        if (countdown <= 0) {
+                            clearInterval(delayInterval);
+                            delayInterval = null;
                             $countdownDiv.remove();
                             $('.answer-btn').show();
+                        } else {
+                            renderCountdown();
                         }
                     }
                 }, 1000);
                 // Pause button handler
-                $container.off('click', '#pause-delay-btn').on('click', '#pause-delay-btn', function(e) {
+                $container.off('click', '#pause-delay-btn').on('click', '#pause-delay-btn', function (e) {
                     e.preventDefault();
                     paused = true;
-                    $countdownDiv.html(
-                        'Answers will appear when you are ready. ' +
-                        '<button id="skip-delay-btn" class="btn btn-link btn-sm p-0 ms-2" style="font-size:1em;vertical-align:baseline;text-decoration:underline;">continue</button>'
-                    );
+                    renderCountdown();
                 });
                 // See question (skip) button handler
-                $container.off('click', '#skip-delay-btn').on('click', '#skip-delay-btn', function() {
-                    clearInterval(interval);
+                $container.off('click', '#skip-delay-btn').on('click', '#skip-delay-btn', function () {
+                    clearInterval(delayInterval);
+                    delayInterval = null;
                     $countdownDiv.remove();
                     $('.answer-btn').show();
                 });
@@ -571,6 +654,14 @@
                 $('#delay-countdown').remove();
                 $('.answer-btn').show();
             }
+        }
+        // --- Ensure timer is reset when fetching a new question or changing filters ---
+        function resetDelayCountdown() {
+            if (delayInterval) {
+                clearInterval(delayInterval);
+                delayInterval = null;
+            }
+            $('#delay-countdown').remove();
         }
 
         // Render topics/subtopics as text-only, multi-selectable
@@ -589,6 +680,7 @@
         }
 
         function updateFilters() {
+            resetDelayCountdown();
             const data = {
                 module: currentSelections.module,
                 topics: currentSelections.topics,
@@ -600,7 +692,7 @@
                 method: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify(data),
-                success: function(response) {
+                success: function (response) {
                     // Populate topics dropdown (text only, no checkboxes)
                     const $topicMenu = $('#topic-dropdown-menu');
                     renderDropdownMenu($topicMenu, response.topics, currentSelections.topics);
@@ -617,7 +709,7 @@
         }
 
         // Make label click toggle selection and update, but do not close dropdown
-        $(document).on('click', '#topic-dropdown-menu .dropdown-item-checkbox', function(e) {
+        $(document).on('click', '#topic-dropdown-menu .dropdown-item-checkbox', function (e) {
             const value = $(this).data('value');
             const idx = currentSelections.topics.indexOf(value);
             if (idx === -1) {
@@ -629,7 +721,7 @@
             getNewQuestion();
         });
 
-        $(document).on('click', '#subtopic-dropdown-menu .dropdown-item-checkbox', function(e) {
+        $(document).on('click', '#subtopic-dropdown-menu .dropdown-item-checkbox', function (e) {
             const value = $(this).data('value');
             const idx = currentSelections.subtopics.indexOf(value);
             if (idx === -1) {
@@ -643,7 +735,7 @@
         });
 
         // Prevent dropdown from closing when clicking inside the menu
-        $(document).on('click', '.dropdown-menu-multiselect', function(e) {
+        $(document).on('click', '.dropdown-menu-multiselect', function (e) {
             e.stopPropagation();
         });
 
@@ -659,6 +751,7 @@
         }
 
         function getNewQuestion(specificQuestionId = null) {
+            resetDelayCountdown();
             const data = {
                 module: currentSelections.module,
                 topics: currentSelections.topics,
@@ -677,10 +770,10 @@
                 method: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify(data),
-                success: function(response) {
+                success: function (response) {
                     if (response.error) {
                         $('#question-text').text(response.error);
-                        $('#answers-container .answer-btn').each(function() {
+                        $('#answers-container .answer-btn').each(function () {
                             $(this).text('').prop('disabled', true).hide();
                         });
                         $('#pdfs-dropdown-list').empty();
@@ -712,7 +805,7 @@
                     let existingAnswers = [];
                     // If this is a refresh after edit, get existing button order
                     if (specificQuestionId) {
-                        $existingButtons.each(function() {
+                        $existingButtons.each(function () {
                             existingAnswers.push($(this).text());
                         });
                     }
@@ -743,7 +836,7 @@
                     });
 
                     // Hide unused buttons
-                    $('.answer-btn').each(function(idx) {
+                    $('.answer-btn').each(function (idx) {
                         if (idx >= response.answers.length) {
                             $(this).hide();
                         }
@@ -752,7 +845,7 @@
                     // Update edit buttons for admins
                     $('.edit-answer-btn').remove();
                     if (isAdmin) {
-                        $('.answer-btn:visible').each(function(idx) {
+                        $('.answer-btn:visible').each(function (idx) {
                             if (!$(this).parent().hasClass('answer-row')) {
                                 $(this).wrap('<div class="d-flex align-items-center answer-row" style="gap:8px;"></div>');
                             }
@@ -796,7 +889,7 @@
         }
 
         // --- Answer button logic ---
-        $(document).off('click', '.answer-btn').on('click', '.answer-btn', function() {
+        $(document).off('click', '.answer-btn').on('click', '.answer-btn', function () {
             const $btn = $(this);
             if ($btn.prop('disabled')) return;
             const selectedAnswer = $btn.text();
@@ -809,12 +902,12 @@
                     answer: selectedAnswer,
                     token: currentQuestionToken
                 }),
-                success: function(response) {
+                success: function (response) {
                     if (response.correct) {
                         $btn.removeClass('btn-primary').addClass('btn-success');
                         $('.answer-btn').prop('disabled', true);
                         // Auto-advance after 1 second
-                        setTimeout(function() {
+                        setTimeout(function () {
                             getNewQuestion();
                         }, 1000);
                     } else {
@@ -823,7 +916,7 @@
                         // Let other buttons remain clickable for more attempts
                     }
                 },
-                error: function(xhr) {
+                error: function (xhr) {
                     if (xhr.status === 401) {
                         window.location.href = "{{ url_for('login') }}";
                     }
@@ -833,7 +926,7 @@
 
         // --- Edit answer button logic (admin only) ---
         function cleanupEditForms() {
-            $('.edit-answer-form').each(function() {
+            $('.edit-answer-form').each(function () {
                 const $form = $(this);
                 const $row = $form.closest('.answer-row');
                 $row.find('.answer-btn').show();
@@ -841,7 +934,7 @@
                 $form.remove();
             });
             // Re-enable all buttons
-            $('.edit-answer-btn, .answer-btn').each(function() {
+            $('.edit-answer-btn, .answer-btn').each(function () {
                 const $btn = $(this);
                 if (!$btn.hasClass('btn-danger')) {
                     $btn.prop('disabled', false);
@@ -849,20 +942,20 @@
             });
         }
 
-        $(document).off('click', '.edit-answer-btn').on('click', '.edit-answer-btn', function(e) {
+        $(document).off('click', '.edit-answer-btn').on('click', '.edit-answer-btn', function (e) {
             e.preventDefault();
-            
+
             // First cleanup any existing edit forms
             cleanupEditForms();
-            
+
             const idx = $(this).data('idx');
             const $answerBtn = $('.answer-btn').eq(idx);
             const $editBtn = $(this);
             const currentText = $answerBtn.text();
-            
+
             // Disable all edit and answer buttons while editing
             $('.edit-answer-btn, .answer-btn').prop('disabled', true);
-            
+
             // Show the edit form
             $answerBtn.hide();
             $editBtn.hide();
@@ -874,12 +967,12 @@
                 </form>
             `;
             $editBtn.after(formHtml);
-            
+
             // Focus the input field
             $editBtn.siblings('.edit-answer-form').find('input').focus();
         });
         // Save edited answer
-        $(document).off('submit', '.edit-answer-form').on('submit', '.edit-answer-form', function(e) {
+        $(document).off('submit', '.edit-answer-form').on('submit', '.edit-answer-form', function (e) {
             e.preventDefault();
             const $form = $(this);
             const $submitBtn = $form.find('button[type="submit"]');
@@ -899,7 +992,7 @@
                     question_id: questionId, // Use the correct question ID
                     new_text: newText
                 }),
-                success: function(resp) {
+                success: function (resp) {
                     if (resp.success) {
                         cleanupEditForms();
                         getNewQuestion(currentQuestionId);
@@ -911,7 +1004,7 @@
                         $('.edit-answer-btn').prop('disabled', false);
                     }
                 },
-                error: function() {
+                error: function () {
                     alert('Error updating answer.');
                     $submitBtn.prop('disabled', false);
                     $cancelBtn.prop('disabled', false);
@@ -921,20 +1014,20 @@
             });
         });
         // Cancel edit
-        $(document).off('click', '.cancel-edit-btn').on('click', '.cancel-edit-btn', function() {
+        $(document).off('click', '.cancel-edit-btn').on('click', '.cancel-edit-btn', function () {
             cleanupEditForms();
         });
 
-        $('#new-question-btn').off('click').on('click', function() {
+        $('#new-question-btn').off('click').on('click', function () {
             getNewQuestion();
         });
 
         // Report Question button always visible
-        $('#report-question-btn').off('click').on('click', function() {
+        $('#report-question-btn').off('click').on('click', function () {
             const questionText = $('#question-text').text();
             let answerText = '';
             // Try to get the correct answer (if already answered correctly)
-            $('.answer-btn').each(function() {
+            $('.answer-btn').each(function () {
                 if ($(this).hasClass('btn-success')) answerText = $(this).text();
             });
             // If not found, just use the first answer button's text
@@ -954,7 +1047,7 @@
             }
         }
         function updateModuleDropdownSelection() {
-            $('#module-dropdown-menu .dropdown-item-module').each(function() {
+            $('#module-dropdown-menu .dropdown-item-module').each(function () {
                 const val = $(this).data('value');
                 if (val === currentSelections.module) {
                     $(this).addClass('selected').attr('aria-selected', 'true');
@@ -963,7 +1056,7 @@
                 }
             });
         }
-        $(document).on('click', '#module-dropdown-menu .dropdown-item-module', function(e) {
+        $(document).on('click', '#module-dropdown-menu .dropdown-item-module', function (e) {
             const value = $(this).data('value');
             if (currentSelections.module === value) {
                 currentSelections.module = '';
@@ -987,16 +1080,16 @@
             }
         });
         // Prevent dropdown from closing on selection
-        $(document).on('mousedown', '#module-dropdown-menu .dropdown-item-module', function(e) {
+        $(document).on('mousedown', '#module-dropdown-menu .dropdown-item-module', function (e) {
             e.preventDefault();
         });
         // Update label and selection on show
-        $('#module-dropdown').on('show.bs.dropdown', function() {
+        $('#module-dropdown').on('show.bs.dropdown', function () {
             updateModuleDropdownLabel();
             updateModuleDropdownSelection();
         });
         // Also update on page load
-        $(document).ready(function() {
+        $(document).ready(function () {
             updateModuleDropdownLabel();
             updateModuleDropdownSelection();
         });
@@ -1005,7 +1098,7 @@
         // $('#module-select').change(function() { ... }); // REMOVE
 
         // Update filters and UI if module is set from URL
-        $(document).ready(function() {
+        $(document).ready(function () {
             const urlParams = new URLSearchParams(window.location.search);
             {% if session.user_id %}
             if (urlParams.has('module')) {
@@ -1027,4 +1120,5 @@
         });
     </script>
 </body>
+
 </html>
