@@ -536,7 +536,7 @@
                         <button id="report-question-btn" class="btn btn-report">Report Question</button>
                         <!-- Delay Answers Input (restyled, no "sec" text) -->
                         <div class="delay-answers-group" title="Delay before showing answers (seconds)">
-                            <span class="delay-answers-label">Delay answers</span>
+                            <span class="delay-answers-label">Pondering Time</span>
                             <input type="number" min="0" max="60" step="1" id="delay-answers-input"
                                 class="form-control form-control-sm" value="0" aria-label="Delay answers in seconds"
                                 inputmode="numeric" pattern="[0-9]*">
@@ -545,10 +545,11 @@
                 </div>
 
                 <div id="answers-container" class="row g-2" style="height: 100%;">
-                    <div class="col-12 mb-2"><button class="btn btn-primary w-100 answer-btn" disabled></button></div>
-                    <div class="col-12 mb-2"><button class="btn btn-primary w-100 answer-btn" disabled></button></div>
-                    <div class="col-12 mb-2"><button class="btn btn-primary w-100 answer-btn" disabled></button></div>
-                    <div class="col-12"><button class="btn btn-primary w-100 answer-btn" disabled></button></div>
+                    {% for i in range(NUMBER_OF_DISTRACTORS + 1) %}
+                    <div class="col-12 {% if not loop.last %}mb-2{% endif %}">
+                        <button class="btn btn-primary w-100 answer-btn" disabled></button>
+                    </div>
+                    {% endfor %}
                 </div>
             </div>
         </div>
@@ -1149,12 +1150,12 @@
         });
 
         // Add click handlers to close dropdowns when clicking outside
-        $(document).on('click', function(e) {
-            if (!$(e.target).closest('#topic-dropdown-menu').length && 
+        $(document).on('click', function (e) {
+            if (!$(e.target).closest('#topic-dropdown-menu').length &&
                 !$(e.target).closest('#topic-dropdown').length) {
                 $('#topic-dropdown').dropdown('hide');
             }
-            if (!$(e.target).closest('#subtopic-dropdown-menu').length && 
+            if (!$(e.target).closest('#subtopic-dropdown-menu').length &&
                 !$(e.target).closest('#subtopic-dropdown').length) {
                 $('#subtopic-dropdown').dropdown('hide');
             }

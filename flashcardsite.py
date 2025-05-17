@@ -29,7 +29,7 @@ app.config["DISCORD_OAUTH2_SCOPE"] = ["identify, guilds"]
 discord = DiscordOAuth2Session(app)
 
 SESSION_VERSION = 4  # Increment this when you change scopes or session structure
-
+NUMBER_OF_DISTRACTORS = 4
 
 # Database functions
 def get_db():
@@ -222,7 +222,7 @@ def index():
     return render_template('index.html',
                          modules=get_unique_values('module'),
                          topics=get_unique_values('topic'),
-                         subtopics=get_unique_values('subtopic'))
+                         subtopics=get_unique_values('subtopic'), NUMBER_OF_DISTRACTORS=NUMBER_OF_DISTRACTORS)
 
 @app.route('/get_filters', methods=['POST'])
 def get_filters():
@@ -305,10 +305,10 @@ def get_question():
     current_tags = json.loads(row['tags']) if row['tags'] else []
     
     # Try to get distractors in order of relevance
-    distractors_needed = 3
+    distractors_needed = NUMBER_OF_DISTRACTORS
     similar_rows = []
 
-    # 1. First try: Same tags (if any)
+    # 1. First try: Same tags (if any) - but limit to distractors_needed-1
     if current_tags:
         tag_conditions = ' OR '.join(['tags LIKE ?' for _ in current_tags])
         tag_params = ['%' + tag + '%' for tag in current_tags]
@@ -316,36 +316,43 @@ def get_question():
             SELECT id, answer FROM questions 
             WHERE module = ? AND id != ? AND ({tag_conditions})
             AND answer != ? ORDER BY RANDOM()
+            LIMIT {distractors_needed - 1}
         '''
         similar_rows = db.execute(tag_query, [module, row['id']] + tag_params + [correct_answer]).fetchall()
 
-    # 2. If we need more, try same subtopic
-    if len(similar_rows) < distractors_needed and row['subtopic']:
-        subtopic_query = '''
+    # 2. Get remaining from same subtopic/topic
+    remaining_needed = distractors_needed - len(similar_rows)
+    if remaining_needed > 0:
+        hierarchy_query = '''
             SELECT id, answer FROM questions 
-            WHERE module = ? AND subtopic = ? AND id != ? 
+            WHERE module = ? AND id != ? 
             AND answer != ? AND id NOT IN ({})
-            ORDER BY RANDOM()
+            AND (subtopic = ? OR topic = ?)
+            ORDER BY (subtopic = ?) DESC, RANDOM()
+            LIMIT ?
         '''
         exclude_ids = ','.join('?' * len(similar_rows)) if similar_rows else 'NULL'
         exclude_params = [r['id'] for r in similar_rows]
-        subtopic_rows = db.execute(subtopic_query.format(exclude_ids),
-            [module, row['subtopic'], row['id'], correct_answer] + exclude_params).fetchall()
-        similar_rows.extend(subtopic_rows)
+        hierarchy_rows = db.execute(hierarchy_query.format(exclude_ids),
+            [module, row['id'], correct_answer] + exclude_params + 
+            [row['subtopic'], row['topic'], row['subtopic'], remaining_needed]).fetchall()
+        similar_rows.extend(hierarchy_rows)
 
-    # 3. If still need more, try same topic
-    if len(similar_rows) < distractors_needed and row['topic']:
-        topic_query = '''
+    # 3. If still need more, get random ones from the same module
+    if len(similar_rows) < distractors_needed:
+        module_query = '''
             SELECT id, answer FROM questions 
-            WHERE module = ? AND topic = ? AND id != ? 
+            WHERE module = ? AND id != ? 
             AND answer != ? AND id NOT IN ({})
             ORDER BY RANDOM()
+            LIMIT ?
         '''
         exclude_ids = ','.join('?' * len(similar_rows)) if similar_rows else 'NULL'
         exclude_params = [r['id'] for r in similar_rows]
-        topic_rows = db.execute(topic_query.format(exclude_ids),
-            [module, row['topic'], row['id'], correct_answer] + exclude_params).fetchall()
-        similar_rows.extend(topic_rows)
+        remaining_needed = distractors_needed - len(similar_rows)
+        module_rows = db.execute(module_query.format(exclude_ids),
+            [module, row['id'], correct_answer] + exclude_params + [remaining_needed]).fetchall()
+        similar_rows.extend(module_rows)
 
     # 4. If still need more, get random ones from the same module
     if len(similar_rows) < distractors_needed:
