@@ -84,18 +84,18 @@
                     <div class="row mb-3">
                         <div class="col-md-4 mb-2">
                             <label for="topic" class="form-label">Topic <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control mini-input" id="topic" name="topic" maxlength="64" value="{{ '' if clear_fields else prev_topic if prev_topic is defined else '' }}" required>
+                            <input type="text" class="form-control mini-input" id="topic" name="topic" maxlength="64" value="{{ prev_topic if prev_topic is defined else '' }}" required>
                         </div>
                         <div class="col-md-4 mb-2">
                             <label for="subtopic" class="form-label">Subtopic <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control mini-input" id="subtopic" name="subtopic" maxlength="64" value="{{ '' if clear_fields else prev_subtopic if prev_subtopic is defined else '' }}" required>
+                            <input type="text" class="form-control mini-input" id="subtopic" name="subtopic" maxlength="64" value="{{ prev_subtopic if prev_subtopic is defined else '' }}" required>
                         </div>
                         <div class="col-md-4 mb-2">
                             <label for="tags" class="form-label d-flex justify-content-between align-items-center" style="white-space:nowrap;">
                                 <span>Tags <span class="text-danger">*</span></span>
                                 <span class="text-muted ms-2" style="font-size:0.95em;">(comma separated)</span>
                             </label>
-                            <input type="text" class="form-control mini-input" id="tags" name="tags" maxlength="128" placeholder="e.g. recursion, trees" value="{{ '' if clear_fields else prev_tags if prev_tags is defined else '' }}" required>
+                            <input type="text" class="form-control mini-input" id="tags" name="tags" maxlength="128" placeholder="e.g. recursion, trees" value="{{ prev_tags if prev_tags is defined else '' }}" required>
                         </div>
                     </div>
                     <button type="submit" class="btn btn-success w-100">Submit for Review</button>

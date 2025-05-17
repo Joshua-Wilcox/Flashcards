@@ -735,7 +735,9 @@ def submit_flashcard():
                 (user.id, user.username, int(datetime.utcnow().timestamp()), question, answer, module, topic, subtopic, tags))
             db.commit()
             flash('Flashcard submitted for review! Thank you.')
-            return render_template('submit_flashcard.html', modules=modules, selected_module=module, clear_fields=True)
+            # Only clear question and answer, keep topic, subtopic, tags
+            return render_template('submit_flashcard.html', modules=modules, selected_module=module, clear_fields=True,
+                                   prev_topic=topic, prev_subtopic=subtopic, prev_tags=tags)
         else:
             flash('Please fill in all required fields (question, answer, module, topic, subtopic, tags).')
             return render_template('submit_flashcard.html', modules=modules, selected_module=module, clear_fields=False,
