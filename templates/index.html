@@ -748,21 +748,6 @@
             getNewQuestion();
         });
 
-        // Prevent dropdown from closing when clicking on a dropdown item (subtopic)
-        $(document).on('click', '#subtopic-dropdown-menu .dropdown-item-checkbox', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-            const value = $(this).data('value');
-            const idx = currentSelections.subtopics.indexOf(value);
-            if (idx === -1) {
-                currentSelections.subtopics.push(value);
-            } else {
-                currentSelections.subtopics.splice(idx, 1);
-            }
-            updateDropdownLabel($('#subtopic-dropdown'), currentSelections.subtopics, "Select Subtopic");
-            updateFilters();
-            getNewQuestion();
-        });
 
         // Prevent dropdown from closing when clicking the dropdown menu itself
         $(document).on('mousedown', '.dropdown-menu-multiselect', function (e) {
