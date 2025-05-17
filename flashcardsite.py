@@ -228,11 +228,33 @@ def index():
 def get_filters():
     selected_module = request.json.get('module')
     selected_topics = request.json.get('topics', [])
-    
+
     db = get_db()
-    topics = db.execute('SELECT DISTINCT topic FROM questions WHERE module = ? OR ? IS NULL', (selected_module, selected_module)).fetchall()
-    subtopics = db.execute('SELECT DISTINCT subtopic FROM questions WHERE (module = ? OR ? IS NULL) AND (topic IN (%s) OR ? IS NULL)' % ','.join(['?']*len(selected_topics)), [selected_module, selected_module] + selected_topics + [None]).fetchall()
-    
+    # Get all topics for the selected module
+    topics = db.execute(
+        'SELECT DISTINCT topic FROM questions WHERE module = ? AND topic IS NOT NULL AND topic != ""',
+        (selected_module,)
+    ).fetchall()
+
+    # Get all subtopics for the selected module and selected topics (if any)
+    if selected_topics:
+        # Only subtopics for the selected module and selected topics
+        placeholders = ','.join('?' * len(selected_topics))
+        query = f'''
+            SELECT DISTINCT subtopic FROM questions
+            WHERE module = ?
+              AND topic IN ({placeholders})
+              AND subtopic IS NOT NULL AND subtopic != ""
+        '''
+        params = [selected_module] + selected_topics
+        subtopics = db.execute(query, params).fetchall()
+    else:
+        # All subtopics for the selected module
+        subtopics = db.execute(
+            'SELECT DISTINCT subtopic FROM questions WHERE module = ? AND subtopic IS NOT NULL AND subtopic != ""',
+            (selected_module,)
+        ).fetchall()
+
     return jsonify({
         'topics': sorted([row[0] for row in topics if row[0]]),
         'subtopics': sorted([row[0] for row in subtopics if row[0]])

@@ -156,20 +156,75 @@
 
         /* Custom styles for multi-select dropdowns */
         .dropdown-menu-multiselect {
-            max-height: 260px;
+            max-height: 320px;
             overflow-y: auto;
-            min-width: 220px;
+            min-width: 260px;
+            border-radius: 14px;
+            box-shadow: 0 4px 16px rgba(13,110,253,0.08), 0 1.5px 4px rgba(0,0,0,0.04);
+            border: 1px solid #e3eafc;
+            padding: 6px 0;
+            background: #f8faff;
+            width: 100%;
+            white-space: normal;
         }
-        .dropdown-item-checkbox {
+        .dropdown-item-checkbox, .dropdown-item-module {
             cursor: pointer;
             user-select: none;
+            display: block;
+            padding: 10px 18px 10px 18px;
+            border-radius: 8px;
+            margin: 2px 8px;
+            transition: background 0.13s, color 0.13s;
+            font-size: 1.05em;
+            font-weight: 500;
+            color: #222;
+            white-space: normal;
+            word-break: break-word;
+            overflow-wrap: break-word;
         }
-        .dropdown-item-checkbox input[type="checkbox"] {
-            margin-right: 8px;
+        .dropdown-item-checkbox.selected, .dropdown-item-module.selected {
+            background: #e7f1ff;
+            color: #0d6efd;
         }
-        .dropdown-toggle-multiselect {
+        .dropdown-item-checkbox:hover, .dropdown-item-checkbox:focus-within,
+        .dropdown-item-module:hover, .dropdown-item-module:focus-within {
+            background: #e7f1ff;
+            color: #0d6efd;
+        }
+        .dropdown-toggle-multiselect, .dropdown-toggle-module {
             text-align: left;
             white-space: normal;
+            border-radius: 14px !important;
+            border: 1.5px solid #b3c6e0 !important;
+            background: #f8faff !important;
+            color: #222 !important;
+            font-weight: 500;
+            font-size: 1.07em;
+            box-shadow: 0 1.5px 4px rgba(13,110,253,0.04);
+            transition: border 0.13s, box-shadow 0.13s;
+        }
+        .dropdown-toggle-multiselect:focus, .dropdown-toggle-multiselect.active, .dropdown-toggle-multiselect[aria-expanded="true"],
+        .dropdown-toggle-module:focus, .dropdown-toggle-module.active, .dropdown-toggle-module[aria-expanded="true"] {
+            border-color: #0d6efd !important;
+            box-shadow: 0 0 0 2px #b3d1ff66;
+            background: #e7f1ff !important;
+            color: #0d6efd !important;
+        }
+        .dropdown-toggle-multiselect[disabled], .dropdown-toggle-module[disabled] {
+            background: #f1f3f7 !important;
+            color: #b3b3b3 !important;
+            border-color: #e0e0e0 !important;
+            opacity: 0.7;
+        }
+        @media (max-width: 576px) {
+            .dropdown-menu-multiselect {
+                min-width: 98vw;
+                font-size: 1em;
+            }
+            .dropdown-item-checkbox, .dropdown-item-module {
+                font-size: 1em;
+                padding: 10px 10px 10px 12px;
+            }
         }
 
         .btn-report {
@@ -336,13 +391,19 @@
             </nav>
             <div class="row">
                 <div class="col-12 col-md-4 select-container">
-                    <label for="module-select">Module:</label>
-                    <select id="module-select" class="form-select" {% if not session.user_id %}disabled{% endif %}>
-                        <option value="">Select Module</option>
-                        {% for module in modules %}
-                        <option value="{{ module }}">{{ module }}</option>
-                        {% endfor %}
-                    </select>
+                    <label for="module-dropdown">Module:</label>
+                    <div class="dropdown w-100">
+                        <button class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-module w-100" type="button" id="module-dropdown" data-bs-toggle="dropdown" aria-expanded="false" {% if not session.user_id %}disabled{% endif %}>
+                            Select Module
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-multiselect w-100" aria-labelledby="module-dropdown" id="module-dropdown-menu">
+                            {% for module in modules %}
+                            <li>
+                                <div class="dropdown-item-module" data-value="{{ module }}">{{ module }}</div>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
                 </div>
                 <div class="col-12 col-md-4 select-container">
                     <label for="topic-dropdown">Topics:</label>
@@ -512,6 +573,21 @@
             }
         }
 
+        // Render topics/subtopics as text-only, multi-selectable
+        function renderDropdownMenu($menu, items, selectedItems) {
+            $menu.empty();
+            items.forEach(item => {
+                const isSelected = selectedItems.includes(item);
+                $menu.append(
+                    `<li>
+                        <div class="dropdown-item-checkbox${isSelected ? ' selected' : ''}" data-value="${item}" tabindex="0" role="option" aria-selected="${isSelected}">
+                            ${item}
+                        </div>
+                    </li>`
+                );
+            });
+        }
+
         function updateFilters() {
             const data = {
                 module: currentSelections.module,
@@ -525,39 +601,61 @@
                 contentType: 'application/json',
                 data: JSON.stringify(data),
                 success: function(response) {
-                    // Populate topics dropdown
+                    // Populate topics dropdown (text only, no checkboxes)
                     const $topicMenu = $('#topic-dropdown-menu');
-                    $topicMenu.empty();
-                    response.topics.forEach(topic => {
-                        const checked = currentSelections.topics.includes(topic) ? 'checked' : '';
-                        $topicMenu.append(
-                            `<li>
-                                <label class="dropdown-item dropdown-item-checkbox">
-                                    <input type="checkbox" value="${topic}" ${checked}>${topic}
-                                </label>
-                            </li>`
-                        );
-                    });
-                    $('#topic-dropdown').prop('disabled', !data.module);
+                    renderDropdownMenu($topicMenu, response.topics, currentSelections.topics);
+                    $('#topic-dropdown').prop('disabled', !data.module || response.topics.length === 0);
                     updateDropdownLabel($('#topic-dropdown'), currentSelections.topics, "Select Topic");
 
-                    // Populate subtopics dropdown
+                    // Populate subtopics dropdown (text only, no checkboxes)
                     const $subtopicMenu = $('#subtopic-dropdown-menu');
-                    $subtopicMenu.empty();
-                    response.subtopics.forEach(subtopic => {
-                        const checked = currentSelections.subtopics.includes(subtopic) ? 'checked' : '';
-                        $subtopicMenu.append(
-                            `<li>
-                                <label class="dropdown-item dropdown-item-checkbox">
-                                    <input type="checkbox" value="${subtopic}" ${checked}>${subtopic}
-                                </label>
-                            </li>`
-                        );
-                    });
-                    $('#subtopic-dropdown').prop('disabled', !response.topics.length || !currentSelections.topics.length);
+                    renderDropdownMenu($subtopicMenu, response.subtopics, currentSelections.subtopics);
+                    $('#subtopic-dropdown').prop('disabled', !data.module || response.subtopics.length === 0);
                     updateDropdownLabel($('#subtopic-dropdown'), currentSelections.subtopics, "Select Subtopic");
                 }
             });
+        }
+
+        // Make label click toggle selection and update, but do not close dropdown
+        $(document).on('click', '#topic-dropdown-menu .dropdown-item-checkbox', function(e) {
+            const value = $(this).data('value');
+            const idx = currentSelections.topics.indexOf(value);
+            if (idx === -1) {
+                currentSelections.topics.push(value);
+            } else {
+                currentSelections.topics.splice(idx, 1);
+            }
+            updateFilters();
+            getNewQuestion();
+        });
+
+        $(document).on('click', '#subtopic-dropdown-menu .dropdown-item-checkbox', function(e) {
+            const value = $(this).data('value');
+            const idx = currentSelections.subtopics.indexOf(value);
+            if (idx === -1) {
+                currentSelections.subtopics.push(value);
+            } else {
+                currentSelections.subtopics.splice(idx, 1);
+            }
+            updateDropdownLabel($('#subtopic-dropdown'), currentSelections.subtopics, "Select Subtopic");
+            updateFilters();
+            getNewQuestion();
+        });
+
+        // Prevent dropdown from closing when clicking inside the menu
+        $(document).on('click', '.dropdown-menu-multiselect', function(e) {
+            e.stopPropagation();
+        });
+
+        // Helper to update dropdown button label
+        function updateDropdownLabel($dropdownBtn, selected, defaultLabel) {
+            if (selected.length === 0) {
+                $dropdownBtn.text(defaultLabel);
+            } else if (selected.length === 1) {
+                $dropdownBtn.text(selected[0]);
+            } else {
+                $dropdownBtn.text(selected.length + " selected");
+            }
         }
 
         function getNewQuestion(specificQuestionId = null) {
@@ -846,10 +944,36 @@
             }
         });
 
-        $('#module-select').change(function() {
-            currentSelections.module = $(this).val();
+        // --- Module dropdown logic (single select, styled like topics) ---
+        function updateModuleDropdownLabel() {
+            const $btn = $('#module-dropdown');
+            if (!currentSelections.module) {
+                $btn.text('Select Module');
+            } else {
+                $btn.text(currentSelections.module);
+            }
+        }
+        function updateModuleDropdownSelection() {
+            $('#module-dropdown-menu .dropdown-item-module').each(function() {
+                const val = $(this).data('value');
+                if (val === currentSelections.module) {
+                    $(this).addClass('selected').attr('aria-selected', 'true');
+                } else {
+                    $(this).removeClass('selected').attr('aria-selected', 'false');
+                }
+            });
+        }
+        $(document).on('click', '#module-dropdown-menu .dropdown-item-module', function(e) {
+            const value = $(this).data('value');
+            if (currentSelections.module === value) {
+                currentSelections.module = '';
+            } else {
+                currentSelections.module = value;
+            }
             currentSelections.topics = [];
             currentSelections.subtopics = [];
+            updateModuleDropdownLabel();
+            updateModuleDropdownSelection();
             updateFilters();
 
             // Show/hide welcome and QA sections
@@ -862,45 +986,32 @@
                 $('#welcome-section').show();
             }
         });
-
-        // Handle topic dropdown checkbox selection
-        $(document).on('change', '#topic-dropdown-menu input[type="checkbox"]', function() {
-            const selected = [];
-            $('#topic-dropdown-menu input[type="checkbox"]:checked').each(function() {
-                selected.push($(this).val());
-            });
-            currentSelections.topics = selected;
-            currentSelections.subtopics = [];
-            updateFilters();
-            getNewQuestion();
+        // Prevent dropdown from closing on selection
+        $(document).on('mousedown', '#module-dropdown-menu .dropdown-item-module', function(e) {
+            e.preventDefault();
+        });
+        // Update label and selection on show
+        $('#module-dropdown').on('show.bs.dropdown', function() {
+            updateModuleDropdownLabel();
+            updateModuleDropdownSelection();
+        });
+        // Also update on page load
+        $(document).ready(function() {
+            updateModuleDropdownLabel();
+            updateModuleDropdownSelection();
         });
 
-        // Handle subtopic dropdown checkbox selection
-        $(document).on('change', '#subtopic-dropdown-menu input[type="checkbox"]', function() {
-            const selected = [];
-            $('#subtopic-dropdown-menu input[type="checkbox"]:checked').each(function() {
-                selected.push($(this).val());
-            });
-            currentSelections.subtopics = selected;
-            updateDropdownLabel($('#subtopic-dropdown'), selected, "Select Subtopic");
-            getNewQuestion();
-        });
+        // --- Remove old <select> module logic ---
+        // $('#module-select').change(function() { ... }); // REMOVE
 
-        // Update dropdown labels on show (in case of programmatic changes)
-        $('#topic-dropdown').on('show.bs.dropdown', function() {
-            updateDropdownLabel($(this), currentSelections.topics, "Select Topic");
-        });
-        $('#subtopic-dropdown').on('show.bs.dropdown', function() {
-            updateDropdownLabel($(this), currentSelections.subtopics, "Select Subtopic");
-        });
-
-        // Initialize selections from URL parameters if present
+        // Update filters and UI if module is set from URL
         $(document).ready(function() {
             const urlParams = new URLSearchParams(window.location.search);
             {% if session.user_id %}
             if (urlParams.has('module')) {
                 currentSelections.module = urlParams.get('module');
-                $('#module-select').val(currentSelections.module);
+                updateModuleDropdownLabel();
+                updateModuleDropdownSelection();
                 updateFilters();
                 $('#welcome-section').hide();
                 $('#qa-section').show();
