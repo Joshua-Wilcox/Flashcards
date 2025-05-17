@@ -473,7 +473,8 @@
                     <label for="topic-dropdown">Topics:</label>
                     <div class="dropdown w-100">
                         <button class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-multiselect w-100"
-                            type="button" id="topic-dropdown" data-bs-toggle="dropdown" aria-expanded="false" disabled>
+                            type="button" id="topic-dropdown" data-bs-toggle="dropdown" data-bs-auto-close="false"
+                            aria-expanded="false" disabled>
                             Select Topic
                         </button>
                         <ul class="dropdown-menu dropdown-menu-multiselect w-100" aria-labelledby="topic-dropdown"
@@ -486,8 +487,8 @@
                     <label for="subtopic-dropdown">Subtopics:</label>
                     <div class="dropdown w-100">
                         <button class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-multiselect w-100"
-                            type="button" id="subtopic-dropdown" data-bs-toggle="dropdown" aria-expanded="false"
-                            disabled>
+                            type="button" id="subtopic-dropdown" data-bs-toggle="dropdown" data-bs-auto-close="false"
+                            aria-expanded="false" disabled>
                             Select Subtopic
                         </button>
                         <ul class="dropdown-menu dropdown-menu-multiselect w-100" aria-labelledby="subtopic-dropdown"
@@ -708,8 +709,19 @@
             });
         }
 
+        // Prevent dropdown from closing when clicking inside the menu (topics/subtopics)
+        $(document).on('mousedown', '.dropdown-menu-multiselect', function (e) {
+            e.stopPropagation();
+        });
+
+        // Prevent dropdown from closing when clicking on a dropdown item (topics/subtopics)
+        $(document).on('mousedown', '#topic-dropdown-menu .dropdown-item-checkbox, #subtopic-dropdown-menu .dropdown-item-checkbox', function (e) {
+            e.stopPropagation();
+        });
+
         // Make label click toggle selection and update, but do not close dropdown
         $(document).on('click', '#topic-dropdown-menu .dropdown-item-checkbox', function (e) {
+            e.stopPropagation();
             const value = $(this).data('value');
             const idx = currentSelections.topics.indexOf(value);
             if (idx === -1) {
@@ -722,6 +734,7 @@
         });
 
         $(document).on('click', '#subtopic-dropdown-menu .dropdown-item-checkbox', function (e) {
+            e.stopPropagation();
             const value = $(this).data('value');
             const idx = currentSelections.subtopics.indexOf(value);
             if (idx === -1) {
@@ -734,8 +747,24 @@
             getNewQuestion();
         });
 
-        // Prevent dropdown from closing when clicking inside the menu
-        $(document).on('click', '.dropdown-menu-multiselect', function (e) {
+        // Prevent dropdown from closing when clicking on a dropdown item (subtopic)
+        $(document).on('click', '#subtopic-dropdown-menu .dropdown-item-checkbox', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const value = $(this).data('value');
+            const idx = currentSelections.subtopics.indexOf(value);
+            if (idx === -1) {
+                currentSelections.subtopics.push(value);
+            } else {
+                currentSelections.subtopics.splice(idx, 1);
+            }
+            updateDropdownLabel($('#subtopic-dropdown'), currentSelections.subtopics, "Select Subtopic");
+            updateFilters();
+            getNewQuestion();
+        });
+
+        // Prevent dropdown from closing when clicking the dropdown menu itself
+        $(document).on('mousedown', '.dropdown-menu-multiselect', function (e) {
             e.stopPropagation();
         });
 
@@ -1118,6 +1147,21 @@
             $('#welcome-section').show();
             {% endif %}
         });
+
+        // Add click handlers to close dropdowns when clicking outside
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('#topic-dropdown-menu').length && 
+                !$(e.target).closest('#topic-dropdown').length) {
+                $('#topic-dropdown').dropdown('hide');
+            }
+            if (!$(e.target).closest('#subtopic-dropdown-menu').length && 
+                !$(e.target).closest('#subtopic-dropdown').length) {
+                $('#subtopic-dropdown').dropdown('hide');
+            }
+        });
+
+        // Remove any existing click handlers that might interfere
+        $('.dropdown-menu-multiselect').off('mousedown');
     </script>
 </body>
 
