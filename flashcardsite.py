@@ -269,7 +269,7 @@ def get_question():
     module = data.get('module')
     topics = data.get('topics', [])
     subtopics = data.get('subtopics', [])
-    question_id = data.get('question_id')  # New parameter for specific question requests
+    question_id = data.get('question_id')  # For specific question requests
 
     db = get_db()
     query = '''SELECT * FROM questions WHERE module = ?'''
@@ -300,16 +300,72 @@ def get_question():
     correct_answer = row['answer']
     answers = [correct_answer]
     answer_ids = [row['id']]
-    # Get distractors for both new questions and specific questions
-    similar_rows = db.execute(
-        '''SELECT id, answer FROM questions 
-           WHERE module = ? AND answer != ? 
-           ORDER BY RANDOM() LIMIT 3''', 
-        [module, correct_answer]
-    ).fetchall()
-    for r in similar_rows:
+
+    # Get tags for the current question
+    current_tags = json.loads(row['tags']) if row['tags'] else []
+    
+    # Try to get distractors in order of relevance
+    distractors_needed = 3
+    similar_rows = []
+
+    # 1. First try: Same tags (if any)
+    if current_tags:
+        tag_conditions = ' OR '.join(['tags LIKE ?' for _ in current_tags])
+        tag_params = ['%' + tag + '%' for tag in current_tags]
+        tag_query = f'''
+            SELECT id, answer FROM questions 
+            WHERE module = ? AND id != ? AND ({tag_conditions})
+            AND answer != ? ORDER BY RANDOM()
+        '''
+        similar_rows = db.execute(tag_query, [module, row['id']] + tag_params + [correct_answer]).fetchall()
+
+    # 2. If we need more, try same subtopic
+    if len(similar_rows) < distractors_needed and row['subtopic']:
+        subtopic_query = '''
+            SELECT id, answer FROM questions 
+            WHERE module = ? AND subtopic = ? AND id != ? 
+            AND answer != ? AND id NOT IN ({})
+            ORDER BY RANDOM()
+        '''
+        exclude_ids = ','.join('?' * len(similar_rows)) if similar_rows else 'NULL'
+        exclude_params = [r['id'] for r in similar_rows]
+        subtopic_rows = db.execute(subtopic_query.format(exclude_ids),
+            [module, row['subtopic'], row['id'], correct_answer] + exclude_params).fetchall()
+        similar_rows.extend(subtopic_rows)
+
+    # 3. If still need more, try same topic
+    if len(similar_rows) < distractors_needed and row['topic']:
+        topic_query = '''
+            SELECT id, answer FROM questions 
+            WHERE module = ? AND topic = ? AND id != ? 
+            AND answer != ? AND id NOT IN ({})
+            ORDER BY RANDOM()
+        '''
+        exclude_ids = ','.join('?' * len(similar_rows)) if similar_rows else 'NULL'
+        exclude_params = [r['id'] for r in similar_rows]
+        topic_rows = db.execute(topic_query.format(exclude_ids),
+            [module, row['topic'], row['id'], correct_answer] + exclude_params).fetchall()
+        similar_rows.extend(topic_rows)
+
+    # 4. If still need more, get random ones from the same module
+    if len(similar_rows) < distractors_needed:
+        module_query = '''
+            SELECT id, answer FROM questions 
+            WHERE module = ? AND id != ? 
+            AND answer != ? AND id NOT IN ({})
+            ORDER BY RANDOM()
+        '''
+        exclude_ids = ','.join('?' * len(similar_rows)) if similar_rows else 'NULL'
+        exclude_params = [r['id'] for r in similar_rows]
+        module_rows = db.execute(module_query.format(exclude_ids),
+            [module, row['id'], correct_answer] + exclude_params).fetchall()
+        similar_rows.extend(module_rows)
+
+    # Take only the number of distractors needed
+    for r in similar_rows[:distractors_needed]:
         answers.append(r['answer'])
         answer_ids.append(r['id'])
+
     # Only shuffle for new questions, maintain order for edited ones
     if not question_id:
         combined = list(zip(answers, answer_ids))
@@ -317,11 +373,14 @@ def get_question():
         answers, answer_ids = zip(*combined)
         answers = list(answers)
         answer_ids = list(answer_ids)
+
     # Generate signed token for this question attempt
     token = generate_signed_token(row['id'], session['user_id'])
+    
     # Store a blacklist of used tokens in session to prevent re-use after correct answer
     if 'used_tokens' not in session:
         session['used_tokens'] = []
+
     response = {
         'question': row['question'],
         'answers': answers,
@@ -336,7 +395,6 @@ def get_question():
         'is_admin': is_user_admin(session.get('user_id')) if 'user_id' in session else False
     }
     return jsonify(response)
-
 @app.route('/check_answer', methods=['POST'])
 def check_answer():
     if 'user_id' not in session:
