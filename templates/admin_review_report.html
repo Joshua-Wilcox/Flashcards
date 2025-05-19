@@ -73,6 +73,13 @@
                         <h3>Answer</h3>
                         <textarea class="form-control" id="answer" name="answer" rows="2" required>{{ question_row['answer'] if question_row else "" }}</textarea>
                     </div>
+                    
+                    {% if question_row %}
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="delete_question" name="delete_question" value="1">
+                        <label class="form-check-label text-danger" for="delete_question">Delete this question from the database</label>
+                    </div>
+                    {% endif %}
                 </div>
                 
                 <!-- Distractor Questions Sections -->
@@ -89,6 +96,11 @@
                     <div class="mb-3">
                         <h3>Answer</h3>
                         <textarea class="form-control" name="distractor_answer_{{ i }}" rows="2">{{ distractors[i]['answer'] }}</textarea>
+                    </div>
+                    
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="delete_distractor_{{ i }}" name="delete_distractor_{{ i }}" value="1">
+                        <label class="form-check-label text-danger" for="delete_distractor_{{ i }}">Delete this distractor from the database</label>
                     </div>
                 </div>
                 {% endfor %}

@@ -935,24 +935,38 @@ def admin_review_report(report_id):
             # Main question update
             new_question = request.form.get('question', '').strip()
             new_answer = request.form.get('answer', '').strip()
+            delete_main = request.form.get('delete_question') == '1'
             
             if question_row:
-                db.execute('UPDATE questions SET question = ?, answer = ? WHERE id = ?', 
-                          (new_question, new_answer, question_row['id']))
+                # Check if the main question should be deleted
+                if delete_main:
+                    db.execute('DELETE FROM questions WHERE id = ?', (question_row['id'],))
+                    flash('Main question has been deleted.')
+                else:
+                    # Update the main question if not deleting
+                    db.execute('UPDATE questions SET question = ?, answer = ? WHERE id = ?', 
+                              (new_question, new_answer, question_row['id']))
             
             # Distractor updates
             for i in range(len(distractors)):
                 distractor_id = request.form.get(f'distractor_id_{i}', '')
-                distractor_question = request.form.get(f'distractor_question_{i}', '').strip()
-                distractor_answer = request.form.get(f'distractor_answer_{i}', '').strip()
+                delete_distractor = request.form.get(f'delete_distractor_{i}') == '1'
                 
                 if distractor_id:
-                    db.execute('UPDATE questions SET question = ?, answer = ? WHERE id = ?', 
-                              (distractor_question, distractor_answer, distractor_id))
+                    if delete_distractor:
+                        # Delete this distractor
+                        db.execute('DELETE FROM questions WHERE id = ?', (distractor_id,))
+                        flash(f'Distractor {i+1} has been deleted.')
+                    else:
+                        # Update this distractor
+                        distractor_question = request.form.get(f'distractor_question_{i}', '').strip()
+                        distractor_answer = request.form.get(f'distractor_answer_{i}', '').strip()
+                        db.execute('UPDATE questions SET question = ?, answer = ? WHERE id = ?', 
+                                  (distractor_question, distractor_answer, distractor_id))
             
             db.execute('DELETE FROM reported_questions WHERE id = ?', (report_id,))
             db.commit()
-            flash('Questions updated and report resolved.')
+            flash('Changes have been applied and report resolved.')
             return redirect(url_for('admin_review_flashcards'))
     
     return render_template('admin_review_report.html', report=report, question_row=question_row, distractors=distractors)
