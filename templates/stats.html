@@ -118,10 +118,10 @@
             <div class="mb-3">
                 <div class="d-flex flex-nowrap overflow-auto" id="module-pills-container" style="gap: 8px;">
                     {% for module in modules %}
-                    <button class="btn btn-outline-primary module-pill{% if stats.active_module == module %} active{% endif %}" 
+                    <button class="btn btn-outline-primary module-pill{% if stats.active_module == module.name %} active{% endif %}" 
                             style="border-radius: 999px; min-width: 120px; white-space: nowrap;"
-                            data-module="{{ module }}">
-                        {{ module }}
+                            data-module="{{ module.name }}">
+                        {{ module.name }}
                     </button>
                     {% endfor %}
                 </div>
