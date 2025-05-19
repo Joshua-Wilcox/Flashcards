@@ -9,6 +9,10 @@
         .complaint-box { background: #fff3cd; border: 1px solid #ffeeba; border-radius: 8px; padding: 12px; margin-bottom: 18px; }
         .welcome-title { font-size: 2.2rem; font-weight: 700; color: #0d6efd; }
         .welcome-desc { font-size: 1.1rem; color: #555; margin-top: 10px; }
+        .question-section { margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #eee; }
+        .question-section h2 { font-size: 1.5rem; margin-bottom: 15px; color: #0d6efd; }
+        .question-section h3 { font-size: 1.2rem; margin-bottom: 10px; color: #212529; }
+        .distractor-section { background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
         .navbar-nav .nav-link {
             border-radius: 999px !important;
             padding: 8px 22px !important;
@@ -49,19 +53,46 @@
                 <div class="welcome-title">Review Reported Question</div>
                 <div class="welcome-desc">See the complaint and edit the question/answer as needed.</div>
             </div>
-            <div class="mb-3">
-                <label class="form-label">Complaint:</label>
+            
+            <div class="question-section">
+                <h2>Complaint:</h2>
                 <div class="complaint-box">{{ report['message'] or "No message provided." }}</div>
             </div>
+            
             <form method="post" autocomplete="off">
-                <div class="mb-3">
-                    <label for="question" class="form-label">Question</label>
-                    <textarea class="form-control" id="question" name="question" rows="3" required>{{ question_row['question'] if question_row else report['question'] }}</textarea>
+                <!-- Main Question Section -->
+                <div class="question-section">
+                    <h2>Correct Answer</h2>
+                    
+                    <div class="mb-3">
+                        <h3>Question</h3>
+                        <textarea class="form-control" id="question" name="question" rows="3" required>{{ question_row['question'] if question_row else report['question'] }}</textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h3>Answer</h3>
+                        <textarea class="form-control" id="answer" name="answer" rows="2" required>{{ question_row['answer'] if question_row else "" }}</textarea>
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label for="answer" class="form-label">Answer</label>
-                    <textarea class="form-control" id="answer" name="answer" rows="2" required>{{ question_row['answer'] if question_row else "" }}</textarea>
+                
+                <!-- Distractor Questions Sections -->
+                {% for i in range(distractors|length) %}
+                <div class="question-section distractor-section">
+                    <h2>Distractor {{ i + 1 }}</h2>
+                    
+                    <div class="mb-3">
+                        <h3>Question</h3>
+                        <textarea class="form-control" name="distractor_question_{{ i }}" rows="3">{{ distractors[i]['question'] }}</textarea>
+                        <input type="hidden" name="distractor_id_{{ i }}" value="{{ distractors[i]['id'] }}">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h3>Answer</h3>
+                        <textarea class="form-control" name="distractor_answer_{{ i }}" rows="2">{{ distractors[i]['answer'] }}</textarea>
+                    </div>
                 </div>
+                {% endfor %}
+                
                 <div class="btn-group d-flex justify-content-between mt-4">
                     <button type="submit" name="action" value="update" class="btn btn-success w-50 me-2">Submit Changes</button>
                     <button type="submit" name="action" value="discard" class="btn btn-danger w-50 ms-2">Discard Report</button>

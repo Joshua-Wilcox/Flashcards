@@ -506,12 +506,28 @@ def report_question():
     user = discord.fetch_user()
     question = request.args.get('question', '')
     answer = request.args.get('answer', '')
+    distractor_ids = request.args.get('distractor_ids', '')
     db = get_db()
     question_id = None
     if question:
         row = db.execute('SELECT id FROM questions WHERE question = ?', (question,)).fetchone()
         if row:
             question_id = row['id']
+    
+    # Fetch distractor information if we have IDs
+    distractors = []
+    if distractor_ids:
+        distractor_id_list = distractor_ids.split(',')
+        for d_id in distractor_id_list:
+            if d_id and d_id != question_id:  # Skip the main question if it's in the list
+                d_row = db.execute('SELECT id, question, answer FROM questions WHERE id = ?', (d_id,)).fetchone()
+                if d_row:
+                    distractors.append({
+                        'id': d_row['id'],
+                        'question': d_row['question'],
+                        'answer': d_row['answer']
+                    })
+    
     if request.method == 'POST':
         message = request.form.get('message', '')
         question_text = request.form.get('question_text', '')
@@ -521,14 +537,22 @@ def report_question():
             row = db.execute('SELECT id FROM questions WHERE question = ?', (question_text,)).fetchone()
             if row:
                 qid = row['id']
+        
+        # Store distractors as JSON string
+        distractors_json = request.form.get('distractors_json', '[]')
+        
         db.execute(
-            'INSERT INTO reported_questions (user_id, username, question, question_id, message, timestamp) VALUES (?, ?, ?, ?, ?, ?)',
-            (user.id, user.username, f"Q: {question_text}\nA: {answer_text}", qid, message, int(datetime.utcnow().timestamp()))
+            'INSERT INTO reported_questions (user_id, username, question, question_id, message, timestamp, distractors) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            (user.id, user.username, f"Q: {question_text}\nA: {answer_text}", qid, message, int(datetime.utcnow().timestamp()), distractors_json)
         )
         db.commit()
         flash('Your report has been submitted!')
         return redirect(url_for('index'))
-    return render_template('report_question.html', question=question, answer=answer)
+    
+    # Convert distractors to JSON for the form
+    distractors_json = json.dumps(distractors)
+    
+    return render_template('report_question.html', question=question, answer=answer, distractors_json=distractors_json)
 
 @app.route('/edit_answer', methods=['POST'])
 def edit_answer():
@@ -883,30 +907,55 @@ def admin_review_report(report_id):
     if not report:
         flash('Report not found.')
         return redirect(url_for('admin_review_flashcards'))
+    
     # Try to get the original question row
     question_row = None
     if report['question_id']:
         question_row = db.execute('SELECT * FROM questions WHERE id = ?', (report['question_id'],)).fetchone()
+    
+    # Parse distractors from JSON
+    distractors = []
+    if report['distractors']:
+        try:
+            distractors = json.loads(report['distractors'])
+        except:
+            # Handle potential JSON parsing error
+            pass
+    
     # If POST, handle update or discard
     if request.method == 'POST':
         action = request.form.get('action')
-        new_question = request.form.get('question', '').strip()
-        new_answer = request.form.get('answer', '').strip()
+        
         if action == 'discard':
             db.execute('DELETE FROM reported_questions WHERE id = ?', (report_id,))
             db.commit()
             flash('Report discarded.')
             return redirect(url_for('admin_review_flashcards'))
         elif action == 'update':
-            if not question_row:
-                flash('Original question not found, cannot update.')
-                return redirect(url_for('admin_review_report', report_id=report_id))
-            db.execute('UPDATE questions SET question = ?, answer = ? WHERE id = ?', (new_question, new_answer, question_row['id']))
+            # Main question update
+            new_question = request.form.get('question', '').strip()
+            new_answer = request.form.get('answer', '').strip()
+            
+            if question_row:
+                db.execute('UPDATE questions SET question = ?, answer = ? WHERE id = ?', 
+                          (new_question, new_answer, question_row['id']))
+            
+            # Distractor updates
+            for i in range(len(distractors)):
+                distractor_id = request.form.get(f'distractor_id_{i}', '')
+                distractor_question = request.form.get(f'distractor_question_{i}', '').strip()
+                distractor_answer = request.form.get(f'distractor_answer_{i}', '').strip()
+                
+                if distractor_id:
+                    db.execute('UPDATE questions SET question = ?, answer = ? WHERE id = ?', 
+                              (distractor_question, distractor_answer, distractor_id))
+            
             db.execute('DELETE FROM reported_questions WHERE id = ?', (report_id,))
             db.commit()
-            flash('Question updated and report resolved.')
+            flash('Questions updated and report resolved.')
             return redirect(url_for('admin_review_flashcards'))
-    return render_template('admin_review_report.html', report=report, question_row=question_row)
+    
+    return render_template('admin_review_report.html', report=report, question_row=question_row, distractors=distractors)
 
 @app.route('/admin_review_pdf_request/<int:request_id>', methods=['GET', 'POST'])
 def admin_review_pdf_request(request_id):

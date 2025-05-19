@@ -1047,8 +1047,21 @@
             });
             // If not found, just use the first answer button's text
             if (!answerText) answerText = $('.answer-btn').first().text();
+            
+            // Get distractor IDs from answer buttons' data attributes
+            let distractorIds = [];
+            $('.answer-btn:visible').each(function() {
+                const questionId = $(this).data('question-id');
+                if (questionId) {
+                    distractorIds.push(questionId);
+                }
+            });
+            
             if (questionText) {
-                window.location.href = '/report_question?question=' + encodeURIComponent(questionText) + '&answer=' + encodeURIComponent(answerText);
+                window.location.href = '/report_question?question=' + encodeURIComponent(questionText) + 
+                                      '&answer=' + encodeURIComponent(answerText) + 
+                                      '&distractor_ids=' + encodeURIComponent(distractorIds.join(','));
+                console.log("Redirecting to report page with distractor IDs:", distractorIds.join(','));
             }
         });
 
