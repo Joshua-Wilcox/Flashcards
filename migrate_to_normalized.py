@@ -1,7 +1,5 @@
 import sqlite3
 import json
-import hashlib
-import os
 
 OLD_DB = 'flashcards.db'
 NEW_DB = 'flashcards_normalized.db'
@@ -14,12 +12,22 @@ def get_or_create_id(cursor, table, name):
     cursor.execute(f"INSERT INTO {table} (name) VALUES (?)", (name,))
     return cursor.lastrowid
 
-def get_or_create_pdf(cursor, path):
+def get_or_create_pdf(cursor, path, module_id=None, topic_id=None, subtopic_id=None):
     cursor.execute("SELECT id FROM pdfs WHERE path = ?", (path,))
     row = cursor.fetchone()
     if row:
+        # If PDF exists but IDs are provided now, update it if they were null
+        if module_id is not None or topic_id is not None or subtopic_id is not None:
+            cursor.execute("""
+                UPDATE pdfs SET 
+                module_id = COALESCE(module_id, ?),
+                topic_id = COALESCE(topic_id, ?),
+                subtopic_id = COALESCE(subtopic_id, ?)
+                WHERE id = ?
+            """, (module_id, topic_id, subtopic_id, row[0]))
         return row[0]
-    cursor.execute("INSERT INTO pdfs (path) VALUES (?)", (path,))
+    cursor.execute("INSERT INTO pdfs (path, module_id, topic_id, subtopic_id) VALUES (?, ?, ?, ?)", 
+                  (path, module_id, topic_id, subtopic_id))
     return cursor.lastrowid
 
 def get_or_create_module(cursor, name):
@@ -54,18 +62,20 @@ def migrate_questions_and_related(old_db, new_db):
             new_cursor.execute("INSERT OR IGNORE INTO question_tags (question_id, tag_id) VALUES (?, ?)", (qid, tag_id))
 
         # Topic
+        topic_id = None
         if topic:
             topic_id = get_or_create_id(new_cursor, 'topics', topic)
             new_cursor.execute("INSERT OR IGNORE INTO question_topics (question_id, topic_id) VALUES (?, ?)", (qid, topic_id))
 
         # Subtopic
+        subtopic_id = None
         if subtopic:
             subtopic_id = get_or_create_id(new_cursor, 'subtopics', subtopic)
             new_cursor.execute("INSERT OR IGNORE INTO question_subtopics (question_id, subtopic_id) VALUES (?, ?)", (qid, subtopic_id))
 
         # PDFs and pdf_tags
         for pdf_path in pdfs:
-            pdf_id = get_or_create_pdf(new_cursor, pdf_path)
+            pdf_id = get_or_create_pdf(new_cursor, pdf_path, module_id, topic_id, subtopic_id)
             for tag_id in tag_ids:
                 cur = new_cursor.execute("SELECT count FROM pdf_tags WHERE pdf_id = ? AND tag_id = ?", (pdf_id, tag_id))
                 row2 = cur.fetchone()
@@ -125,9 +135,9 @@ def migrate_module_stats(old_db, new_db):
                     continue
                 module_id = module_row[0]
                 
-                # Insert normalized stats
+                # Insert or replace normalized stats
                 new_cursor.execute('''
-                    INSERT INTO module_stats 
+                    INSERT OR REPLACE INTO module_stats 
                     (user_id, module_id, number_answered, number_correct, last_answered_time, current_streak)
                     VALUES (?, ?, ?, ?, ?, ?)
                 ''', (
@@ -165,7 +175,7 @@ def main():
     new_db.row_factory = sqlite3.Row
 
     # First create the new schema
-    with open('schema.sql', 'r') as f:
+    with open('schema.sql', 'r', encoding='utf-8') as f:
         new_db.executescript(f.read())
     new_db.commit()
 

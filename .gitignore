@@ -3,3 +3,4 @@
 flashcards.db
 .env
 whitelist.json
+*.db

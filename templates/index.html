@@ -424,6 +424,46 @@
 
         /* Remove wiggle animation */
         /* .wiggle { animation: wiggle 0.7s; } */
+
+        /* Style for PDF dropdown items */
+        #pdfs-dropdown-list .dropdown-item {
+            white-space: normal;
+            padding: 8px 16px;
+            position: relative;
+        }
+
+        #pdfs-dropdown-list .dropdown-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        #pdfs-dropdown-list .text-muted {
+            font-size: 0.85em;
+        }
+        
+        .match-pill {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: 600;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+        
+        .match-high {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .match-medium {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .match-low {
+            background-color: #f8f9fa;
+            color: #6c757d;
+        }
     </style>
 </head>
 
@@ -527,7 +567,7 @@
                     <div class="d-flex flex-wrap gap-2 mt-2 align-items-center">
                         <div class="dropdown" id="pdfs-dropdown-container" style="display:none;">
                             <button class="btn btn-secondary dropdown-toggle" type="button" id="pdfsDropdown"
-                                data-bs-toggle="dropdown" aria-expanded="false">
+                                data-bs-toggle="dropdown" aria-expanded="false" data-question-id="">
                                 Relevant Lecture Notes
                             </button>
                             <ul class="dropdown-menu" aria-labelledby="pdfsDropdown" id="pdfs-dropdown-list"></ul>
@@ -876,7 +916,7 @@
 
                     $('#new-question-btn').hide();
 
-                    // Update PDFs and tags last since they're less critical
+                    // Update PDFs and tags
                     $('#tags-container').empty();
                     response.tags.forEach(tag => {
                         $('#tags-container').append(`<span class="tag">${tag}</span>`);
@@ -884,17 +924,61 @@
 
                     $('#pdfs-dropdown-list').empty();
                     if (response.pdfs && response.pdfs.length > 0) {
+                        // Store the current question ID on the dropdown button
+                        $('#pdfsDropdown').attr('data-question-id', response.question_id);
+                        
+                        // Update button text to show PDF count
+                        $('#pdfsDropdown').text(`Relevant Lecture Notes (${response.pdfs.length})`);
+                        
+                        // Add PDFs to dropdown with match percentages
                         response.pdfs.forEach(pdf => {
                             let name = pdf.name || pdf;
-                            let url = pdf.url || pdf;
+                            let url = pdf.path || pdf;
                             if (!/^https?:\/\//.test(url)) {
                                 url = '/pdf/' + url.replace(/^\/*/, '');
                             }
-                            $('#pdfs-dropdown-list').append(`<li><a class="dropdown-item" href="${url}" target="_blank">${name}</a></li>`);
+                            
+                            // Create display text with metadata and match percentage
+                            let displayText = name;
+                            let metadataText = '';
+                            
+                            if (pdf.module) {
+                                metadataText += pdf.module;
+                                if (pdf.topic) {
+                                    metadataText += ` > ${pdf.topic}`;
+                                    if (pdf.subtopic) {
+                                        metadataText += ` > ${pdf.subtopic}`;
+                                    }
+                                }
+                            }
+                            
+                            // Determine match class based on percentage
+                            let matchClass = '';
+                            if (pdf.match_percent >= 80) {
+                                matchClass = 'match-high';
+                            } else if (pdf.match_percent >= 50) {
+                                matchClass = 'match-medium';
+                            } else {
+                                matchClass = 'match-low';
+                            }
+                            
+                            // Create match percentage pill
+                            let matchPill = `<span class="match-pill ${matchClass}">${pdf.match_percent}% match</span>`;
+                            
+                            if (metadataText) {
+                                displayText = `${name} ${matchPill}<br><small class="text-muted">${metadataText}</small>`;
+                            } else {
+                                displayText = `${name} ${matchPill}`;
+                            }
+                            
+                            $('#pdfs-dropdown-list').append(`<li><a class="dropdown-item" href="${url}" target="_blank">${displayText}</a></li>`);
                         });
                         $('#pdfs-dropdown-container').show();
                     } else {
-                        $('#pdfs-dropdown-container').hide();
+                        // No PDFs found initially - still show the dropdown button for on-demand loading
+                        $('#pdfsDropdown').attr('data-question-id', response.question_id);
+                        $('#pdfsDropdown').text('Find Lecture Notes');
+                        $('#pdfs-dropdown-container').show();
                     }
 
                     // --- Delay showing answers if needed ---

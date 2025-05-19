@@ -70,7 +70,13 @@ CREATE TABLE IF NOT EXISTS question_subtopics (
 
 CREATE TABLE IF NOT EXISTS pdfs (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    path TEXT UNIQUE NOT NULL
+    path TEXT UNIQUE NOT NULL,
+    module_id INTEGER,
+    topic_id INTEGER,
+    subtopic_id INTEGER,
+    FOREIGN KEY (module_id) REFERENCES modules(id) ON DELETE SET NULL,
+    FOREIGN KEY (topic_id) REFERENCES topics(id) ON DELETE SET NULL,
+    FOREIGN KEY (subtopic_id) REFERENCES subtopics(id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS pdf_tags (

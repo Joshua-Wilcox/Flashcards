@@ -102,9 +102,11 @@ def get_pdfs_for_tags(tag_names):
     db = get_db()
     if not tag_names:
         return []
+    
+    # Get PDFs by tags
     placeholders = ','.join('?' * len(tag_names))
-    rows = db.execute(f'''
-        SELECT p.path, SUM(pt.count) as tag_count
+    tag_rows = db.execute(f'''
+        SELECT p.path, SUM(pt.count) as tag_count, p.module_id, p.topic_id, p.subtopic_id
         FROM pdfs p
         JOIN pdf_tags pt ON p.id = pt.pdf_id
         JOIN tags t ON pt.tag_id = t.id
@@ -112,7 +114,33 @@ def get_pdfs_for_tags(tag_names):
         GROUP BY p.id
         ORDER BY tag_count DESC
     ''', tag_names).fetchall()
-    return [{'path': row['path'], 'name': os.path.basename(row['path'])} for row in rows]
+    
+    # Get module, topic, and subtopic names to enhance the results
+    results = []
+    for row in tag_rows:
+        pdf_info = {'path': row['path'], 'name': os.path.basename(row['path'])}
+        
+        # Add module name if available
+        if row['module_id']:
+            module_row = db.execute('SELECT name FROM modules WHERE id = ?', (row['module_id'],)).fetchone()
+            if module_row:
+                pdf_info['module'] = module_row['name']
+        
+        # Add topic name if available
+        if row['topic_id']:
+            topic_row = db.execute('SELECT name FROM topics WHERE id = ?', (row['topic_id'],)).fetchone()
+            if topic_row:
+                pdf_info['topic'] = topic_row['name']
+        
+        # Add subtopic name if available
+        if row['subtopic_id']:
+            subtopic_row = db.execute('SELECT name FROM subtopics WHERE id = ?', (row['subtopic_id'],)).fetchone()
+            if subtopic_row:
+                pdf_info['subtopic'] = subtopic_row['name']
+        
+        results.append(pdf_info)
+        
+    return results
 
 def add_tags_and_link_question(db, question_id, tag_names):
     for tag in tag_names:
@@ -328,6 +356,175 @@ def get_filters():
         'subtopics': sorted([row[0] for row in subtopics if row[0]])
     })
 
+def get_pdfs_for_question(question_id, max_pdfs=3):
+    """
+    Find relevant PDFs for a question, prioritizing by:
+    1. Module + Topic + Subtopic match (95%)
+    2. Module + Topic match (80%)
+    3. Module match (60%)
+    4. Tag matches (20-50% based on tag overlap)
+    Returns a maximum of max_pdfs PDFs with match percentages.
+    """
+    db = get_db()
+    question = db.execute('SELECT module_id FROM questions WHERE id = ?', (question_id,)).fetchone()
+    if not question:
+        return []
+    
+    module_id = question['module_id']
+    
+    # Get topic and subtopic for the question
+    topic_rows = db.execute('''
+        SELECT topic_id FROM question_topics WHERE question_id = ?
+    ''', (question_id,)).fetchall()
+    topic_ids = [row['topic_id'] for row in topic_rows]
+    
+    subtopic_rows = db.execute('''
+        SELECT subtopic_id FROM question_subtopics WHERE question_id = ?
+    ''', (question_id,)).fetchall()
+    subtopic_ids = [row['subtopic_id'] for row in subtopic_rows]
+    
+    results = []
+    
+    # Priority 1: Module + Topic + Subtopic match (95% match)
+    if topic_ids and subtopic_ids:
+        for topic_id in topic_ids:
+            for subtopic_id in subtopic_ids:
+                pdfs = db.execute('''
+                    SELECT p.id, p.path, p.module_id, p.topic_id, p.subtopic_id, 
+                           m.name as module_name, t.name as topic_name, s.name as subtopic_name
+                    FROM pdfs p
+                    LEFT JOIN modules m ON p.module_id = m.id
+                    LEFT JOIN topics t ON p.topic_id = t.id
+                    LEFT JOIN subtopics s ON p.subtopic_id = s.id
+                    WHERE p.module_id = ? AND p.topic_id = ? AND p.subtopic_id = ?
+                    LIMIT ?
+                ''', (module_id, topic_id, subtopic_id, max_pdfs)).fetchall()
+                
+                for pdf in pdfs:
+                    pdf_info = {
+                        'path': pdf['path'],
+                        'name': os.path.basename(pdf['path']),
+                        'module': pdf['module_name'],
+                        'topic': pdf['topic_name'],
+                        'subtopic': pdf['subtopic_name'],
+                        'match_percent': 95  # Exact module, topic, subtopic match
+                    }
+                    if pdf_info not in results:
+                        results.append(pdf_info)
+                        if len(results) >= max_pdfs:
+                            return sorted(results, key=lambda x: x.get('match_percent', 0), reverse=True)
+    
+    # Priority 2: Module + Topic match (80% match)
+    if topic_ids and len(results) < max_pdfs:
+        for topic_id in topic_ids:
+            pdfs = db.execute('''
+                SELECT p.id, p.path, p.module_id, p.topic_id, p.subtopic_id,
+                       m.name as module_name, t.name as topic_name, s.name as subtopic_name
+                FROM pdfs p
+                LEFT JOIN modules m ON p.module_id = m.id
+                LEFT JOIN topics t ON p.topic_id = t.id
+                LEFT JOIN subtopics s ON p.subtopic_id = s.id
+                WHERE p.module_id = ? AND p.topic_id = ? AND p.subtopic_id IS NULL
+                LIMIT ?
+            ''', (module_id, topic_id, max_pdfs - len(results))).fetchall()
+            
+            for pdf in pdfs:
+                pdf_info = {
+                    'path': pdf['path'],
+                    'name': os.path.basename(pdf['path']),
+                    'module': pdf['module_name'],
+                    'topic': pdf['topic_name'],
+                    'subtopic': pdf['subtopic_name'],
+                    'match_percent': 80  # Module and topic match
+                }
+                if not any(r['path'] == pdf_info['path'] for r in results):
+                    results.append(pdf_info)
+                    if len(results) >= max_pdfs:
+                        return sorted(results, key=lambda x: x.get('match_percent', 0), reverse=True)
+    
+    # Priority 3: Module match (60% match)
+    if len(results) < max_pdfs:
+        pdfs = db.execute('''
+            SELECT p.id, p.path, p.module_id, p.topic_id, p.subtopic_id,
+                   m.name as module_name, t.name as topic_name, s.name as subtopic_name
+            FROM pdfs p
+            LEFT JOIN modules m ON p.module_id = m.id
+            LEFT JOIN topics t ON p.topic_id = t.id
+            LEFT JOIN subtopics s ON p.subtopic_id = s.id
+            WHERE p.module_id = ? AND p.topic_id IS NULL
+            LIMIT ?
+        ''', (module_id, max_pdfs - len(results))).fetchall()
+        
+        for pdf in pdfs:
+            pdf_info = {
+                'path': pdf['path'],
+                'name': os.path.basename(pdf['path']),
+                'module': pdf['module_name'],
+                'topic': pdf['topic_name'],
+                'subtopic': pdf['subtopic_name'],
+                'match_percent': 60  # Only module matches
+            }
+            if not any(r['path'] == pdf_info['path'] for r in results):
+                results.append(pdf_info)
+                if len(results) >= max_pdfs:
+                    return sorted(results, key=lambda x: x.get('match_percent', 0), reverse=True)
+    
+    # Priority 4: Tag matches (20-50% match based on tag overlap)
+    if len(results) < max_pdfs:
+        tag_names = get_tags_for_question(question_id)
+        
+        if tag_names:
+            # Get all PDFs with tag matches and their tag counts
+            placeholders = ','.join('?' * len(tag_names))
+            tag_pdfs = db.execute(f'''
+                SELECT p.id, p.path, p.module_id, p.topic_id, p.subtopic_id,
+                       m.name as module_name, t.name as topic_name, s.name as subtopic_name,
+                       COUNT(pt.tag_id) as matching_tags,
+                       (SELECT COUNT(*) FROM pdf_tags WHERE pdf_id = p.id) as total_pdf_tags
+                FROM pdfs p
+                JOIN pdf_tags pt ON p.id = pt.pdf_id
+                JOIN tags tag ON pt.tag_id = tag.id
+                LEFT JOIN modules m ON p.module_id = m.id
+                LEFT JOIN topics t ON p.topic_id = t.id
+                LEFT JOIN subtopics s ON p.subtopic_id = s.id
+                WHERE tag.name IN ({placeholders})
+                GROUP BY p.id
+                ORDER BY matching_tags DESC
+                LIMIT ?
+            ''', tag_names + [max_pdfs - len(results)]).fetchall()
+            
+            # Get total number of question tags for calculating match percentage
+            total_question_tags = len(tag_names)
+            
+            for pdf in tag_pdfs:
+                # Calculate tag match percentage: 20% base + up to 30% based on tag overlap
+                matching_tags = pdf['matching_tags']
+                total_pdf_tags = max(pdf['total_pdf_tags'], 1)  # Avoid division by zero
+                
+                # Calculate tag overlap ratio (matching tags / total tags across both)
+                tag_overlap = matching_tags / (total_question_tags + total_pdf_tags - matching_tags)
+                
+                # Calculate match percentage: 20% base + up to 30% based on tag overlap
+                match_percent = 20 + min(30, int(30 * tag_overlap))
+                
+                pdf_info = {
+                    'path': pdf['path'],
+                    'name': os.path.basename(pdf['path']),
+                    'module': pdf['module_name'],
+                    'topic': pdf['topic_name'],
+                    'subtopic': pdf['subtopic_name'],
+                    'match_percent': match_percent,  # Tag-based match
+                    'matching_tags': matching_tags
+                }
+                
+                if not any(r['path'] == pdf_info['path'] for r in results):
+                    results.append(pdf_info)
+                    if len(results) >= max_pdfs:
+                        break
+    
+    # Sort by match percentage (highest first)
+    return sorted(results, key=lambda x: x.get('match_percent', 0), reverse=True)
+
 @app.route('/get_question', methods=['POST'])
 def get_question():
     if 'user_id' not in session:
@@ -392,7 +589,10 @@ def get_question():
     row = rows[0] if question_id else random.choice(rows)
     qid = row['id']
     tags = get_tags_for_question(qid)
-    pdfs = get_pdfs_for_tags(tags)
+    
+    # Get initial PDFs for the question (max 3)
+    pdfs = get_pdfs_for_question(qid, max_pdfs=3)
+    
     topics_list = get_topics_for_question(qid)
     subtopics_list = get_subtopics_for_question(qid)
     module_display = get_module_name_by_id(db, row['module_id'])
@@ -430,6 +630,23 @@ def get_question():
         'is_admin': is_user_admin(session.get('user_id')) if 'user_id' in session else False
     }
     return jsonify(response)
+
+# Add a new route for on-demand PDF loading
+@app.route('/load_pdfs_by_tags', methods=['POST'])
+def load_pdfs_by_tags():
+    if 'user_id' not in session:
+        return jsonify({'error': 'You must be logged in'}), 401
+    
+    data = request.get_json()
+    question_id = data.get('question_id')
+    
+    if not question_id:
+        return jsonify({'error': 'Missing question ID'}), 400
+    
+    # Get PDFs for the question (max 3)
+    pdfs = get_pdfs_for_question(question_id, max_pdfs=3)
+    
+    return jsonify({'pdfs': pdfs})
 
 @app.route('/submit_flashcard', methods=['GET', 'POST'])
 def submit_flashcard():
