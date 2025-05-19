@@ -385,7 +385,7 @@ def get_pdfs_for_question(question_id, max_pdfs=3):
     
     results = []
     
-    # Priority 1: Module + Topic + Subtopic match (95% match)
+    # Priority 1: Module + Topic + Subtopic match (100% match)
     if topic_ids and subtopic_ids:
         for topic_id in topic_ids:
             for subtopic_id in subtopic_ids:
@@ -407,7 +407,7 @@ def get_pdfs_for_question(question_id, max_pdfs=3):
                         'module': pdf['module_name'],
                         'topic': pdf['topic_name'],
                         'subtopic': pdf['subtopic_name'],
-                        'match_percent': 95  # Exact module, topic, subtopic match
+                        'match_percent': 100  # Exact module, topic, subtopic match
                     }
                     if pdf_info not in results:
                         results.append(pdf_info)
@@ -442,7 +442,7 @@ def get_pdfs_for_question(question_id, max_pdfs=3):
                     if len(results) >= max_pdfs:
                         return sorted(results, key=lambda x: x.get('match_percent', 0), reverse=True)
     
-    # Priority 3: Module match (60% match)
+    # Priority 3: Module match (70% match)
     if len(results) < max_pdfs:
         pdfs = db.execute('''
             SELECT p.id, p.path, p.module_id, p.topic_id, p.subtopic_id,
@@ -462,7 +462,7 @@ def get_pdfs_for_question(question_id, max_pdfs=3):
                 'module': pdf['module_name'],
                 'topic': pdf['topic_name'],
                 'subtopic': pdf['subtopic_name'],
-                'match_percent': 60  # Only module matches
+                'match_percent': 70  # Only module matches
             }
             if not any(r['path'] == pdf_info['path'] for r in results):
                 results.append(pdf_info)
@@ -497,15 +497,15 @@ def get_pdfs_for_question(question_id, max_pdfs=3):
             total_question_tags = len(tag_names)
             
             for pdf in tag_pdfs:
-                # Calculate tag match percentage: 20% base + up to 30% based on tag overlap
+                # Calculate tag match percentage: 40% base + up to 30% based on tag overlap
                 matching_tags = pdf['matching_tags']
                 total_pdf_tags = max(pdf['total_pdf_tags'], 1)  # Avoid division by zero
                 
                 # Calculate tag overlap ratio (matching tags / total tags across both)
                 tag_overlap = matching_tags / (total_question_tags + total_pdf_tags - matching_tags)
                 
-                # Calculate match percentage: 20% base + up to 30% based on tag overlap
-                match_percent = 20 + min(30, int(30 * tag_overlap))
+                # Calculate match percentage: 40% base + up to 30% based on tag overlap
+                match_percent = 40 + min(30, int(60 * tag_overlap))
                 
                 pdf_info = {
                     'path': pdf['path'],
