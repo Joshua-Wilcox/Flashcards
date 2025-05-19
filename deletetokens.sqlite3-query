@@ -1,0 +1,4 @@
+-- database: ./flashcards.db
+
+DELETE FROM used_tokens
+WHERE used_at < strftime('%s','now') - 172800;

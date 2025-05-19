@@ -374,12 +374,11 @@ def get_question():
         answer_ids.append(r['id'])
 
     # Only shuffle for new questions, maintain order for edited ones
-    if not question_id:
-        combined = list(zip(answers, answer_ids))
-        random.shuffle(combined)
-        answers, answer_ids = zip(*combined)
-        answers = list(answers)
-        answer_ids = list(answer_ids)
+    combined = list(zip(answers, answer_ids))
+    random.shuffle(combined)
+    answers, answer_ids = zip(*combined)
+    answers = list(answers)
+    answer_ids = list(answer_ids)
 
     # Generate signed token for this question attempt
     token = generate_signed_token(row['id'], session['user_id'])
@@ -906,8 +905,9 @@ def verify_signed_token(token, user_id):
         expected_sig = hmac.new(SECRET_TOKEN_KEY.encode(), payload.encode(), hashlib.sha256).hexdigest()
         if not hmac.compare_digest(signature, expected_sig):
             return None, False
-        if int(time.time()) - int(timestamp) > TOKEN_EXPIRY_SECONDS:
-            return None, False
+        # If you care about expiry
+        # if int(time.time()) - int(timestamp) > TOKEN_EXPIRY_SECONDS:
+        #     return None, False
         return question_id, True
     except Exception:
         return None, False
