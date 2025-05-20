@@ -231,12 +231,6 @@ def init_db():
         except sqlite3.OperationalError:
             pass  # Column already exists
         db.commit()
-        # Add module_stats column if missing
-        try:
-            db.execute('ALTER TABLE user_stats ADD COLUMN module_stats TEXT')
-        except sqlite3.OperationalError:
-            pass  # Column already exists
-        db.commit()
 
 def is_user_whitelisted(user_id, user_guilds):
     with open('whitelist.json', 'r') as f:
@@ -735,28 +729,6 @@ def admin_review_flashcard(submission_id):
                 user_id, module_id
             ))
             
-            # Also update module_stats in the JSON field for backward compatibility
-            stats_row = db.execute('SELECT module_stats FROM user_stats WHERE user_id = ?', (user_id,)).fetchone()
-            if stats_row and stats_row['module_stats']:
-                try:
-                    module_stats = json.loads(stats_row['module_stats'])
-                    if str(module_id) not in module_stats:
-                        module_stats[str(module_id)] = {
-                            "last_answered_time": None,
-                            "number_answered": 0,
-                            "number_correct": 0,
-                            "current_streak": 0,
-                            "approved_cards": 0
-                        }
-                    if "approved_cards" not in module_stats[str(module_id)]:
-                        module_stats[str(module_id)]["approved_cards"] = 0
-                    module_stats[str(module_id)]["approved_cards"] += 1
-                    db.execute('UPDATE user_stats SET module_stats = ? WHERE user_id = ?', 
-                              (json.dumps(module_stats), user_id))
-                except (ValueError, KeyError):
-                    # If there's an error with the JSON, we've already updated the normalized tables
-                    pass
-            
             db.execute('DELETE FROM submitted_flashcards WHERE id = ?', (submission_id,))
             db.commit()
             flash('Flashcard approved and added to the database.')
@@ -870,55 +842,23 @@ def check_answer():
     is_correct = submitted_answer == correct_answer
 
     # Always increment total_answers
-    stats = db.execute('SELECT correct_answers, total_answers, current_streak, module_stats FROM user_stats WHERE user_id = ?', (user_id,)).fetchone()
+    stats = db.execute('SELECT correct_answers, total_answers, current_streak FROM user_stats WHERE user_id = ?', (user_id,)).fetchone()
     if stats:
         correct = stats['correct_answers'] or 0
         total = stats['total_answers'] or 0
         streak = stats['current_streak'] if 'current_streak' in stats.keys() else 0
-        module_stats = json.loads(stats['module_stats']) if stats['module_stats'] else {}
     else:
         correct = 0
         total = 0
         streak = 0
-        module_stats = {}
+    
     total += 1
     # Use Europe/London timezone for last_answer_time
     london_tz = pytz.timezone('Europe/London')
     now_london = datetime.now(london_tz)
     last_answer_time = int(now_london.timestamp())
-    # --- Update per-module stats ---
-    if module_id not in module_stats:
-        module_stats[module_id] = {
-            "last_answered_time": None,
-            "number_answered": 0,
-            "number_correct": 0,
-            "current_streak": 0
-        }
-    # Ensure current_streak key exists for all modules
-    if "current_streak" not in module_stats[module_id]:
-        module_stats[module_id]["current_streak"] = 0
-    module_stats[module_id]["last_answered_time"] = last_answer_time
-    module_stats[module_id]["number_answered"] = module_stats[module_id].get("number_answered", 0) + 1
-    if is_correct:
-        correct += 1
-        streak += 1
-        module_stats[module_id]["number_correct"] = module_stats[module_id].get("number_correct", 0) + 1
-        module_stats[module_id]["current_streak"] = module_stats[module_id].get("current_streak", 0) + 1
-        db.execute('INSERT OR IGNORE INTO used_tokens (user_id, token, used_at) VALUES (?, ?, ?)', (user_id, token, last_answer_time))
-    else:
-        streak = 0
-        module_stats[module_id]["current_streak"] = 0
-    # Update user stats
-    db.execute('''UPDATE user_stats 
-                  SET correct_answers = ?, 
-                      total_answers = ?, 
-                      last_answer_time = ?, 
-                      current_streak = ?,
-                      module_stats = ? 
-                  WHERE user_id = ?''',
-               (correct, total, last_answer_time, streak, json.dumps(module_stats), user_id))
     
-    # Update stats in normalized tables
+    # Update module stats in normalized table only
     db.execute('''INSERT OR REPLACE INTO module_stats
                   (user_id, module_id, number_answered, number_correct, last_answered_time, current_streak)
                   VALUES (?, ?, 
@@ -933,7 +873,15 @@ def check_answer():
                 last_answer_time,
                 is_correct, user_id, module_id))
 
-    # Update overall stats
+    # Update overall stats based on aggregated module stats
+    if is_correct:
+        correct += 1
+        streak += 1
+        db.execute('INSERT OR IGNORE INTO used_tokens (user_id, token, used_at) VALUES (?, ?, ?)', (user_id, token, last_answer_time))
+    else:
+        streak = 0
+        
+    # Update overall user stats
     db.execute('''UPDATE user_stats 
                   SET correct_answers = (SELECT SUM(number_correct) FROM module_stats WHERE user_id = ?),
                       total_answers = (SELECT SUM(number_answered) FROM module_stats WHERE user_id = ?),
@@ -1026,7 +974,7 @@ def leaderboard():
             LIMIT 50
         ''').fetchall()
     else:
-        # Get stats for specific module
+        # Get stats for specific module directly from module_stats table
         users = db.execute(f'''
             SELECT us.user_id, us.username, 
                    COALESCE(ms.number_correct, 0) as correct_answers,
@@ -1044,54 +992,9 @@ def leaderboard():
             LIMIT 50
         ''', (module_filter,)).fetchall()
 
-    leaderboard = []
-    for row in users:
-        user = dict(row)
-        # If module filter is active, override stats with per-module
-        if module_filter and user.get('module_stats'):
-            try:
-                ms = json.loads(user['module_stats'])
-                modstats = ms.get(module_filter, {})
-                user['correct_answers'] = modstats.get('number_correct', 0)
-                user['total_answers'] = modstats.get('number_answered', 0)
-                user['accuracy'] = (modstats.get('number_correct', 0) / modstats.get('number_answered', 1)) if modstats.get('number_answered', 0) else 0
-                user['current_streak'] = modstats.get('current_streak', 0)
-                user['last_answer_time'] = modstats.get('last_answered_time', None)
-                user['approved_cards'] = modstats.get('approved_cards', 0)
-            except Exception:
-                user['correct_answers'] = 0
-                user['total_answers'] = 0
-                user['accuracy'] = 0
-                user['current_streak'] = 0
-                user['last_answer_time'] = None
-                user['approved_cards'] = 0
-        leaderboard.append(user)
-    # --- Sort leaderboard in Python if module filter is active ---
-    if module_filter:
-        def sort_key(user):
-            if sort == 'accuracy':
-                return user['accuracy']
-            elif sort == 'last_answer_time':
-                val = user.get('last_answer_time')
-                if val is None:
-                    return 0 if order == 'asc' else float('-inf')
-                return val
-            return user.get(sort, 0)
-        leaderboard = sorted(
-            leaderboard,
-            key=sort_key,
-            reverse=(order == 'desc')
-        )
-        # For tie-breaking, sort by total_answers descending
-        if sort != 'total_answers':
-            leaderboard = sorted(
-                leaderboard,
-                key=lambda u: (sort_key(u), u.get('total_answers', 0)),
-                reverse=(order == 'desc')
-            )
-    else:
-        # Already sorted by SQL for global stats
-        pass
+    # Convert DB rows to dictionaries for the template
+    leaderboard = [dict(row) for row in users]
+    
     modules = get_all_modules()
     return render_template('leaderboard.html', leaderboard=leaderboard, sort=sort, order=order, modules=modules, active_module=module_filter)
 
