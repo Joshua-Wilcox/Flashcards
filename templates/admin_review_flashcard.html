@@ -33,6 +33,88 @@
         @media (max-width: 900px) {
             .review-card { max-width: 98vw; }
         }
+        .form-sequence-container {
+            position: relative;
+        }
+        /* Styles for suggestions dropdown */
+        .suggestion-container {
+            position: relative;
+        }
+        .suggestions-dropdown {
+            position: absolute;
+            width: 100%;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            background: white;
+            border: 1px solid #ced4da;
+            border-radius: 0 0 0.25rem 0.25rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+        .suggestion-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .suggestion-item:hover, .suggestion-item.active {
+            background-color: #f8f9fa;
+        }
+        .create-new-item {
+            padding: 8px 12px;
+            background-color: #e7f3ff;
+            color: #0d6efd;
+            font-weight: 500;
+            border-bottom: 1px solid #d1e6ff;
+        }
+        .create-new-item:hover {
+            background-color: #d1e6ff;
+        }
+        .suggestion-count {
+            float: right;
+            color: #6c757d;
+            font-size: 0.85em;
+        }
+        /* Tag styles */
+        .tag-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .tag-item {
+            background-color: #e7f3ff;
+            color: #0d6efd;
+            padding: 4px 10px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+        .tag-remove {
+            margin-left: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .tag-add-container {
+            display: flex;
+            margin-top: 8px;
+        }
+        .tag-input {
+            flex-grow: 1;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+        .tag-add-btn {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+        #tags-error {
+            color: #dc3545;
+            font-size: 0.875em;
+            margin-top: 0.25rem;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -54,7 +136,7 @@
                     Submitted by: <b>{{ submission['username'] or submission['user_id'] }}</b> at {{ submission['timestamp'] | datetimeformat }}
                 </div>
             </div>
-            <form method="post" autocomplete="off">
+            <form id="flashcard-form" method="post" autocomplete="off">
                 <div class="mb-3">
                     <label for="question" class="form-label">Question <span class="text-danger">*</span></label>
                     <textarea class="form-control" id="question" name="question" rows="3" required>{{ submission['submitted_question'] }}</textarea>
@@ -63,32 +145,67 @@
                     <label for="answer" class="form-label">Answer <span class="text-danger">*</span></label>
                     <textarea class="form-control" id="answer" name="answer" rows="2" required>{{ submission['submitted_answer'] }}</textarea>
                 </div>
-                <div class="mb-3">
-                    <label for="module" class="form-label">Module <span class="text-danger">*</span></label>
-                    <select class="form-select" id="module" name="module" required>
-                        <option value="">Select Module</option>
-                        {% for m in modules %}
-                            <option value="{{ m }}" {% if submission['module'] == m %}selected{% endif %}>{{ m }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="row mb-3">
-                    <div class="col-md-4 mb-2">
+                
+                <!-- Sequential form flow container -->
+                <div class="form-sequence-container">
+                    <!-- Step 1: Module -->
+                    <div class="mb-3">
+                        <label for="module" class="form-label">Module <span class="text-danger">*</span></label>
+                        <select class="form-select" id="module" name="module" required>
+                            <option value="">Select Module</option>
+                            {% for m in modules %}
+                                <option value="{{ m }}" {% if submission['module'] == m %}selected{% endif %}>{{ m }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Step 2: Topic with suggestions -->
+                    <div class="mb-3">
                         <label for="topic" class="form-label">Topic <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control mini-input" id="topic" name="topic" maxlength="64" value="{{ submission['submitted_topic'] or '' }}" required>
+                        <div class="suggestion-container">
+                            <input type="text" class="form-control" id="topic" name="topic" 
+                                   maxlength="64" placeholder="Choose a topic..." 
+                                   value="{{ submission['submitted_topic'] or '' }}" required>
+                            <div class="suggestions-dropdown" id="topic-suggestions"></div>
+                        </div>
                     </div>
-                    <div class="col-md-4 mb-2">
+                    
+                    <!-- Step 3: Subtopic with suggestions -->
+                    <div class="mb-3">
                         <label for="subtopic" class="form-label">Subtopic <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control mini-input" id="subtopic" name="subtopic" maxlength="64" value="{{ submission['submitted_subtopic'] or '' }}" required>
-                    </div>
-                    <div class="col-md-4 mb-2">
-                        <label for="tags" class="form-label d-flex justify-content-between align-items-center" style="white-space:nowrap;">
-                            <span>Tags <span class="text-danger">*</span></span>
-                            <span class="text-muted ms-2" style="font-size:0.95em;">(comma separated)</span>
-                        </label>
-                        <input type="text" class="form-control mini-input" id="tags" name="tags" maxlength="128" value="{{ submission['submitted_tags_comma_separated'] or '' }}" required>
+                        <div class="suggestion-container">
+                            <input type="text" class="form-control" id="subtopic" name="subtopic" 
+                                   maxlength="64" placeholder="Choose a subtopic..." 
+                                   value="{{ submission['submitted_subtopic'] or '' }}" required>
+                            <div class="suggestions-dropdown" id="subtopic-suggestions"></div>
+                        </div>
                     </div>
                 </div>
+                
+                <!-- Step 4: Tags - multiple with "add tag" pill -->
+                <div class="mb-3">
+                    <label class="form-label">Tags <span class="text-danger">*</span> <small class="text-muted">(at least 3 required)</small></label>
+                    <div class="tag-add-container">
+                        <input type="text" class="form-control tag-input" id="tag-input" 
+                               placeholder="Enter a tag..." maxlength="32">
+                        <button type="button" class="btn btn-primary tag-add-btn" id="add-tag-btn">Add Tag</button>
+                    </div>
+                    <div class="suggestions-dropdown" id="tag-suggestions"></div>
+                    <div class="tag-container" id="tag-container"></div>
+                    <div id="tags-error">Please add at least 3 tags</div>
+                    <input type="hidden" id="tags" name="tags" value="{{ submission['submitted_tags_comma_separated'] or '' }}" required>
+                </div>
+                
+                <!-- Update the duplicate container UI to show similarity scores -->
+                <div id="duplicate-container" class="mb-3" style="display: none;">
+                    <div class="alert alert-warning">
+                        <h5 class="alert-heading">Potential Duplicates Found</h5>
+                        <p>The following questions may be similar to this submission. Please review before approving:</p>
+                        <div id="duplicate-list" class="list-group mt-2"></div>
+                        <p class="mt-2 mb-0"><small>If this question is different enough, you may still approve it.</small></p>
+                    </div>
+                </div>
+
                 <div class="btn-group d-flex justify-content-between mt-4">
                     <button type="submit" name="action" value="approve" class="btn btn-success w-50 me-2">Approve</button>
                     <button type="submit" name="action" value="reject" class="btn btn-danger w-50 ms-2">Reject</button>
@@ -99,5 +216,340 @@
             <p>made with ❤️ by <a href="https://github.com/joshua-wilcox">Josh Wilcox</a></p>
         </footer>
     </div>
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            let selectedTags = [];
+            const submittedTags = "{{ submission['submitted_tags_comma_separated'] or '' }}";
+            
+            // Initialize tags from submitted data
+            if (submittedTags) {
+                selectedTags = submittedTags.split(',').map(tag => tag.trim()).filter(tag => tag);
+                updateTagsDisplay();
+            }
+            
+            // Remove the automatic fetching of suggestions on page load
+            // Instead, only fetch when user interacts with the fields
+            
+            // STEP 1: Module selection enables topic field
+            $('#module').on('change', function() {
+                const module = $(this).val();
+                if (!module) {
+                    $('#topic-suggestions').empty().hide();
+                    $('#subtopic-suggestions').empty().hide();
+                    $('#tag-suggestions').empty().hide();
+                }
+            });
+            
+            // TOPIC SUGGESTIONS
+            $('#topic').on('focus input', function() {
+                fetchTopicSuggestions();
+            });
+            
+            function fetchTopicSuggestions() {
+                const module = $('#module').val();
+                const query = $('#topic').val().trim();
+                
+                if (!module) {
+                    return;
+                }
+                
+                $.ajax({
+                    url: '/api/suggest/topics',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ module: module, query: query }),
+                    success: function(response) {
+                        const suggestions = response.suggestions;
+                        let html = `<div class="create-new-item" data-value="${query}">+ Create topic "${query}"</div>`;
+                        
+                        suggestions.forEach(suggestion => {
+                            html += `<div class="suggestion-item" data-value="${suggestion.name}">
+                                ${suggestion.name}
+                                <span class="suggestion-count">${suggestion.count} questions</span>
+                            </div>`;
+                        });
+                        
+                        $('#topic-suggestions').html(html).show();
+                    }
+                });
+            }
+            
+            // SUBTOPIC SUGGESTIONS
+            $('#subtopic').on('focus input', function() {
+                fetchSubtopicSuggestions();
+            });
+            
+            function fetchSubtopicSuggestions() {
+                const module = $('#module').val();
+                const topic = $('#topic').val().trim();
+                const query = $('#subtopic').val().trim();
+                
+                if (!module || !topic) {
+                    return;
+                }
+                
+                $.ajax({
+                    url: '/api/suggest/subtopics',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ module: module, topic: topic, query: query }),
+                    success: function(response) {
+                        const suggestions = response.suggestions;
+                        let html = `<div class="create-new-item" data-value="${query}">+ Create subtopic "${query}"</div>`;
+                        
+                        suggestions.forEach(suggestion => {
+                            html += `<div class="suggestion-item" data-value="${suggestion.name}">
+                                ${suggestion.name}
+                                <span class="suggestion-count">${suggestion.count} questions</span>
+                            </div>`;
+                        });
+                        
+                        $('#subtopic-suggestions').html(html).show();
+                    }
+                });
+            }
+            
+            // TAG SUGGESTIONS
+            $('#tag-input').on('focus input', function(e) {
+                e.stopPropagation(); // Prevent event from bubbling up
+                fetchTagSuggestions();
+            });
+            
+            function fetchTagSuggestions() {
+                const module = $('#module').val();
+                const topic = $('#topic').val().trim();
+                const subtopic = $('#subtopic').val().trim();
+                const query = $('#tag-input').val().trim();
+                
+                if (!module || !topic || !subtopic) {
+                    return;
+                }
+                
+                $.ajax({
+                    url: '/api/suggest/tags',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ 
+                        module: module, 
+                        topic: topic, 
+                        subtopic: subtopic,
+                        query: query 
+                    }),
+                    success: function(response) {
+                        const suggestions = response.suggestions;
+                        let html = `<div class="create-new-item" data-value="${query}">+ Create tag "${query}"</div>`;
+                        
+                        suggestions.forEach(suggestion => {
+                            // Skip suggestions for tags already selected
+                            if (selectedTags.includes(suggestion.name)) {
+                                return;
+                            }
+                            
+                            html += `<div class="suggestion-item" data-value="${suggestion.name}">
+                                ${suggestion.name}
+                                <span class="suggestion-count">${suggestion.count} questions</span>
+                            </div>`;
+                        });
+                        
+                        $('#tag-suggestions').html(html).show();
+                    }
+                });
+            }
+            
+            // Handle suggestion selection for topic
+            $(document).on('click', '#topic-suggestions .suggestion-item, #topic-suggestions .create-new-item', function() {
+                const value = $(this).data('value');
+                $('#topic').val(value);
+                $('#topic-suggestions').hide();
+            });
+            
+            // Handle suggestion selection for subtopic
+            $(document).on('click', '#subtopic-suggestions .suggestion-item, #subtopic-suggestions .create-new-item', function() {
+                const value = $(this).data('value');
+                $('#subtopic').val(value);
+                $('#subtopic-suggestions').hide();
+            });
+            
+            // Handle suggestion selection for tags
+            $(document).on('click', '#tag-suggestions .suggestion-item, #tag-suggestions .create-new-item', function(e) {
+                e.stopPropagation(); // Prevent event from bubbling up
+                const value = $(this).data('value');
+                $('#tag-input').val('');
+                $('#tag-suggestions').hide();
+                
+                // Add the tag if it's not already in the list
+                if (!selectedTags.includes(value)) {
+                    selectedTags.push(value);
+                    updateTagsDisplay();
+                }
+            });
+            
+            // Add tag button click handler
+            $('#add-tag-btn').on('click', function() {
+                const value = $('#tag-input').val().trim();
+                if (value && !selectedTags.includes(value)) {
+                    selectedTags.push(value);
+                    $('#tag-input').val('');
+                    updateTagsDisplay();
+                }
+            });
+            
+            // Enter key in tag input also adds the tag
+            $('#tag-input').on('keypress', function(e) {
+                if (e.which === 13) { // Enter key
+                    e.preventDefault();
+                    const value = $(this).val().trim();
+                    if (value && !selectedTags.includes(value)) {
+                        selectedTags.push(value);
+                        $(this).val('');
+                        updateTagsDisplay();
+                    }
+                }
+            });
+            
+            // Remove tag when clicking the X
+            $(document).on('click', '.tag-remove', function() {
+                const tagToRemove = $(this).data('tag');
+                selectedTags = selectedTags.filter(tag => tag !== tagToRemove);
+                updateTagsDisplay();
+            });
+            
+            // Hide suggestion dropdowns when clicking outside
+            $(document).on('click', function(e) {
+                if (!$(e.target).closest('.tag-add-container, #tag-suggestions').length) {
+                    $('#tag-suggestions').hide();
+                }
+                if (!$(e.target).closest('#topic, #topic-suggestions').length) {
+                    $('#topic-suggestions').hide();
+                }
+                if (!$(e.target).closest('#subtopic, #subtopic-suggestions').length) {
+                    $('#subtopic-suggestions').hide();
+                }
+            });
+            
+            // Prevent dropdown from closing when clicking inside it
+            $(document).on('click', '#tag-suggestions', function(e) {
+                e.stopPropagation();
+            });
+            
+            // Handle form submission
+            $('#flashcard-form').on('submit', function(e) {
+                // Validate at least 3 tags
+                if (selectedTags.length < 3) {
+                    e.preventDefault();
+                    $('#tags-error').show();
+                    return false;
+                }
+                
+                // Set the tags hidden input before submitting
+                $('#tags').val(selectedTags.join(', '));
+                return true;
+            });
+            
+            // Function to update the tags display
+            function updateTagsDisplay() {
+                // Update the visual representation of tags
+                let html = '';
+                selectedTags.forEach(tag => {
+                    html += `
+                        <div class="tag-item">
+                            ${tag}
+                            <span class="tag-remove" data-tag="${tag}">×</span>
+                        </div>
+                    `;
+                });
+                $('#tag-container').html(html);
+                
+                // Update the hidden input value
+                $('#tags').val(selectedTags.join(', '));
+                
+                // Update validation state
+                if (selectedTags.length >= 3) {
+                    $('#tags-error').hide();
+                } else {
+                    $('#tags-error').show();
+                }
+            }
+            
+            // Enhanced duplicate detection with debounce
+            let duplicateCheckTimeout = null;
+            
+            function checkForDuplicates() {
+                const question = $('#question').val().trim();
+                const module = $('#module').val();
+                
+                if (!question || !module || question.length < 10) {
+                    $('#duplicate-container').hide();
+                    return;
+                }
+                
+                $.ajax({
+                    url: '/api/check_duplicates',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ 
+                        question: question,
+                        module: module
+                    }),
+                    success: function(response) {
+                        const duplicates = response.duplicates;
+                        if (duplicates && duplicates.length > 0) {
+                            // Populate duplicate list
+                            const $list = $('#duplicate-list');
+                            $list.empty();
+                            
+                            duplicates.forEach(dup => {
+                                // Convert similarity score to percentage
+                                const similarityPct = Math.round(dup.similarity * 100);
+                                
+                                // Determine color based on similarity
+                                let bgClass = 'bg-light';
+                                if (similarityPct >= 70) {
+                                    bgClass = 'bg-danger text-white';
+                                } else if (similarityPct >= 50) {
+                                    bgClass = 'bg-warning';
+                                } else if (similarityPct >= 30) {
+                                    bgClass = 'bg-info bg-opacity-25';
+                                }
+                                
+                                $list.append(`
+                                    <div class="list-group-item ${bgClass}">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div class="fw-bold">${dup.question}</div>
+                                            <span class="badge bg-primary rounded-pill">${similarityPct}% match</span>
+                                        </div>
+                                        <small class="text-${similarityPct >= 70 && bgClass === 'bg-danger text-white' ? 'light' : 'muted'}">Answer: ${dup.answer}</small>
+                                    </div>
+                                `);
+                            });
+                            
+                            $('#duplicate-container').show();
+                        } else {
+                            $('#duplicate-container').hide();
+                        }
+                    }
+                });
+            }
+            
+            // Check for duplicates when page loads with initial question
+            setTimeout(checkForDuplicates, 1000);
+            
+            // Run duplicate check when user has finished typing in the question field
+            $('#question').on('blur', function() {
+                clearTimeout(duplicateCheckTimeout);
+                duplicateCheckTimeout = setTimeout(checkForDuplicates, 500);
+            });
+            
+            // Run when module is changed
+            $('#module').on('change', function() {
+                if ($('#question').val().trim().length > 10) {
+                    clearTimeout(duplicateCheckTimeout);
+                    duplicateCheckTimeout = setTimeout(checkForDuplicates, 500);
+                }
+            });
+        });
+    </script>
 </body>
 </html>

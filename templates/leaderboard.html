@@ -147,28 +147,51 @@
                         <th>Rank</th>
                         <th>User</th>
                         <th>
-                            <button class="sort-btn{% if sort == 'correct_answers' %} active{% endif %}" onclick="window.location='?sort=correct_answers&order={{ 'asc' if sort == 'correct_answers' and order == 'desc' else 'desc' }}{% if active_module %}&module={{ active_module }}{% endif %}'">Correct
-                                {% if sort == 'correct_answers' %}<span class="sort-arrow">{{ '↑' if order == 'asc' else '↓' }}</span>{% endif %}
+                            <button class="sort-btn {% if sort == 'correct_answers' %}active{% endif %}" data-sort="correct_answers">
+                                Correct
+                                {% if sort == 'correct_answers' %}
+                                <span class="sort-arrow">{% if order == 'desc' %}▼{% else %}▲{% endif %}</span>
+                                {% endif %}
                             </button>
                         </th>
                         <th>
-                            <button class="sort-btn{% if sort == 'total_answers' %} active{% endif %}" onclick="window.location='?sort=total_answers&order={{ 'asc' if sort == 'total_answers' and order == 'desc' else 'desc' }}{% if active_module %}&module={{ active_module }}{% endif %}'">Total
-                                {% if sort == 'total_answers' %}<span class="sort-arrow">{{ '↑' if order == 'asc' else '↓' }}</span>{% endif %}
+                            <button class="sort-btn {% if sort == 'total_answers' %}active{% endif %}" data-sort="total_answers">
+                                Total
+                                {% if sort == 'total_answers' %}
+                                <span class="sort-arrow">{% if order == 'desc' %}▼{% else %}▲{% endif %}</span>
+                                {% endif %}
                             </button>
                         </th>
                         <th>
-                            <button class="sort-btn{% if sort == 'accuracy' %} active{% endif %}" onclick="window.location='?sort=accuracy&order={{ 'asc' if sort == 'accuracy' and order == 'desc' else 'desc' }}{% if active_module %}&module={{ active_module }}{% endif %}'">Accuracy
-                                {% if sort == 'accuracy' %}<span class="sort-arrow">{{ '↑' if order == 'asc' else '↓' }}</span>{% endif %}
+                            <button class="sort-btn {% if sort == 'accuracy' %}active{% endif %}" data-sort="accuracy">
+                                Accuracy
+                                {% if sort == 'accuracy' %}
+                                <span class="sort-arrow">{% if order == 'desc' %}▼{% else %}▲{% endif %}</span>
+                                {% endif %}
                             </button>
                         </th>
                         <th>
-                            <button class="sort-btn{% if sort == 'current_streak' %} active{% endif %}" onclick="window.location='?sort=current_streak&order={{ 'asc' if sort == 'current_streak' and order == 'desc' else 'desc' }}{% if active_module %}&module={{ active_module }}{% endif %}'">Streak
-                                {% if sort == 'current_streak' %}<span class="sort-arrow">{{ '↑' if order == 'asc' else '↓' }}</span>{% endif %}
+                            <button class="sort-btn {% if sort == 'current_streak' %}active{% endif %}" data-sort="current_streak">
+                                Streak
+                                {% if sort == 'current_streak' %}
+                                <span class="sort-arrow">{% if order == 'desc' %}▼{% else %}▲{% endif %}</span>
+                                {% endif %}
                             </button>
                         </th>
                         <th>
-                            <button class="sort-btn{% if sort == 'last_answer_time' %} active{% endif %}" onclick="window.location='?sort=last_answer_time&order={{ 'asc' if sort == 'last_answer_time' and order == 'desc' else 'desc' }}{% if active_module %}&module={{ active_module }}{% endif %}'">Last Answered
-                                {% if sort == 'last_answer_time' %}<span class="sort-arrow">{{ '↑' if order == 'asc' else '↓' }}</span>{% endif %}
+                            <button class="sort-btn {% if sort == 'approved_cards' %}active{% endif %}" data-sort="approved_cards">
+                                Approved Cards
+                                {% if sort == 'approved_cards' %}
+                                <span class="sort-arrow">{% if order == 'desc' %}▼{% else %}▲{% endif %}</span>
+                                {% endif %}
+                            </button>
+                        </th>
+                        <th>
+                            <button class="sort-btn {% if sort == 'last_answer_time' %}active{% endif %}" data-sort="last_answer_time">
+                                Last Active
+                                {% if sort == 'last_answer_time' %}
+                                <span class="sort-arrow">{% if order == 'desc' %}▼{% else %}▲{% endif %}</span>
+                                {% endif %}
                             </button>
                         </th>
                     </tr>
@@ -177,28 +200,13 @@
                     {% for user in leaderboard %}
                     <tr>
                         <td class="rank-badge">{{ loop.index }}</td>
-                        <td>
-                            <a class="username-link" href="{{ url_for('user_stats', user_id=user['user_id']) }}">
-                                {{ user['username'] }}
-                            </a>
-                        </td>
-                        <td>{{ user['correct_answers'] }}</td>
-                        <td>{{ user['total_answers'] }}</td>
-                        <td>
-                            {% if user['total_answers'] > 0 %}
-                                {{ "%.1f"|format(user['accuracy'] * 100) }}%
-                            {% else %}
-                                0%
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if active_module %}
-                                {{ user['current_streak'] or 0 }}
-                            {% else %}
-                                {{ user['current_streak'] or 0 }}
-                            {% endif %}
-                        </td>
-                        <td><span class="last-answered" data-timestamp="{{ user['last_answer_time'] or '' }}"></span></td>
+                        <td><a href="{{ url_for('user_stats', user_id=user.user_id) }}" class="username-link">{{ user.username }}</a></td>
+                        <td>{{ user.correct_answers }}</td>
+                        <td>{{ user.total_answers }}</td>
+                        <td>{{ (user.accuracy * 100) | round(1) }}%</td>
+                        <td>{{ user.current_streak }}</td>
+                        <td>{{ user.approved_cards }}</td>
+                        <td><span class="last-answered" data-timestamp="{{ user.last_answer_time }}"></span></td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -235,7 +243,9 @@ function formatRelativeTime(ts) {
     }
     return "Just now";
 }
+
 document.addEventListener("DOMContentLoaded", function() {
+    // Handle formatting for last-answered timestamps
     document.querySelectorAll('.last-answered').forEach(function(el) {
         const ts = el.getAttribute('data-timestamp');
         if (ts && !isNaN(ts)) {
@@ -244,17 +254,59 @@ document.addEventListener("DOMContentLoaded", function() {
             el.textContent = "Never";
         }
     });
+    
+    // Handle sorting buttons click
+    document.querySelectorAll('.sort-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const sortBy = btn.getAttribute('data-sort');
+            const url = new URL(window.location.href);
+            
+            // If already sorting by this column, toggle the order
+            if (url.searchParams.get('sort') === sortBy) {
+                const currentOrder = url.searchParams.get('order') || 'desc';
+                url.searchParams.set('order', currentOrder === 'desc' ? 'asc' : 'desc');
+            } else {
+                // New sort column, default to descending order
+                url.searchParams.set('sort', sortBy);
+                url.searchParams.set('order', 'desc');
+            }
+            
+            // Maintain the module filter if present
+            const moduleFilter = url.searchParams.get('module');
+            if (moduleFilter) {
+                url.searchParams.set('module', moduleFilter);
+            }
+            
+            window.location.href = url.toString();
+        });
+    });
+    
     // Module pill filter logic
     document.querySelectorAll('.module-pill').forEach(function(btn) {
         btn.addEventListener('click', function() {
             const module = btn.getAttribute('data-module');
             const url = new URL(window.location.href);
-            if (btn.classList.contains('active')) {
-                url.searchParams.delete('module');
-            } else {
+            
+            // Preserve current sorting
+            const currentSort = url.searchParams.get('sort');
+            const currentOrder = url.searchParams.get('order');
+            
+            // Clear all parameters and set new ones
+            url.search = '';
+            
+            if (module) {
                 url.searchParams.set('module', module);
             }
-            window.location = url.toString();
+            
+            if (currentSort) {
+                url.searchParams.set('sort', currentSort);
+            }
+            
+            if (currentOrder) {
+                url.searchParams.set('order', currentOrder);
+            }
+            
+            window.location.href = url.toString();
         });
     });
 });

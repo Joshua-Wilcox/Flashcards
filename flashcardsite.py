@@ -499,7 +499,7 @@ def get_pdfs_for_question(question_id, max_pdfs=3):
             for pdf in tag_pdfs:
                 # Calculate tag match percentage: 40% base + up to 30% based on tag overlap
                 matching_tags = pdf['matching_tags']
-                total_pdf_tags = max(pdf['total_pdf_tags'], 1)  # Avoid division by zero
+                total_pdf_tags = max(pdf['total_pdf_tags'], 1) # Avoid division by zero
                 
                 # Calculate tag overlap ratio (matching tags / total tags across both)
                 tag_overlap = matching_tags / (total_question_tags + total_pdf_tags - matching_tags)
@@ -705,6 +705,58 @@ def admin_review_flashcard(submission_id):
             add_tags_and_link_question(db, question_id, tag_list)
             add_topic_and_link_question(db, question_id, topic)
             add_subtopic_and_link_question(db, question_id, subtopic)
+            
+            # Increment the user's approved cards counter
+            user_id = submission['user_id']
+            
+            # Update global approved cards counter
+            db.execute('''
+                UPDATE user_stats 
+                SET approved_cards = COALESCE(approved_cards, 0) + 1 
+                WHERE user_id = ?
+            ''', (user_id,))
+            
+            # Update per-module approved cards counter
+            db.execute('''
+                INSERT OR REPLACE INTO module_stats
+                (user_id, module_id, number_answered, number_correct, last_answered_time, current_streak, approved_cards)
+                VALUES (?, ?, 
+                       COALESCE((SELECT number_answered FROM module_stats WHERE user_id = ? AND module_id = ?), 0),
+                       COALESCE((SELECT number_correct FROM module_stats WHERE user_id = ? AND module_id = ?), 0),
+                       (SELECT last_answered_time FROM module_stats WHERE user_id = ? AND module_id = ?),
+                       COALESCE((SELECT current_streak FROM module_stats WHERE user_id = ? AND module_id = ?), 0),
+                       COALESCE((SELECT approved_cards FROM module_stats WHERE user_id = ? AND module_id = ?), 0) + 1)
+            ''', (
+                user_id, module_id, 
+                user_id, module_id,
+                user_id, module_id,
+                user_id, module_id,
+                user_id, module_id,
+                user_id, module_id
+            ))
+            
+            # Also update module_stats in the JSON field for backward compatibility
+            stats_row = db.execute('SELECT module_stats FROM user_stats WHERE user_id = ?', (user_id,)).fetchone()
+            if stats_row and stats_row['module_stats']:
+                try:
+                    module_stats = json.loads(stats_row['module_stats'])
+                    if str(module_id) not in module_stats:
+                        module_stats[str(module_id)] = {
+                            "last_answered_time": None,
+                            "number_answered": 0,
+                            "number_correct": 0,
+                            "current_streak": 0,
+                            "approved_cards": 0
+                        }
+                    if "approved_cards" not in module_stats[str(module_id)]:
+                        module_stats[str(module_id)]["approved_cards"] = 0
+                    module_stats[str(module_id)]["approved_cards"] += 1
+                    db.execute('UPDATE user_stats SET module_stats = ? WHERE user_id = ?', 
+                              (json.dumps(module_stats), user_id))
+                except (ValueError, KeyError):
+                    # If there's an error with the JSON, we've already updated the normalized tables
+                    pass
+            
             db.execute('DELETE FROM submitted_flashcards WHERE id = ?', (submission_id,))
             db.commit()
             flash('Flashcard approved and added to the database.')
@@ -942,16 +994,33 @@ def leaderboard():
         'total_answers': 'total_answers',
         'accuracy': '(CASE WHEN total_answers > 0 THEN 1.0 * correct_answers / total_answers ELSE 0 END)',
         'current_streak': 'current_streak',
-        'last_answer_time': 'last_answer_time'
+        'last_answer_time': 'last_answer_time',
+        'approved_cards': 'approved_cards'  # Add approved_cards to allowed sort columns
     }
     sort_col = allowed.get(sort, 'correct_answers')
     order_sql = 'DESC' if order == 'desc' else 'ASC'
     db = get_db()
+    
+    # Check if the approved_cards column exists in the user_stats table
+    # If not, we need to execute the schema update first
+    cursor = db.cursor()
+    columns = [column[1] for column in cursor.execute('PRAGMA table_info(user_stats)').fetchall()]
+    if 'approved_cards' not in columns:
+        db.execute('ALTER TABLE user_stats ADD COLUMN approved_cards INTEGER DEFAULT 0')
+        db.commit()
+    
+    # Also check module_stats table and add the column if it doesn't exist
+    columns = [column[1] for column in cursor.execute('PRAGMA table_info(module_stats)').fetchall()]
+    if 'approved_cards' not in columns:
+        db.execute('ALTER TABLE module_stats ADD COLUMN approved_cards INTEGER DEFAULT 0')
+        db.commit()
+    
     if not module_filter:
         # Use SQL sorting for global stats
         users = db.execute(f'''
             SELECT user_id, username, correct_answers, total_answers, current_streak, last_answer_time,
-                (CASE WHEN total_answers > 0 THEN 1.0 * correct_answers / total_answers ELSE 0 END) as accuracy
+                (CASE WHEN total_answers > 0 THEN 1.0 * correct_answers / total_answers ELSE 0 END) as accuracy,
+                COALESCE(approved_cards, 0) as approved_cards
             FROM user_stats
             ORDER BY {sort_col} {order_sql}, total_answers DESC
             LIMIT 50
@@ -960,17 +1029,18 @@ def leaderboard():
         # Get stats for specific module
         users = db.execute(f'''
             SELECT us.user_id, us.username, 
-                   ms.number_correct as correct_answers,
-                   ms.number_answered as total_answers,
-                   ms.current_streak,
+                   COALESCE(ms.number_correct, 0) as correct_answers,
+                   COALESCE(ms.number_answered, 0) as total_answers,
+                   COALESCE(ms.current_streak, 0) as current_streak,
                    ms.last_answered_time as last_answer_time,
-                   (CASE WHEN ms.number_answered > 0 
-                         THEN 1.0 * ms.number_correct / ms.number_answered 
-                         ELSE 0 END) as accuracy
+                   (CASE WHEN COALESCE(ms.number_answered, 0) > 0 
+                         THEN 1.0 * COALESCE(ms.number_correct, 0) / COALESCE(ms.number_answered, 1) 
+                         ELSE 0 END) as accuracy,
+                   COALESCE(ms.approved_cards, 0) as approved_cards
             FROM user_stats us
             LEFT JOIN modules m ON m.name = ?
             LEFT JOIN module_stats ms ON ms.user_id = us.user_id AND ms.module_id = m.id
-            ORDER BY {sort_col} {order_sql}, ms.number_answered DESC
+            ORDER BY {sort_col} {order_sql}, COALESCE(ms.number_answered, 0) DESC
             LIMIT 50
         ''', (module_filter,)).fetchall()
 
@@ -987,12 +1057,14 @@ def leaderboard():
                 user['accuracy'] = (modstats.get('number_correct', 0) / modstats.get('number_answered', 1)) if modstats.get('number_answered', 0) else 0
                 user['current_streak'] = modstats.get('current_streak', 0)
                 user['last_answer_time'] = modstats.get('last_answered_time', None)
+                user['approved_cards'] = modstats.get('approved_cards', 0)
             except Exception:
                 user['correct_answers'] = 0
                 user['total_answers'] = 0
                 user['accuracy'] = 0
                 user['current_streak'] = 0
                 user['last_answer_time'] = None
+                user['approved_cards'] = 0
         leaderboard.append(user)
     # --- Sort leaderboard in Python if module filter is active ---
     if module_filter:
@@ -1031,7 +1103,7 @@ def user_stats(user_id):
     # Get base user stats
     base_stats = db.execute('''
         SELECT user_id, username, correct_answers, total_answers, 
-               last_answer_time, current_streak
+               last_answer_time, current_streak, approved_cards
         FROM user_stats 
         WHERE user_id = ?
     ''', (user_id,)).fetchone()
@@ -1042,7 +1114,7 @@ def user_stats(user_id):
     # Get module stats
     module_stats = db.execute('''
         SELECT m.name, ms.number_answered, ms.number_correct, 
-               ms.last_answered_time, ms.current_streak
+               ms.last_answered_time, ms.current_streak, ms.approved_cards
         FROM modules m
         LEFT JOIN module_stats ms ON ms.module_id = m.id 
         AND ms.user_id = ?
@@ -1055,7 +1127,8 @@ def user_stats(user_id):
             'number_answered': row['number_answered'] or 0,
             'number_correct': row['number_correct'] or 0,
             'last_answered_time': row['last_answered_time'],
-            'current_streak': row['current_streak'] or 0
+            'current_streak': row['current_streak'] or 0,
+            'approved_cards': row['approved_cards'] or 0
         } for row in module_stats
     }
     stats_dict['active_module'] = module_filter
@@ -1075,7 +1148,7 @@ def stats():
     # Get base user stats
     base_stats = db.execute('''
         SELECT user_id, username, correct_answers, total_answers, 
-               last_answer_time, current_streak
+               last_answer_time, current_streak, approved_cards
         FROM user_stats 
         WHERE user_id = ?
     ''', (session['user_id'],)).fetchone()
@@ -1083,7 +1156,7 @@ def stats():
     # Get module stats
     module_stats = db.execute('''
         SELECT m.name, ms.number_answered, ms.number_correct, 
-               ms.last_answered_time, ms.current_streak
+               ms.last_answered_time, ms.current_streak, ms.approved_cards
         FROM modules m
         LEFT JOIN module_stats ms ON ms.module_id = m.id 
         AND ms.user_id = ?
@@ -1096,7 +1169,8 @@ def stats():
             'number_answered': row['number_answered'] or 0,
             'number_correct': row['number_correct'] or 0,
             'last_answered_time': row['last_answered_time'],
-            'current_streak': row['current_streak'] or 0
+            'current_streak': row['current_streak'] or 0,
+            'approved_cards': row['approved_cards'] or 0
         } for row in module_stats
     }
     stats_dict['active_module'] = module_filter
@@ -1279,9 +1353,400 @@ def verify_signed_token(token, user_id):
         return None, False
 
 
+# Add these new API routes for auto-suggestions
+@app.route('/api/suggest/topics', methods=['POST'])
+def suggest_topics():
+    if not discord.authorized:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    data = request.get_json()
+    module_name = data.get('module', '')
+    query = data.get('query', '').lower()
+    
+    if not module_name:
+        return jsonify({'suggestions': []})
+    
+    db = get_db()
+    
+    # Get module ID
+    module_row = db.execute('SELECT id FROM modules WHERE name = ?', (module_name,)).fetchone()
+    if not module_row:
+        return jsonify({'suggestions': []})
+    
+    module_id = module_row['id']
+    
+    # Get topics for this module with occurrence count
+    if query:
+        topics = db.execute('''
+            SELECT t.name, COUNT(qt.question_id) as count
+            FROM topics t
+            JOIN question_topics qt ON t.id = qt.topic_id
+            JOIN questions q ON qt.question_id = q.id
+            WHERE q.module_id = ? AND LOWER(t.name) LIKE ?
+            GROUP BY t.name
+            ORDER BY count DESC, t.name
+            LIMIT 10
+        ''', (module_id, f'%{query}%')).fetchall()
+    else:
+        topics = db.execute('''
+            SELECT t.name, COUNT(qt.question_id) as count
+            FROM topics t
+            JOIN question_topics qt ON t.id = qt.topic_id
+            JOIN questions q ON qt.question_id = q.id
+            WHERE q.module_id = ?
+            GROUP BY t.name
+            ORDER BY count DESC, t.name
+            LIMIT 10
+        ''', (module_id,)).fetchall()
+    
+    suggestions = [{'name': row['name'], 'count': row['count']} for row in topics]
+    return jsonify({'suggestions': suggestions})
+
+@app.route('/api/suggest/subtopics', methods=['POST'])
+def suggest_subtopics():
+    if not discord.authorized:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    data = request.get_json()
+    module_name = data.get('module', '')
+    topic_name = data.get('topic', '')
+    query = data.get('query', '').lower()
+    
+    if not module_name or not topic_name:
+        return jsonify({'suggestions': []})
+    
+    db = get_db()
+    
+    # Get module ID
+    module_row = db.execute('SELECT id FROM modules WHERE name = ?', (module_name,)).fetchone()
+    if not module_row:
+        return jsonify({'suggestions': []})
+    
+    module_id = module_row['id']
+    
+    # Get topic ID
+    topic_row = db.execute('SELECT id FROM topics WHERE name = ?', (topic_name,)).fetchone()
+    if not topic_row:
+        return jsonify({'suggestions': []})
+    
+    topic_id = topic_row['id']
+    
+    # Get subtopics for this module and topic with occurrence count
+    if query:
+        subtopics = db.execute('''
+            SELECT s.name, COUNT(qs.question_id) as count
+            FROM subtopics s
+            JOIN question_subtopics qs ON s.id = qs.subtopic_id
+            JOIN questions q ON qs.question_id = q.id
+            JOIN question_topics qt ON q.id = qt.question_id
+            WHERE q.module_id = ? AND qt.topic_id = ? AND LOWER(s.name) LIKE ?
+            GROUP BY s.name
+            ORDER BY count DESC, s.name
+            LIMIT 10
+        ''', (module_id, topic_id, f'%{query}%')).fetchall()
+    else:
+        subtopics = db.execute('''
+            SELECT s.name, COUNT(qs.question_id) as count
+            FROM subtopics s
+            JOIN question_subtopics qs ON s.id = qs.subtopic_id
+            JOIN questions q ON qs.question_id = q.id
+            JOIN question_topics qt ON q.id = qt.question_id
+            WHERE q.module_id = ? AND qt.topic_id = ?
+            GROUP BY s.name
+            ORDER BY count DESC, s.name
+            LIMIT 10
+        ''', (module_id, topic_id)).fetchall()
+    
+    suggestions = [{'name': row['name'], 'count': row['count']} for row in subtopics]
+    return jsonify({'suggestions': suggestions})
+
+@app.route('/api/suggest/tags', methods=['POST'])
+def suggest_tags():
+    if not discord.authorized:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    data = request.get_json()
+    module_name = data.get('module', '')
+    topic_name = data.get('topic', '')
+    subtopic_name = data.get('subtopic', '')
+    query = data.get('query', '').lower()
+    
+    if not module_name:
+        return jsonify({'suggestions': []})
+    
+    db = get_db()
+    
+    # Get module ID
+    module_row = db.execute('SELECT id FROM modules WHERE name = ?', (module_name,)).fetchone()
+    if not module_row:
+        return jsonify({'suggestions': []})
+    
+    module_id = module_row['id']
+    
+    # Base query to get tags for this module
+    sql = '''
+        SELECT t.name, COUNT(qt.question_id) as count
+        FROM tags t
+        JOIN question_tags qt ON t.id = qt.tag_id
+        JOIN questions q ON qt.question_id = q.id
+        WHERE q.module_id = ?
+    '''
+    params = [module_id]
+    
+    # Add topic filter if provided
+    if topic_name:
+        sql += '''
+            AND EXISTS (
+                SELECT 1 FROM question_topics qtop
+                JOIN topics top ON qtop.topic_id = top.id
+                WHERE qtop.question_id = q.id AND top.name = ?
+            )
+        '''
+        params.append(topic_name)
+    
+    # Add subtopic filter if provided
+    if subtopic_name:
+        sql += '''
+            AND EXISTS (
+                SELECT 1 FROM question_subtopics qsub
+                JOIN subtopics sub ON qsub.subtopic_id = sub.id
+                WHERE qsub.question_id = q.id AND sub.name = ?
+            )
+        '''
+        params.append(subtopic_name)
+    
+    # Add query filter if provided
+    if query:
+        sql += ' AND LOWER(t.name) LIKE ?'
+        params.append(f'%{query}%')
+    
+    # Finalize the query
+    sql += '''
+        GROUP BY t.name
+        ORDER BY count DESC, t.name
+        LIMIT 10
+    '''
+    
+    tags = db.execute(sql, params).fetchall()
+    suggestions = [{'name': row['name'], 'count': row['count']} for row in tags]
+    return jsonify({'suggestions': suggestions})
+
+# Update the check_duplicates endpoint to use the enhanced method
+@app.route('/api/check_duplicates', methods=['POST'])
+def check_duplicates():
+    """
+    Check for potential duplicate questions in the same module using semantic similarity.
+    Returns a list of similar questions if any are found.
+    """
+    if not discord.authorized:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    data = request.get_json()
+    question_text = data.get('question', '').strip()
+    module_name = data.get('module', '')
+    
+    if not question_text or not module_name or len(question_text) < 10:
+        return jsonify({'duplicates': []})
+    
+    db = get_db()
+    
+    # Get module ID
+    module_row = db.execute('SELECT id FROM modules WHERE name = ?', (module_name,)).fetchone()
+    if not module_row:
+        return jsonify({'duplicates': []})
+    
+    module_id = module_row['id']
+    
+    # Find semantically similar questions
+    potential_duplicates = find_semantic_duplicates(db, question_text, module_id)
+    
+    return jsonify({'duplicates': potential_duplicates})
+
+def find_semantic_duplicates(db, question_text, module_id, limit=5, threshold=0.3):
+    """
+    Enhanced semantic duplicate detection using TF-IDF and cosine similarity
+    to better understand the meaning behind questions.
+    
+    Args:
+        db: Database connection
+        question_text: The question to check for duplicates
+        module_id: The module to search within
+        limit: Maximum number of duplicates to return
+        threshold: Minimum similarity score to consider a match
+    
+    Returns:
+        List of potential duplicate questions with similarity scores
+    """
+    from collections import Counter
+    import math
+    
+    # Step 1: Get all questions in the same module
+    rows = db.execute('''
+        SELECT id, question, answer
+        FROM questions
+        WHERE module_id = ?
+    ''', (module_id,)).fetchall()
+    
+    if not rows:
+        return []
+    
+    # Create a list of all documents (questions) to process
+    docs = [row['question'] for row in rows]
+    
+    # Add the input question to the end
+    docs.append(question_text)
+    
+    # Step 2: Preprocess all documents
+    processed_docs = []
+    stop_words = {'the', 'a', 'an', 'in', 'on', 'at', 'to', 'for', 'with', 'by', 'about', 
+                 'as', 'of', 'and', 'or', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 
+                 'have', 'has', 'had', 'do', 'does', 'did', 'what', 'when', 'where', 'why', 
+                 'how', 'which', 'who', 'whom', 'this', 'that', 'these', 'those'}
+    
+    for doc in docs:
+        # Convert to lowercase
+        doc_lower = doc.lower()
+        
+        # Remove punctuation
+        for char in '.,?!;:()[]{}""\'':
+            doc_lower = doc_lower.replace(char, ' ')
+        
+        # Tokenize and remove stop words and short words
+        tokens = [word for word in doc_lower.split() if word not in stop_words and len(word) > 2]
+        
+        # Stem words (simple implementation - just take first 6 chars)
+        # This isn't as good as a real stemmer but helps with basic word forms
+        stemmed = [word[:6] for word in tokens if len(word) > 3]
+        
+        processed_docs.append(stemmed)
+    
+    # Step 3: Calculate TF-IDF vectors
+    # First, get document frequency for each term
+    term_doc_freq = Counter()
+    all_terms = set()
+    
+    for doc in processed_docs:
+        terms = set(doc)  # Unique terms in this document
+        for term in terms:
+            term_doc_freq[term] += 1
+            all_terms.add(term)
+    
+    num_docs = len(processed_docs)
+    
+    # Calculate IDF for each term
+    idf = {term: math.log(num_docs / (1 + term_doc_freq[term])) for term in all_terms}
+    
+    # Calculate TF-IDF vector for each document
+    tfidf_vectors = []
+    
+    for doc in processed_docs:
+        # Calculate term frequency in this document
+        tf = Counter(doc)
+        # Normalize by document length
+        doc_len = len(doc) or 1  # Avoid division by zero
+        
+        # Calculate TF-IDF for each term
+        doc_vector = {term: (tf[term] / doc_len) * idf.get(term, 0) for term in all_terms}
+        tfidf_vectors.append(doc_vector)
+    
+    # Step 4: Calculate cosine similarity between the input question and all others
+    input_vector = tfidf_vectors[-1]  # The last one is our input question
+    input_magnitude = math.sqrt(sum(val**2 for val in input_vector.values()))
+    
+    similarities = []
+    
+    for i, doc_vector in enumerate(tfidf_vectors[:-1]):  # Skip the last one (input question)
+        # Calculate dot product
+        dot_product = sum(input_vector.get(term, 0) * doc_vector.get(term, 0) for term in all_terms)
+        
+        # Calculate magnitude of document vector
+        doc_magnitude = math.sqrt(sum(val**2 for val in doc_vector.values()))
+        
+        # Calculate cosine similarity
+        similarity = 0
+        if input_magnitude > 0 and doc_magnitude > 0:  # Avoid division by zero
+            similarity = dot_product / (input_magnitude * doc_magnitude)
+        
+        similarities.append((i, similarity))
+    
+    # Step 5: Return the top matches above the threshold
+    top_matches = sorted(similarities, key=lambda x: x[1], reverse=True)[:limit]
+    
+    results = []
+    for idx, score in top_matches:
+        if score >= threshold:  # Only include matches above the threshold
+            row = rows[idx]
+            results.append({
+                'id': row['id'],
+                'question': row['question'],
+                'answer': row['answer'],
+                'similarity': score
+            })
+    
+    return results
+
+# Add a text similarity function for more holistic comparison
+def get_text_similarity(text1, text2):
+    """
+    Calculate text similarity using a combination of:
+    1. Character n-gram overlap (catches typos and small rewrites)
+    2. Word overlap (semantic meaning)
+    3. Word order similarity (sentence structure)
+    
+    Returns a similarity score between 0 and 1
+    """
+    if not text1 or not text2:
+        return 0.0
+        
+    # Normalize both texts
+    text1 = text1.lower().strip()
+    text2 = text2.lower().strip()
+    
+    # Quick equality check
+    if text1 == text2:
+        return 1.0
+        
+    # Remove punctuation
+    for char in '.,?!;:()[]{}""\'':
+        text1 = text1.replace(char, ' ')
+        text2 = text2.replace(char, ' ')
+    
+    # Split into words
+    words1 = [w for w in text1.split() if len(w) > 2]
+    words2 = [w for w in text2.split() if len(w) > 2]
+    
+    if not words1 or not words2:
+        return 0.0
+    
+    # 1. Word set similarity (Jaccard)
+    set1 = set(words1)
+    set2 = set(words2)
+    jaccard = len(set1.intersection(set2)) / len(set1.union(set2)) if set1 or set2 else 0
+    
+    # 2. Character trigram similarity
+    def get_trigrams(text):
+        return [text[i:i+3] for i in range(len(text)-2) if len(text[i:i+3].strip()) == 3]
+        
+    trigrams1 = set(get_trigrams(' '.join(words1)))
+    trigrams2 = set(get_trigrams(' '.join(words2)))
+    trigram_sim = len(trigrams1.intersection(trigrams2)) / len(trigrams1.union(trigrams2)) if trigrams1 or trigrams2 else 0
+    
+    # 3. Sequence similarity (difflib)
+    seq_sim = difflib.SequenceMatcher(None, text1, text2).ratio()
+    
+    # 4. Word order similarity using difflib on words
+    word_order_sim = difflib.SequenceMatcher(None, words1, words2).ratio()
+    
+    # Weight and combine the similarities
+    # Adjust weights based on importance
+    final_sim = (jaccard * 0.3) + (trigram_sim * 0.2) + (seq_sim * 0.2) + (word_order_sim * 0.3)
+    
+    return final_sim
+
 if __name__ == '__main__':
     init_db()
-    # Enable HTTP for local development
+
+
     os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
     app.run(host='127.0.0.1', debug=True, port=2456)
 

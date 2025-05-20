@@ -11,11 +11,13 @@
             flex-direction: column;
         }
         .stats-card {
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
             transition: transform 0.2s;
         }
         .stats-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.1);
         }
         .stat-value {
             font-size: 2.5rem;
@@ -186,6 +188,18 @@
                                 <div class="stat-label">Last Answer</div>
                             </div>
                         </div>
+                        <div class="col-12 col-md-6">
+                            <div class="card stats-card p-3 mb-3">
+                                <div class="stat-value">
+                                    {% if stats.active_module and stats.module_stats[stats.active_module] %}
+                                        {{ stats.module_stats[stats.active_module].approved_cards or 0 }}
+                                    {% else %}
+                                        {{ stats['approved_cards'] or 0 }}
+                                    {% endif %}
+                                </div>
+                                <div class="stat-label">Approved Cards</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -204,6 +218,7 @@
                                     <th>Accuracy</th>
                                     <th>Last Answered</th>
                                     <th>Streak</th>
+                                    <th>Approved Cards</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -225,6 +240,7 @@
                                     <td>
                                         {{ modstats.current_streak or 0 }}
                                     </td>
+                                    <td>{{ modstats.approved_cards or 0 }}</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
