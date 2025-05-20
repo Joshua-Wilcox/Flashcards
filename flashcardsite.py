@@ -1678,7 +1678,7 @@ def create_checkout_session():
         
         # Create a checkout session with only the card payment method for maximum compatibility
         checkout_session = stripe.checkout.Session.create(
-            payment_method_types=['card'],
+            payment_method_types=['card', 'klarna', 'pay_by_bank', 'samsung_pay', 'afterpay_clearpay', 'revolut_pay'],
             line_items=[{
                 'price_data': {
                     'currency': 'gbp',
