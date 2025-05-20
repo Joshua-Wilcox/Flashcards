@@ -35,6 +35,93 @@
         @media (max-width: 900px) {
             .submit-card { max-width: 98vw; }
         }
+
+        /* New styles for suggestions dropdown */
+        .suggestion-container {
+            position: relative;
+        }
+        .suggestions-dropdown {
+            position: absolute;
+            width: 100%;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            background: white;
+            border: 1px solid #ced4da;
+            border-radius: 0 0 0.25rem 0.25rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+        .suggestion-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .suggestion-item:hover, .suggestion-item.active {
+            background-color: #f8f9fa;
+        }
+        .create-new-item {
+            padding: 8px 12px;
+            background-color: #e7f3ff;
+            color: #0d6efd;
+            font-weight: 500;
+            border-bottom: 1px solid #d1e6ff;
+        }
+        .create-new-item:hover {
+            background-color: #d1e6ff;
+        }
+        .suggestion-count {
+            float: right;
+            color: #6c757d;
+            font-size: 0.85em;
+        }
+        .tag-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .tag-item {
+            background-color: #e7f3ff;
+            color: #0d6efd;
+            padding: 4px 10px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+        .tag-remove {
+            margin-left: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .tag-add-container {
+            display: flex;
+            margin-top: 8px;
+        }
+        .tag-input {
+            flex-grow: 1;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+        .tag-add-btn {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+        .disabled-field {
+            background-color: #e9ecef;
+            opacity: 0.65;
+            cursor: not-allowed;
+        }
+        .form-sequence-container {
+            position: relative;
+        }
+        #tags-error {
+            color: #dc3545;
+            font-size: 0.875em;
+            margin-top: 0.25rem;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -63,7 +150,7 @@
                     </div>
                   {% endif %}
                 {% endwith %}
-                <form method="post" autocomplete="off">
+                <form id="flashcard-form" method="post" autocomplete="off">
                     <div class="mb-3">
                         <label for="question" class="form-label">Question <span class="text-danger">*</span></label>
                         <textarea class="form-control" id="question" name="question" rows="3" required>{{ '' if clear_fields else prev_question if prev_question is defined else '' }}</textarea>
@@ -72,32 +159,57 @@
                         <label for="answer" class="form-label">Answer <span class="text-danger">*</span></label>
                         <textarea class="form-control" id="answer" name="answer" rows="2" required>{{ '' if clear_fields else prev_answer if prev_answer is defined else '' }}</textarea>
                     </div>
-                    <div class="mb-3">
-                        <label for="module" class="form-label">Module <span class="text-danger">*</span></label>
-                        <select class="form-select" id="module" name="module" required>
-                            <option value="">Select Module</option>
-                            {% for m in modules %}
-                                <option value="{{ m }}" {% if selected_module == m %}selected{% endif %}>{{ m }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-md-4 mb-2">
+                    
+                    <!-- Sequential form flow container -->
+                    <div class="form-sequence-container">
+                        <!-- Step 1: Module -->
+                        <div class="mb-3">
+                            <label for="module" class="form-label">Module <span class="text-danger">*</span></label>
+                            <select class="form-select" id="module" name="module" required>
+                                <option value="">Select Module</option>
+                                {% for m in modules %}
+                                    <option value="{{ m }}" {% if selected_module == m %}selected{% endif %}>{{ m }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <!-- Step 2: Topic with suggestions -->
+                        <div class="mb-3">
                             <label for="topic" class="form-label">Topic <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control mini-input" id="topic" name="topic" maxlength="64" value="{{ prev_topic if prev_topic is defined else '' }}" required>
+                            <div class="suggestion-container">
+                                <input type="text" class="form-control" id="topic" name="topic" 
+                                       maxlength="64" placeholder="Choose a topic..." 
+                                       value="{{ prev_topic if prev_topic is defined else '' }}" required disabled>
+                                <div class="suggestions-dropdown" id="topic-suggestions"></div>
+                            </div>
                         </div>
-                        <div class="col-md-4 mb-2">
+                        
+                        <!-- Step 3: Subtopic with suggestions -->
+                        <div class="mb-3">
                             <label for="subtopic" class="form-label">Subtopic <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control mini-input" id="subtopic" name="subtopic" maxlength="64" value="{{ prev_subtopic if prev_subtopic is defined else '' }}" required>
-                        </div>
-                        <div class="col-md-4 mb-2">
-                            <label for="tags" class="form-label d-flex justify-content-between align-items-center" style="white-space:nowrap;">
-                                <span>Tags <span class="text-danger">*</span></span>
-                                <span class="text-muted ms-2" style="font-size:0.95em;">(comma separated)</span>
-                            </label>
-                            <input type="text" class="form-control mini-input" id="tags" name="tags" maxlength="128" placeholder="e.g. recursion, trees" value="{{ prev_tags if prev_tags is defined else '' }}" required>
+                            <div class="suggestion-container">
+                                <input type="text" class="form-control" id="subtopic" name="subtopic" 
+                                       maxlength="64" placeholder="Choose a subtopic..." 
+                                       value="{{ prev_subtopic if prev_subtopic is defined else '' }}" required disabled>
+                                <div class="suggestions-dropdown" id="subtopic-suggestions"></div>
+                            </div>
                         </div>
                     </div>
+                    
+                    <!-- Step 4: Tags - multiple with "add tag" pill -->
+                    <div class="mb-3">
+                        <label class="form-label">Tags <span class="text-danger">*</span> <small class="text-muted">(at least 3 required)</small></label>
+                        <div class="tag-add-container">
+                            <input type="text" class="form-control tag-input" id="tag-input" 
+                                   placeholder="Enter a tag..." maxlength="32" disabled>
+                            <button type="button" class="btn btn-primary tag-add-btn" id="add-tag-btn" disabled>Add Tag</button>
+                        </div>
+                        <div class="suggestions-dropdown" id="tag-suggestions"></div>
+                        <div class="tag-container" id="tag-container"></div>
+                        <div id="tags-error">Please add at least 3 tags</div>
+                        <input type="hidden" id="tags" name="tags" required>
+                    </div>
+                    
                     <button type="submit" class="btn btn-success w-100">Submit for Review</button>
                 </form>
             </div>
@@ -107,5 +219,262 @@
             <p>websites are not free! if this has helped you more than a coffee, consider <a href="https://ko-fi.com/joshwilcox">supporting</a></p>
         </footer>
     </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            let selectedTags = [];
+            
+            // Load saved tags if any (from previous form submission)
+            {% if prev_tags is defined and prev_tags %}
+                {% if clear_fields %}
+                    selectedTags = [];
+                {% else %}
+                    selectedTags = "{{ prev_tags }}".split(',').map(tag => tag.trim()).filter(tag => tag);
+                    updateTagsDisplay();
+                {% endif %}
+            {% endif %}
+            
+            // STEP 1: Module selection enables topic field
+            $('#module').on('change', function() {
+                const module = $(this).val();
+                if (module) {
+                    $('#topic').prop('disabled', false).removeClass('disabled-field');
+                    $('#subtopic').prop('disabled', true).addClass('disabled-field').val('');
+                    $('#tag-input, #add-tag-btn').prop('disabled', true).addClass('disabled-field');
+                    selectedTags = [];
+                    updateTagsDisplay();
+                } else {
+                    $('#topic, #subtopic, #tag-input, #add-tag-btn')
+                        .prop('disabled', true)
+                        .addClass('disabled-field');
+                    $('#topic, #subtopic').val('');
+                }
+            });
+            
+            // Initialize fields based on current module selection
+            if ($('#module').val()) {
+                $('#topic').prop('disabled', false).removeClass('disabled-field');
+                if ($('#topic').val()) {
+                    $('#subtopic').prop('disabled', false).removeClass('disabled-field');
+                    if ($('#subtopic').val()) {
+                        $('#tag-input, #add-tag-btn').prop('disabled', false).removeClass('disabled-field');
+                    }
+                }
+            }
+            
+            // TOPIC SUGGESTIONS
+            $('#topic').on('focus input', function() {
+                const module = $('#module').val();
+                const query = $(this).val().trim();
+                
+                if (!module) {
+                    return;
+                }
+                
+                $.ajax({
+                    url: '/api/suggest/topics',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ module: module, query: query }),
+                    success: function(response) {
+                        const suggestions = response.suggestions;
+                        let html = `<div class="create-new-item" data-value="${query}">+ Create topic "${query}"</div>`;
+                        
+                        suggestions.forEach(suggestion => {
+                            html += `<div class="suggestion-item" data-value="${suggestion.name}">
+                                ${suggestion.name}
+                                <span class="suggestion-count">${suggestion.count} questions</span>
+                            </div>`;
+                        });
+                        
+                        $('#topic-suggestions').html(html).show();
+                    }
+                });
+            });
+            
+            // SUBTOPIC SUGGESTIONS
+            $('#subtopic').on('focus input', function() {
+                const module = $('#module').val();
+                const topic = $('#topic').val();
+                const query = $(this).val().trim();
+                
+                if (!module || !topic) {
+                    return;
+                }
+                
+                $.ajax({
+                    url: '/api/suggest/subtopics',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ module: module, topic: topic, query: query }),
+                    success: function(response) {
+                        const suggestions = response.suggestions;
+                        let html = `<div class="create-new-item" data-value="${query}">+ Create subtopic "${query}"</div>`;
+                        
+                        suggestions.forEach(suggestion => {
+                            html += `<div class="suggestion-item" data-value="${suggestion.name}">
+                                ${suggestion.name}
+                                <span class="suggestion-count">${suggestion.count} questions</span>
+                            </div>`;
+                        });
+                        
+                        $('#subtopic-suggestions').html(html).show();
+                    }
+                });
+            });
+            
+            // TAG SUGGESTIONS
+            $('#tag-input').on('focus input', function() {
+                const module = $('#module').val();
+                const topic = $('#topic').val();
+                const subtopic = $('#subtopic').val();
+                const query = $(this).val().trim();
+                
+                if (!module || !topic || !subtopic) {
+                    return;
+                }
+                
+                $.ajax({
+                    url: '/api/suggest/tags',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ 
+                        module: module, 
+                        topic: topic, 
+                        subtopic: subtopic,
+                        query: query 
+                    }),
+                    success: function(response) {
+                        const suggestions = response.suggestions;
+                        let html = `<div class="create-new-item" data-value="${query}">+ Create tag "${query}"</div>`;
+                        
+                        suggestions.forEach(suggestion => {
+                            // Skip suggestions for tags already selected
+                            if (selectedTags.includes(suggestion.name)) {
+                                return;
+                            }
+                            
+                            html += `<div class="suggestion-item" data-value="${suggestion.name}">
+                                ${suggestion.name}
+                                <span class="suggestion-count">${suggestion.count} questions</span>
+                            </div>`;
+                        });
+                        
+                        $('#tag-suggestions').html(html).show();
+                    }
+                });
+            });
+            
+            // Handle suggestion selection for topic
+            $(document).on('click', '#topic-suggestions .suggestion-item, #topic-suggestions .create-new-item', function() {
+                const value = $(this).data('value');
+                $('#topic').val(value);
+                $('#topic-suggestions').hide();
+                
+                // Enable subtopic field now that topic is selected
+                $('#subtopic').prop('disabled', false).removeClass('disabled-field');
+            });
+            
+            // Handle suggestion selection for subtopic
+            $(document).on('click', '#subtopic-suggestions .suggestion-item, #subtopic-suggestions .create-new-item', function() {
+                const value = $(this).data('value');
+                $('#subtopic').val(value);
+                $('#subtopic-suggestions').hide();
+                
+                // Enable tags field now that subtopic is selected
+                $('#tag-input, #add-tag-btn').prop('disabled', false).removeClass('disabled-field');
+            });
+            
+            // Handle suggestion selection for tags
+            $(document).on('click', '#tag-suggestions .suggestion-item, #tag-suggestions .create-new-item', function() {
+                const value = $(this).data('value');
+                $('#tag-input').val('');
+                $('#tag-suggestions').hide();
+                
+                // Add the tag if it's not already in the list
+                if (!selectedTags.includes(value)) {
+                    selectedTags.push(value);
+                    updateTagsDisplay();
+                }
+            });
+            
+            // Add tag button click handler
+            $('#add-tag-btn').on('click', function() {
+                const value = $('#tag-input').val().trim();
+                if (value && !selectedTags.includes(value)) {
+                    selectedTags.push(value);
+                    $('#tag-input').val('');
+                    updateTagsDisplay();
+                }
+            });
+            
+            // Enter key in tag input also adds the tag
+            $('#tag-input').on('keypress', function(e) {
+                if (e.which === 13) { // Enter key
+                    e.preventDefault();
+                    const value = $(this).val().trim();
+                    if (value && !selectedTags.includes(value)) {
+                        selectedTags.push(value);
+                        $(this).val('');
+                        updateTagsDisplay();
+                    }
+                }
+            });
+            
+            // Remove tag when clicking the X
+            $(document).on('click', '.tag-remove', function() {
+                const tagToRemove = $(this).data('tag');
+                selectedTags = selectedTags.filter(tag => tag !== tagToRemove);
+                updateTagsDisplay();
+            });
+            
+            // Hide suggestion dropdowns when clicking outside
+            $(document).on('click', function(e) {
+                if (!$(e.target).closest('.suggestion-container').length) {
+                    $('.suggestions-dropdown').hide();
+                }
+            });
+            
+            // Handle form submission
+            $('#flashcard-form').on('submit', function(e) {
+                // Validate at least 3 tags
+                if (selectedTags.length < 3) {
+                    e.preventDefault();
+                    $('#tags-error').show();
+                    return false;
+                }
+                
+                // Set the tags hidden input before submitting
+                $('#tags').val(selectedTags.join(', '));
+                return true;
+            });
+            
+            // Function to update the tags display
+            function updateTagsDisplay() {
+                // Update the visual representation of tags
+                let html = '';
+                selectedTags.forEach(tag => {
+                    html += `
+                        <div class="tag-item">
+                            ${tag}
+                            <span class="tag-remove" data-tag="${tag}">×</span>
+                        </div>
+                    `;
+                });
+                $('#tag-container').html(html);
+                
+                // Update the hidden input value
+                $('#tags').val(selectedTags.join(', '));
+                
+                // Update validation state
+                if (selectedTags.length >= 3) {
+                    $('#tags-error').hide();
+                } else {
+                    $('#tags-error').show();
+                }
+            }
+        });
+    </script>
 </body>
 </html>

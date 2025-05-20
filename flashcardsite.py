@@ -499,7 +499,7 @@ def get_pdfs_for_question(question_id, max_pdfs=3):
             for pdf in tag_pdfs:
                 # Calculate tag match percentage: 20% base + up to 30% based on tag overlap
                 matching_tags = pdf['matching_tags']
-                total_pdf_tags = max(pdf['total_pdf_tags'], 1)  # Avoid division by zero
+                total_pdf_tags = max(pdf['total_pdf_tags'], 1) # Avoid division by zero
                 
                 # Calculate tag overlap ratio (matching tags / total tags across both)
                 tag_overlap = matching_tags / (total_question_tags + total_pdf_tags - matching_tags)
@@ -1278,6 +1278,184 @@ def verify_signed_token(token, user_id):
     except Exception:
         return None, False
 
+
+# Add these new API routes for auto-suggestions
+@app.route('/api/suggest/topics', methods=['POST'])
+def suggest_topics():
+    if not discord.authorized:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    data = request.get_json()
+    module_name = data.get('module', '')
+    query = data.get('query', '').lower()
+    
+    if not module_name:
+        return jsonify({'suggestions': []})
+    
+    db = get_db()
+    
+    # Get module ID
+    module_row = db.execute('SELECT id FROM modules WHERE name = ?', (module_name,)).fetchone()
+    if not module_row:
+        return jsonify({'suggestions': []})
+    
+    module_id = module_row['id']
+    
+    # Get topics for this module with occurrence count
+    if query:
+        topics = db.execute('''
+            SELECT t.name, COUNT(qt.question_id) as count
+            FROM topics t
+            JOIN question_topics qt ON t.id = qt.topic_id
+            JOIN questions q ON qt.question_id = q.id
+            WHERE q.module_id = ? AND LOWER(t.name) LIKE ?
+            GROUP BY t.name
+            ORDER BY count DESC, t.name
+            LIMIT 10
+        ''', (module_id, f'%{query}%')).fetchall()
+    else:
+        topics = db.execute('''
+            SELECT t.name, COUNT(qt.question_id) as count
+            FROM topics t
+            JOIN question_topics qt ON t.id = qt.topic_id
+            JOIN questions q ON qt.question_id = q.id
+            WHERE q.module_id = ?
+            GROUP BY t.name
+            ORDER BY count DESC, t.name
+            LIMIT 10
+        ''', (module_id,)).fetchall()
+    
+    suggestions = [{'name': row['name'], 'count': row['count']} for row in topics]
+    return jsonify({'suggestions': suggestions})
+
+@app.route('/api/suggest/subtopics', methods=['POST'])
+def suggest_subtopics():
+    if not discord.authorized:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    data = request.get_json()
+    module_name = data.get('module', '')
+    topic_name = data.get('topic', '')
+    query = data.get('query', '').lower()
+    
+    if not module_name or not topic_name:
+        return jsonify({'suggestions': []})
+    
+    db = get_db()
+    
+    # Get module ID
+    module_row = db.execute('SELECT id FROM modules WHERE name = ?', (module_name,)).fetchone()
+    if not module_row:
+        return jsonify({'suggestions': []})
+    
+    module_id = module_row['id']
+    
+    # Get topic ID
+    topic_row = db.execute('SELECT id FROM topics WHERE name = ?', (topic_name,)).fetchone()
+    if not topic_row:
+        return jsonify({'suggestions': []})
+    
+    topic_id = topic_row['id']
+    
+    # Get subtopics for this module and topic with occurrence count
+    if query:
+        subtopics = db.execute('''
+            SELECT s.name, COUNT(qs.question_id) as count
+            FROM subtopics s
+            JOIN question_subtopics qs ON s.id = qs.subtopic_id
+            JOIN questions q ON qs.question_id = q.id
+            JOIN question_topics qt ON q.id = qt.question_id
+            WHERE q.module_id = ? AND qt.topic_id = ? AND LOWER(s.name) LIKE ?
+            GROUP BY s.name
+            ORDER BY count DESC, s.name
+            LIMIT 10
+        ''', (module_id, topic_id, f'%{query}%')).fetchall()
+    else:
+        subtopics = db.execute('''
+            SELECT s.name, COUNT(qs.question_id) as count
+            FROM subtopics s
+            JOIN question_subtopics qs ON s.id = qs.subtopic_id
+            JOIN questions q ON qs.question_id = q.id
+            JOIN question_topics qt ON q.id = qt.question_id
+            WHERE q.module_id = ? AND qt.topic_id = ?
+            GROUP BY s.name
+            ORDER BY count DESC, s.name
+            LIMIT 10
+        ''', (module_id, topic_id)).fetchall()
+    
+    suggestions = [{'name': row['name'], 'count': row['count']} for row in subtopics]
+    return jsonify({'suggestions': suggestions})
+
+@app.route('/api/suggest/tags', methods=['POST'])
+def suggest_tags():
+    if not discord.authorized:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    data = request.get_json()
+    module_name = data.get('module', '')
+    topic_name = data.get('topic', '')
+    subtopic_name = data.get('subtopic', '')
+    query = data.get('query', '').lower()
+    
+    if not module_name:
+        return jsonify({'suggestions': []})
+    
+    db = get_db()
+    
+    # Get module ID
+    module_row = db.execute('SELECT id FROM modules WHERE name = ?', (module_name,)).fetchone()
+    if not module_row:
+        return jsonify({'suggestions': []})
+    
+    module_id = module_row['id']
+    
+    # Base query to get tags for this module
+    sql = '''
+        SELECT t.name, COUNT(qt.question_id) as count
+        FROM tags t
+        JOIN question_tags qt ON t.id = qt.tag_id
+        JOIN questions q ON qt.question_id = q.id
+        WHERE q.module_id = ?
+    '''
+    params = [module_id]
+    
+    # Add topic filter if provided
+    if topic_name:
+        sql += '''
+            AND EXISTS (
+                SELECT 1 FROM question_topics qtop
+                JOIN topics top ON qtop.topic_id = top.id
+                WHERE qtop.question_id = q.id AND top.name = ?
+            )
+        '''
+        params.append(topic_name)
+    
+    # Add subtopic filter if provided
+    if subtopic_name:
+        sql += '''
+            AND EXISTS (
+                SELECT 1 FROM question_subtopics qsub
+                JOIN subtopics sub ON qsub.subtopic_id = sub.id
+                WHERE qsub.question_id = q.id AND sub.name = ?
+            )
+        '''
+        params.append(subtopic_name)
+    
+    # Add query filter if provided
+    if query:
+        sql += ' AND LOWER(t.name) LIKE ?'
+        params.append(f'%{query}%')
+    
+    # Finalize the query
+    sql += '''
+        GROUP BY t.name
+        ORDER BY count DESC, t.name
+        LIMIT 10
+    '''
+    
+    tags = db.execute(sql, params).fetchall()
+    suggestions = [{'name': row['name'], 'count': row['count']} for row in tags]
+    return jsonify({'suggestions': suggestions})
 
 if __name__ == '__main__':
     init_db()
