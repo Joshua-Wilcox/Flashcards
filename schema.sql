@@ -4,7 +4,8 @@ CREATE TABLE IF NOT EXISTS user_stats (
     correct_answers INTEGER DEFAULT 0,
     total_answers INTEGER DEFAULT 0,
     last_answer_time INTEGER,  -- store as Unix timestamp (seconds)
-    current_streak INTEGER DEFAULT 0  -- Add missing comma here
+    current_streak INTEGER DEFAULT 0,  -- Add missing comma here
+    approved_cards INTEGER DEFAULT 0  -- New column for approved flashcards
 );
 
 CREATE TABLE IF NOT EXISTS requests_to_access (
@@ -128,6 +129,7 @@ CREATE TABLE IF NOT EXISTS module_stats (
     number_correct INTEGER DEFAULT 0,
     last_answered_time INTEGER,
     current_streak INTEGER DEFAULT 0,
+    approved_cards INTEGER DEFAULT 0,  -- New column for approved flashcards
     PRIMARY KEY (user_id, module_id),
     FOREIGN KEY (user_id) REFERENCES user_stats(user_id) ON DELETE CASCADE,
     FOREIGN KEY (module_id) REFERENCES modules(id) ON DELETE CASCADE
