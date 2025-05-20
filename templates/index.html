@@ -1567,13 +1567,15 @@
                 $('#custom-amount').val(''); // Clear custom amount
             });
             
-            // Custom amount input
+            // Custom amount input handling - FIX: Properly track custom amount
             $('#custom-amount').on('input', function() {
                 const customAmount = parseInt($(this).val());
                 if (customAmount && customAmount > 0) {
+                    // When valid custom amount is entered, deselect preset amounts
                     $('.amount-option').removeClass('selected');
                     selectedAmount = customAmount;
                 } else if ($('.amount-option.selected').length) {
+                    // If invalid and a preset is selected, use that
                     selectedAmount = $('.amount-option.selected').data('amount');
                 } else {
                     // Default to £1 if nothing is selected and custom is invalid
@@ -1582,17 +1584,32 @@
                 }
             });
             
-            // Checkout button
+            // Checkout button - FIX: Always check for custom amount value first
             $('#checkout-button').click(function() {
                 const button = $(this);
                 button.prop('disabled', true).text('Processing...');
                 
-                // Create a checkout session on your server with the selected amount
+                let finalAmount = selectedAmount; // Start with currently selected amount
+                
+                // Check if there's a valid custom amount entered (this takes priority)
+                const customAmountInput = $('#custom-amount').val().trim();
+                if (customAmountInput) {
+                    const customAmount = parseInt(customAmountInput);
+                    if (customAmount && customAmount > 0) {
+                        finalAmount = customAmount;
+                        console.log('Using custom amount for checkout:', finalAmount);
+                    }
+                }
+                
+                // Ensure we have a valid amount (minimum £1)
+                finalAmount = Math.max(1, finalAmount);
+                
+                // Create a checkout session on your server with the final amount
                 $.ajax({
                     url: '/create-checkout-session',
                     method: 'POST',
                     contentType: 'application/json',
-                    data: JSON.stringify({ amount: selectedAmount }),
+                    data: JSON.stringify({ amount: finalAmount }),
                     success: function(response) {
                         // Redirect to Stripe Checkout
                         stripe.redirectToCheckout({ sessionId: response.id })
@@ -1648,60 +1665,6 @@
                     }
                 }, 300);
             });
-        });
-        
-        // Get the selected payment amount when the checkout button is clicked
-        let selectedAmount = {{ default_payment }};
-        
-        // Add event listeners to the payment option radio buttons
-        document.querySelectorAll('input[name="paymentOption"]').forEach(radio => {
-          radio.addEventListener('change', function() {
-            selectedAmount = parseInt(this.value);
-            console.log('Selected amount:', selectedAmount);
-          });
-        });
-        
-        // Checkout button
-        $('#checkout-button').click(function() {
-          const button = $(this);
-          button.prop('disabled', true).text('Processing...');
-          
-          // Create a checkout session on your server with the selected amount
-          $.ajax({
-            url: '/create-checkout-session',
-            method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify({ amount: selectedAmount }),
-            success: function(response) {
-              // Redirect to Stripe Checkout
-              stripe.redirectToCheckout({ sessionId: response.id })
-                .then(function(result) {
-                  if (result.error) {
-                    console.error('Stripe checkout error:', result.error);
-                    alert(result.error.message);
-                    button.prop('disabled', false).text('Support Now');
-                  }
-                });
-            },
-            error: function(xhr) {
-              console.error('Error creating checkout session');
-              
-              // Try to parse detailed error message
-              let errorMessage = 'Sorry, there was a problem processing your request. Please try again later.';
-              
-              try {
-                if (xhr.responseJSON && xhr.responseJSON.error) {
-                  errorMessage = xhr.responseJSON.error;
-                  console.error('Detailed error:', errorMessage);
-                }
-              } catch (e) {
-                console.error('Could not parse error response:', e);
-              }
-              
-              alert(errorMessage);
-              button.prop('disabled', false).text('Support Now');
-            }
-          });
         });
     </script>
 </body>

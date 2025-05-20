@@ -1668,17 +1668,27 @@ def create_checkout_session():
     
     try:
         data = request.json
-        # Validate amount is one of the allowed options (1, 3, or 5)
-        amount = data.get('amount', 1)  # Default to £1
-        if amount not in [1, 3, 5]:
-            amount = 1  # Fallback to £1 if an invalid amount is provided
+        
+        # Validate amount is provided and is a positive number
+        if not data or 'amount' not in data:
+            return jsonify({'error': 'Amount is required'}), 400
+            
+        # Parse amount and ensure it's an integer
+        try:
+            amount = int(data.get('amount', 1))
+        except (ValueError, TypeError):
+            # If amount can't be parsed as an integer, default to £1
+            amount = 1
+        
+        # Enforce minimum amount of £1
+        amount = max(1, amount)
         
         # Log the request to help with debugging
         print(f"Creating checkout session for amount: £{amount}")
         
         # Create a checkout session with only the card payment method for maximum compatibility
         checkout_session = stripe.checkout.Session.create(
-            payment_method_types=['card', 'klarna', 'pay_by_bank', 'samsung_pay', 'afterpay_clearpay', 'revolut_pay'],
+            payment_method_types=['card', 'klarna', 'pay_by_bank', 'samsung_pay', 'afterpay_clearpay', 'revolut_pay', 'paypal'],
             line_items=[{
                 'price_data': {
                     'currency': 'gbp',
