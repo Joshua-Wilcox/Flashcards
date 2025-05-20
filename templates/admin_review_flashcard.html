@@ -229,20 +229,13 @@
                 updateTagsDisplay();
             }
             
-            // Initialize fields based on current module selection
-            const initialModule = $('#module').val();
-            if (initialModule) {
-                // We already have existing data, so all fields should be enabled
-                fetchTopicSuggestions();
-                fetchSubtopicSuggestions();
-            }
+            // Remove the automatic fetching of suggestions on page load
+            // Instead, only fetch when user interacts with the fields
             
             // STEP 1: Module selection enables topic field
             $('#module').on('change', function() {
                 const module = $(this).val();
-                if (module) {
-                    fetchTopicSuggestions();
-                } else {
+                if (!module) {
                     $('#topic-suggestions').empty().hide();
                     $('#subtopic-suggestions').empty().hide();
                     $('#tag-suggestions').empty().hide();
@@ -319,7 +312,8 @@
             }
             
             // TAG SUGGESTIONS
-            $('#tag-input').on('focus input', function() {
+            $('#tag-input').on('focus input', function(e) {
+                e.stopPropagation(); // Prevent event from bubbling up
                 fetchTagSuggestions();
             });
             
@@ -369,9 +363,6 @@
                 const value = $(this).data('value');
                 $('#topic').val(value);
                 $('#topic-suggestions').hide();
-                
-                // Force subtopic field to clear/reload its suggestions
-                fetchSubtopicSuggestions();
             });
             
             // Handle suggestion selection for subtopic
@@ -382,7 +373,8 @@
             });
             
             // Handle suggestion selection for tags
-            $(document).on('click', '#tag-suggestions .suggestion-item, #tag-suggestions .create-new-item', function() {
+            $(document).on('click', '#tag-suggestions .suggestion-item, #tag-suggestions .create-new-item', function(e) {
+                e.stopPropagation(); // Prevent event from bubbling up
                 const value = $(this).data('value');
                 $('#tag-input').val('');
                 $('#tag-suggestions').hide();
@@ -426,9 +418,20 @@
             
             // Hide suggestion dropdowns when clicking outside
             $(document).on('click', function(e) {
-                if (!$(e.target).closest('.suggestion-container, .tag-add-container').length) {
-                    $('.suggestions-dropdown').hide();
+                if (!$(e.target).closest('.tag-add-container, #tag-suggestions').length) {
+                    $('#tag-suggestions').hide();
                 }
+                if (!$(e.target).closest('#topic, #topic-suggestions').length) {
+                    $('#topic-suggestions').hide();
+                }
+                if (!$(e.target).closest('#subtopic, #subtopic-suggestions').length) {
+                    $('#subtopic-suggestions').hide();
+                }
+            });
+            
+            // Prevent dropdown from closing when clicking inside it
+            $(document).on('click', '#tag-suggestions', function(e) {
+                e.stopPropagation();
             });
             
             // Handle form submission

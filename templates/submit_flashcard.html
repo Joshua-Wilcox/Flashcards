@@ -335,10 +335,11 @@
             });
             
             // TAG SUGGESTIONS
-            $('#tag-input').on('focus input', function() {
+            $('#tag-input').on('focus input', function(e) {
+                e.stopPropagation(); // Prevent event from bubbling up
                 const module = $('#module').val();
-                const topic = $('#topic').val();
-                const subtopic = $('#subtopic').val();
+                const topic = $('#topic').val().trim();
+                const subtopic = $('#subtopic').val().trim();
                 const query = $(this).val().trim();
                 
                 if (!module || !topic || !subtopic) {
@@ -397,7 +398,8 @@
             });
             
             // Handle suggestion selection for tags
-            $(document).on('click', '#tag-suggestions .suggestion-item, #tag-suggestions .create-new-item', function() {
+            $(document).on('click', '#tag-suggestions .suggestion-item, #tag-suggestions .create-new-item', function(e) {
+                e.stopPropagation(); // Prevent event from bubbling up
                 const value = $(this).data('value');
                 $('#tag-input').val('');
                 $('#tag-suggestions').hide();
@@ -439,10 +441,21 @@
                 updateTagsDisplay();
             });
             
-            // Hide suggestion dropdowns when clicking outside
+            // Prevent dropdown from closing when clicking inside it
+            $(document).on('click', '#tag-suggestions', function(e) {
+                e.stopPropagation();
+            });
+            
+            // Hide suggestion dropdowns when clicking outside specific elements
             $(document).on('click', function(e) {
-                if (!$(e.target).closest('.suggestion-container').length) {
-                    $('.suggestions-dropdown').hide();
+                if (!$(e.target).closest('.tag-add-container, #tag-suggestions').length) {
+                    $('#tag-suggestions').hide();
+                }
+                if (!$(e.target).closest('#topic, #topic-suggestions').length) {
+                    $('#topic-suggestions').hide();
+                }
+                if (!$(e.target).closest('#subtopic, #subtopic-suggestions').length) {
+                    $('#subtopic-suggestions').hide();
                 }
             });
             
