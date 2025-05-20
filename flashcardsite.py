@@ -15,6 +15,7 @@ import threading
 import difflib
 import base64
 import hmac
+import stripe
 
 load_dotenv()  # Load variables from .env
 
@@ -293,7 +294,10 @@ def index():
     return render_template('index.html',
         modules=[m['name'] for m in modules],
         topics=get_unique_values('topic'),
-        subtopics=get_unique_values('subtopic'), NUMBER_OF_DISTRACTORS=NUMBER_OF_DISTRACTORS)
+        subtopics=get_unique_values('subtopic'), 
+        NUMBER_OF_DISTRACTORS=NUMBER_OF_DISTRACTORS,
+        payment_options=[1, 3, 5],  # Add payment options to template context
+        default_payment=1)  # Set default to £1
 
 @app.route('/get_filters', methods=['POST'])
 def get_filters():
@@ -1646,10 +1650,70 @@ def get_text_similarity(text1, text2):
     
     return final_sim
 
+# After your app configuration, set your Stripe API key
+stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
+STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY")
+# Remove explicit API version setting as it may be causing compatibility issues
+
+# Add this context processor to make the Stripe publishable key available in templates
+@app.context_processor
+def inject_stripe_key():
+    return dict(stripe_publishable_key=STRIPE_PUBLISHABLE_KEY)
+
+# Update this route to handle creating Stripe checkout sessions with better error handling
+@app.route('/create-checkout-session', methods=['POST'])
+def create_checkout_session():
+    if 'user_id' not in session:
+        return jsonify({'error': 'You must be logged in'}), 401
+    
+    try:
+        data = request.json
+        # Validate amount is one of the allowed options (1, 3, or 5)
+        amount = data.get('amount', 1)  # Default to £1
+        if amount not in [1, 3, 5]:
+            amount = 1  # Fallback to £1 if an invalid amount is provided
+        
+        # Log the request to help with debugging
+        print(f"Creating checkout session for amount: £{amount}")
+        
+        # Create a checkout session with only the card payment method for maximum compatibility
+        checkout_session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[{
+                'price_data': {
+                    'currency': 'gbp',
+                    'product_data': {
+                        'name': f'Support Flashcards (£{amount})',
+                        'description': 'Thank you for supporting the Flashcards website!',
+                    },
+                    'unit_amount': int(amount * 100),  # Convert to pence
+                },
+                'quantity': 1,
+            }],
+            mode='payment',
+            success_url=request.url_root + 'payment-success',
+            cancel_url=request.url_root,
+        )
+        
+        print(f"Checkout session created with ID: {checkout_session.id}")
+        return jsonify({'id': checkout_session.id})
+    except stripe.error.StripeError as e:
+        # These are Stripe-specific errors
+        error_msg = str(e)
+        print(f"Stripe error occurred: {error_msg}")
+        return jsonify({'error': error_msg}), 400
+    except Exception as e:
+        # For any other unexpected errors
+        error_msg = str(e)
+        print(f"Unexpected error creating checkout session: {error_msg}")
+        return jsonify({'error': error_msg}), 500
+
+# Add a success page route
+@app.route('/payment-success')
+def payment_success():
+    return render_template('payment_success.html')
+
 if __name__ == '__main__':
     init_db()
-
-
     os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
     app.run(host='127.0.0.1', debug=True, port=2456)
-

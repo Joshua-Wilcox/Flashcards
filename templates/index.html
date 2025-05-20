@@ -464,6 +464,199 @@
             background-color: #f8f9fa;
             color: #6c757d;
         }
+
+        /* Ko-fi widget styling */
+        #stripe-widget {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 330px;
+            max-width: 90vw;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        #stripe-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background-color: #6772E5; /* Stripe purple */
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+            border-radius: 12px 12px 0 0;
+        }
+
+        #stripe-header-text {
+            font-size: 16px;
+        }
+
+        #stripe-header-actions {
+            display: flex;
+            align-items: center;
+        }
+
+        #stripe-toggle-btn, #stripe-close-btn {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 0;
+            margin-left: 12px;
+            font-size: 20px;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+        }
+
+        #stripe-toggle-btn:hover, #stripe-close-btn:hover {
+            opacity: 0.8;
+        }
+
+        #stripe-container {
+            padding: 20px;
+            transition: height 0.3s ease;
+            overflow: hidden;
+        }
+
+        #stripe-widget.minimized #stripe-container {
+            height: 0;
+            padding: 0;
+        }
+
+        #stripe-widget.minimized {
+            width: 220px;
+        }
+
+        /* Animation for widget appearing */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translate3d(0, 20px, 0);
+            }
+            to {
+                opacity: 1;
+                transform: translate3d(0, 0, 0);
+            }
+        }
+
+        #stripe-widget {
+            animation: fadeInUp 0.4s ease-out;
+        }
+
+        .amount-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .amount-option {
+            flex: 1;
+            min-width: 60px;
+            padding: 8px;
+            text-align: center;
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .amount-option:hover {
+            background: #e6e6fa;
+            border-color: #6772E5;
+        }
+
+        .amount-option.selected {
+            background: #6772E5;
+            color: white;
+            border-color: #6772E5;
+        }
+
+        .custom-amount {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .custom-amount input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .custom-amount input:focus {
+            outline: none;
+            border-color: #6772E5;
+            box-shadow: 0 0 0 1px rgba(103, 114, 229, 0.3);
+        }
+
+        .support-button {
+            width: 100%;
+            padding: 12px;
+            background: #6772E5;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .support-button:hover {
+            background: #5469d4;
+        }
+
+        .support-button:disabled {
+            background: #a1a8e5;
+            cursor: not-allowed;
+        }
+
+        .support-message {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #4a5568;
+            text-align: center;
+        }
+
+        /* Make sure the widget is properly sized on different devices */
+        @media (max-width: 768px) {
+            #stripe-widget {
+                width: 300px;
+                bottom: 15px;
+                right: 15px;
+            }
+
+            #stripe-widget.minimized {
+                width: 200px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            #stripe-widget {
+                width: 280px;
+                bottom: 10px;
+                right: 10px;
+            }
+
+            #stripe-widget.minimized {
+                width: 180px;
+            }
+        }
     </style>
 </head>
 
@@ -597,13 +790,71 @@
         <footer class="text-center">
             <p>made with ❤️ by <a href="https://github.com/joshua-wilcox">Josh Wilcox</a></p>
             <p>New update to flashcard submission! Take a look!</p>
-            <p>websites are not free! if this has helped you more than a coffee, consider <a
-                    href="https://ko-fi.com/joshwilcox">supporting</a></p>
         </footer>
+    </div>
+
+    <!-- Stripe support widget -->
+    <div id="stripe-widget">
+        <div id="stripe-header">
+            <span id="stripe-header-text">Support the site</span>
+            <div id="stripe-header-actions">
+                <button id="stripe-toggle-btn" aria-label="Toggle support widget">▼</button>
+                <button id="stripe-close-btn" aria-label="Close support widget">×</button>
+            </div>
+        </div>
+        <div id="stripe-container">
+            <div class="amount-options">
+                <div class="amount-option selected" data-amount="1">£1</div>
+                <div class="amount-option" data-amount="3">£3</div>
+                <div class="amount-option" data-amount="5">£5</div>
+            </div>
+            <div class="custom-amount">
+                <span>£</span>
+                <input type="number" id="custom-amount" placeholder="Custom amount" min="1" step="1">
+            </div>
+            <button id="checkout-button" class="support-button">Support Now</button>
+            <div class="support-message">
+                Thank you for helping keep this site running! Proceeds will go towards upkeep
+            </div>
+        </div>
+    </div>
+
+    <!-- Donation modal -->
+    <div class="modal fade" id="donateModal" tabindex="-1" aria-labelledby="donateModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="donateModalLabel">Support Flashcards</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p>Thank you for supporting this flashcard website! Your contribution helps keep it running and ad-free.</p>
+            
+            <div class="payment-options mb-4">
+              <h6>Select an amount:</h6>
+              <div class="btn-group w-100" role="group" aria-label="Payment amount options">
+                {% for option in payment_options %}
+                  <input type="radio" class="btn-check" name="paymentOption" id="option{{ option }}" 
+                         value="{{ option }}" {% if option == default_payment %}checked{% endif %}>
+                  <label class="btn btn-outline-primary" for="option{{ option }}">£{{ option }}</label>
+                {% endfor %}
+              </div>
+            </div>
+            
+            <div class="d-grid">
+              <button id="checkout-button" class="btn btn-primary">Support Now</button>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://js.stripe.com/v3/"></script>
     <script>
         let currentSelections = {
             module: '',
@@ -1246,6 +1497,212 @@
 
         // Remove any existing click handlers that might interfere
         $('.dropdown-menu-multiselect').off('mousedown');
+
+        // Stripe widget functionality
+        $(document).ready(function() {
+            const $stripeWidget = $('#stripe-widget');
+            const $stripeToggleBtn = $('#stripe-toggle-btn');
+            const $stripeCloseBtn = $('#stripe-close-btn');
+            const $stripeHeader = $('#stripe-header');
+            const $supportLink = $('#support-link');
+            let selectedAmount = 1; // Default amount
+            
+            // Stripe initialization
+            const stripe = Stripe('{{ stripe_publishable_key }}'); // Get key from Flask
+            
+            // Check if widget was dismissed in this session
+            if (sessionStorage.getItem('stripe-widget-dismissed') === 'true') {
+                $stripeWidget.hide();
+            }
+            
+            // Toggle widget expanded/minimized state
+            function toggleStripeWidget() {
+                $stripeWidget.toggleClass('minimized');
+                
+                // Update the toggle button icon
+                if ($stripeWidget.hasClass('minimized')) {
+                    $stripeToggleBtn.html('▲');
+                } else {
+                    $stripeToggleBtn.html('▼');
+                }
+            }
+            
+            // Close widget and remember for this session only
+            $stripeCloseBtn.click(function(e) {
+                e.stopPropagation();
+                $stripeWidget.hide();
+                sessionStorage.setItem('stripe-widget-dismissed', 'true');
+            });
+            
+            // Toggle on header click
+            $stripeHeader.click(function() {
+                toggleStripeWidget();
+            });
+            
+            // Prevent the toggle from triggering the header click
+            $stripeToggleBtn.click(function(e) {
+                e.stopPropagation();
+                toggleStripeWidget();
+            });
+            
+            // Re-show widget when footer link is clicked
+            $supportLink.click(function(e) {
+                e.preventDefault();
+                $stripeWidget.show();
+                
+                // If it was minimized, expand it
+                if ($stripeWidget.hasClass('minimized')) {
+                    toggleStripeWidget();
+                }
+                
+                // Clear the dismissed state
+                sessionStorage.removeItem('stripe-widget-dismissed');
+            });
+            
+            // Amount option selection
+            $('.amount-option').click(function() {
+                $('.amount-option').removeClass('selected');
+                $(this).addClass('selected');
+                selectedAmount = $(this).data('amount');
+                $('#custom-amount').val(''); // Clear custom amount
+            });
+            
+            // Custom amount input
+            $('#custom-amount').on('input', function() {
+                const customAmount = parseInt($(this).val());
+                if (customAmount && customAmount > 0) {
+                    $('.amount-option').removeClass('selected');
+                    selectedAmount = customAmount;
+                } else if ($('.amount-option.selected').length) {
+                    selectedAmount = $('.amount-option.selected').data('amount');
+                } else {
+                    // Default to £1 if nothing is selected and custom is invalid
+                    $('.amount-option[data-amount="1"]').addClass('selected');
+                    selectedAmount = 1;
+                }
+            });
+            
+            // Checkout button
+            $('#checkout-button').click(function() {
+                const button = $(this);
+                button.prop('disabled', true).text('Processing...');
+                
+                // Create a checkout session on your server with the selected amount
+                $.ajax({
+                    url: '/create-checkout-session',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ amount: selectedAmount }),
+                    success: function(response) {
+                        // Redirect to Stripe Checkout
+                        stripe.redirectToCheckout({ sessionId: response.id })
+                            .then(function(result) {
+                                if (result.error) {
+                                    console.error('Stripe checkout error:', result.error);
+                                    alert(result.error.message);
+                                    button.prop('disabled', false).text('Support Now');
+                                }
+                            });
+                    },
+                    error: function(xhr) {
+                        console.error('Error creating checkout session');
+                        
+                        // Try to parse detailed error message
+                        let errorMessage = 'Sorry, there was a problem processing your request. Please try again later.';
+                        
+                        try {
+                            if (xhr.responseJSON && xhr.responseJSON.error) {
+                                errorMessage = xhr.responseJSON.error;
+                                console.error('Detailed error:', errorMessage);
+                            }
+                        } catch (e) {
+                            console.error('Could not parse error response:', e);
+                        }
+                        
+                        alert(errorMessage);
+                        button.prop('disabled', false).text('Support Now');
+                    }
+                });
+            });
+            
+            // Minimize the widget when answer buttons appear
+            const originalGetNewQuestion = window.getNewQuestion;
+            window.getNewQuestion = function(...args) {
+                originalGetNewQuestion.apply(this, args);
+                
+                // Minimize widget when there are answer options
+                setTimeout(function() {
+                    if ($('.answer-btn:visible').length > 0 && !$stripeWidget.hasClass('minimized')) {
+                        $stripeWidget.addClass('minimized');
+                        $stripeToggleBtn.html('▲');
+                    }
+                }, 300);
+            };
+            
+            // Also minimize when a module is selected (as that triggers answers to appear)
+            $(document).on('click', '#module-dropdown-menu .dropdown-item-module', function() {
+                setTimeout(function() {
+                    if ($('#qa-section:visible').length > 0 && !$stripeWidget.hasClass('minimized')) {
+                        $stripeWidget.addClass('minimized');
+                        $stripeToggleBtn.html('▲');
+                    }
+                }, 300);
+            });
+        });
+        
+        // Get the selected payment amount when the checkout button is clicked
+        let selectedAmount = {{ default_payment }};
+        
+        // Add event listeners to the payment option radio buttons
+        document.querySelectorAll('input[name="paymentOption"]').forEach(radio => {
+          radio.addEventListener('change', function() {
+            selectedAmount = parseInt(this.value);
+            console.log('Selected amount:', selectedAmount);
+          });
+        });
+        
+        // Checkout button
+        $('#checkout-button').click(function() {
+          const button = $(this);
+          button.prop('disabled', true).text('Processing...');
+          
+          // Create a checkout session on your server with the selected amount
+          $.ajax({
+            url: '/create-checkout-session',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ amount: selectedAmount }),
+            success: function(response) {
+              // Redirect to Stripe Checkout
+              stripe.redirectToCheckout({ sessionId: response.id })
+                .then(function(result) {
+                  if (result.error) {
+                    console.error('Stripe checkout error:', result.error);
+                    alert(result.error.message);
+                    button.prop('disabled', false).text('Support Now');
+                  }
+                });
+            },
+            error: function(xhr) {
+              console.error('Error creating checkout session');
+              
+              // Try to parse detailed error message
+              let errorMessage = 'Sorry, there was a problem processing your request. Please try again later.';
+              
+              try {
+                if (xhr.responseJSON && xhr.responseJSON.error) {
+                  errorMessage = xhr.responseJSON.error;
+                  console.error('Detailed error:', errorMessage);
+                }
+              } catch (e) {
+                console.error('Could not parse error response:', e);
+              }
+              
+              alert(errorMessage);
+              button.prop('disabled', false).text('Support Now');
+            }
+          });
+        });
     </script>
 </body>
 
