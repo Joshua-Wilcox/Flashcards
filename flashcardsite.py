@@ -291,13 +291,20 @@ def request_pdf_access():
 @app.route('/')
 def index():
     modules = get_all_modules()
+    show_payment_widget = False
+    
+    # Only check for payment eligibility if the user is logged in
+    if 'user_id' in session:
+        show_payment_widget = user_has_enough_answers(session['user_id'], minimum=10)
+    
     return render_template('index.html',
         modules=[m['name'] for m in modules],
         topics=get_unique_values('topic'),
         subtopics=get_unique_values('subtopic'), 
         NUMBER_OF_DISTRACTORS=NUMBER_OF_DISTRACTORS,
         payment_options=[1, 3, 5],  # Add payment options to template context
-        default_payment=1)  # Set default to £1
+        default_payment=1,  # Set default to £1
+        show_payment_widget=show_payment_widget)  # Pass this to template
 
 @app.route('/get_filters', methods=['POST'])
 def get_filters():
@@ -1693,8 +1700,8 @@ def create_checkout_session():
                 'price_data': {
                     'currency': 'gbp',
                     'product_data': {
-                        'name': f'Support Flashcards (£{amount})',
-                        'description': 'Thank you for supporting the Flashcards website!',
+                        'name': f'Support flashcards.112000000.xyz',
+                        'description': 'Thank you so much for considering supporting! This is an indie site so any proceeds will really be appreciated. We support multiple payment methods. Please note that PayPal may apply higher transaction fees on small payments, which reduces the amount we receive.',
                     },
                     'unit_amount': int(amount * 100),  # Convert to pence
                 },
@@ -1722,6 +1729,18 @@ def create_checkout_session():
 @app.route('/payment-success')
 def payment_success():
     return render_template('payment_success.html')
+
+def user_has_enough_answers(user_id, minimum=10):
+    """Check if a user has at least the minimum number of correct answers"""
+    if not user_id:
+        return False
+    
+    db = get_db()
+    row = db.execute('SELECT correct_answers FROM user_stats WHERE user_id = ?', (user_id,)).fetchone()
+    if not row:
+        return False
+    
+    return (row['correct_answers'] or 0) >= minimum
 
 if __name__ == '__main__':
     init_db()
