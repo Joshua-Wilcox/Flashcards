@@ -981,27 +981,28 @@ def leaderboard():
                 (CASE WHEN total_answers > 0 THEN 1.0 * correct_answers / total_answers ELSE 0 END) as accuracy,
                 COALESCE(approved_cards, 0) as approved_cards
             FROM user_stats
+            WHERE total_answers != 0
             ORDER BY {sort_col} {order_sql}, total_answers DESC
-            LIMIT 50
         ''').fetchall()
     else:
         # Get stats for specific module directly from module_stats table
         users = db.execute(f'''
             SELECT us.user_id, us.username, 
-                   COALESCE(ms.number_correct, 0) as correct_answers,
-                   COALESCE(ms.number_answered, 0) as total_answers,
-                   COALESCE(ms.current_streak, 0) as current_streak,
-                   ms.last_answered_time as last_answer_time,
-                   (CASE WHEN COALESCE(ms.number_answered, 0) > 0 
-                         THEN 1.0 * COALESCE(ms.number_correct, 0) / COALESCE(ms.number_answered, 1) 
-                         ELSE 0 END) as accuracy,
-                   COALESCE(ms.approved_cards, 0) as approved_cards
+               COALESCE(ms.number_correct, 0) as correct_answers,
+               COALESCE(ms.number_answered, 0) as total_answers,
+               COALESCE(ms.current_streak, 0) as current_streak,
+               ms.last_answered_time as last_answer_time,
+               (CASE WHEN COALESCE(ms.number_answered, 0) > 0 
+                 THEN 1.0 * COALESCE(ms.number_correct, 0) / COALESCE(ms.number_answered, 1) 
+                 ELSE 0 END) as accuracy,
+               COALESCE(ms.approved_cards, 0) as approved_cards
             FROM user_stats us
             LEFT JOIN modules m ON m.name = ?
             LEFT JOIN module_stats ms ON ms.user_id = us.user_id AND ms.module_id = m.id
+            WHERE COALESCE(ms.number_answered, 0) != 0
             ORDER BY {sort_col} {order_sql}, COALESCE(ms.number_answered, 0) DESC
-            LIMIT 50
         ''', (module_filter,)).fetchall()
+
 
     # Convert DB rows to dictionaries for the template
     leaderboard = [dict(row) for row in users]
