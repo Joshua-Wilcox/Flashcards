@@ -761,10 +761,14 @@ def report_question():
     distractor_ids = request.args.get('distractor_ids', '')
     db = get_db()
     question_id = None
+    
+    # Get the correct answer from the database based on the question text
     if question:
-        row = db.execute('SELECT id FROM questions WHERE question = ?', (question,)).fetchone()
+        row = db.execute('SELECT id, answer FROM questions WHERE question = ?', (question,)).fetchone()
         if row:
             question_id = row['id']
+            # Override the provided answer with the actual correct answer from the database
+            answer = row['answer']
     
     # Fetch distractor information if we have IDs
     distractors = []
