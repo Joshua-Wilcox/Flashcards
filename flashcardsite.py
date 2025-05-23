@@ -721,24 +721,24 @@ def admin_review_flashcard(submission_id):
                 WHERE user_id = ?
             ''', (user_id,))
             
-            # Update per-module approved cards counter
-            db.execute('''
-                INSERT OR REPLACE INTO module_stats
-                (user_id, module_id, number_answered, number_correct, last_answered_time, current_streak, approved_cards)
-                VALUES (?, ?, 
-                       COALESCE((SELECT number_answered FROM module_stats WHERE user_id = ? AND module_id = ?), 0),
-                       COALESCE((SELECT number_correct FROM module_stats WHERE user_id = ? AND module_id = ?), 0),
-                       (SELECT last_answered_time FROM module_stats WHERE user_id = ? AND module_id = ?),
-                       COALESCE((SELECT current_streak FROM module_stats WHERE user_id = ? AND module_id = ?), 0),
-                       COALESCE((SELECT approved_cards FROM module_stats WHERE user_id = ? AND module_id = ?), 0) + 1)
-            ''', (
-                user_id, module_id, 
-                user_id, module_id,
-                user_id, module_id,
-                user_id, module_id,
-                user_id, module_id,
-                user_id, module_id
-            ))
+            # First check if the module_stats entry exists
+            row = db.execute('SELECT 1 FROM module_stats WHERE user_id = ? AND module_id = ?', 
+                            (user_id, module_id)).fetchone()
+            
+            if row:
+                # Update existing entry - increment the approved_cards counter
+                db.execute('''
+                    UPDATE module_stats
+                    SET approved_cards = COALESCE(approved_cards, 0) + 1
+                    WHERE user_id = ? AND module_id = ?
+                ''', (user_id, module_id))
+            else:
+                # Insert new entry with approved_cards = 1
+                db.execute('''
+                    INSERT INTO module_stats
+                    (user_id, module_id, number_answered, number_correct, last_answered_time, current_streak, approved_cards)
+                    VALUES (?, ?, 0, 0, NULL, 0, 1)
+                ''', (user_id, module_id))
             
             db.execute('DELETE FROM submitted_flashcards WHERE id = ?', (submission_id,))
             db.commit()
