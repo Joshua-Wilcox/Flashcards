@@ -952,15 +952,6 @@ def leaderboard():
     sort = request.args.get('sort', 'correct_answers')
     order = request.args.get('order', 'desc')
     module_filter = request.args.get('module', None)
-    allowed = {
-        'correct_answers': 'correct_answers',
-        'total_answers': 'total_answers',
-        'accuracy': '(CASE WHEN total_answers > 0 THEN 1.0 * correct_answers / total_answers ELSE 0 END)',
-        'current_streak': 'current_streak',
-        'last_answer_time': 'last_answer_time',
-        'approved_cards': 'approved_cards'  # Add approved_cards to allowed sort columns
-    }
-    sort_col = allowed.get(sort, 'correct_answers')
     order_sql = 'DESC' if order == 'desc' else 'ASC'
     db = get_db()
     
@@ -979,6 +970,17 @@ def leaderboard():
         db.commit()
     
     if not module_filter:
+        # Define sort columns for global stats
+        allowed = {
+            'correct_answers': 'correct_answers',
+            'total_answers': 'total_answers',
+            'accuracy': '(CASE WHEN total_answers > 0 THEN 1.0 * correct_answers / total_answers ELSE 0 END)',
+            'current_streak': 'current_streak',
+            'last_answer_time': 'last_answer_time',
+            'approved_cards': 'approved_cards'
+        }
+        sort_col = allowed.get(sort, 'correct_answers')
+        
         # Use SQL sorting for global stats
         users = db.execute(f'''
             SELECT user_id, username, correct_answers, total_answers, current_streak, last_answer_time,
@@ -989,6 +991,17 @@ def leaderboard():
             ORDER BY {sort_col} {order_sql}, total_answers DESC
         ''').fetchall()
     else:
+        # Define sort columns for module-specific stats - using the correct field names
+        allowed = {
+            'correct_answers': 'COALESCE(ms.number_correct, 0)',
+            'total_answers': 'COALESCE(ms.number_answered, 0)',
+            'accuracy': '(CASE WHEN COALESCE(ms.number_answered, 0) > 0 THEN 1.0 * COALESCE(ms.number_correct, 0) / COALESCE(ms.number_answered, 1) ELSE 0 END)',
+            'current_streak': 'COALESCE(ms.current_streak, 0)',
+            'last_answer_time': 'ms.last_answered_time',
+            'approved_cards': 'COALESCE(ms.approved_cards, 0)'
+        }
+        sort_col = allowed.get(sort, 'COALESCE(ms.number_correct, 0)')
+        
         # Get stats for specific module directly from module_stats table
         users = db.execute(f'''
             SELECT us.user_id, us.username, 
