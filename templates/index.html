@@ -13,9 +13,10 @@
             word-wrap: break-word;
             padding: 18px 10px;
             height: 100%;
-            font-size: clamp(18px, 4vw, 28px);
-            /* Larger text for mobile */
-            min-height: 60px;
+            font-size: clamp(16px, 2.5vw, 24px);
+            /* Reduced max font size */
+            min-height: 48px;
+            /* Reduced min-height */
             border-radius: 16px;
             transition: background 0.2s, color 0.2s;
         }
@@ -40,7 +41,6 @@
         }
 
         .content-wrapper {
-            min-height: 100vh;
             display: flex;
             flex-direction: column;
         }
@@ -71,14 +71,15 @@
 
             html,
             body {
-                height: 100%;
+                height: auto; /* was 100% */
                 margin: 0;
                 padding: 0;
             }
 
             .content-wrapper {
-                min-height: 100vh;
-                height: 100vh;
+                /* min-height: 100vh; */
+                /* height: 100vh; */
+                /* REMOVE these lines to allow content to fit naturally */
             }
 
             .container {
@@ -116,7 +117,6 @@
                 display: flex;
                 flex-direction: column;
                 justify-content: stretch;
-                min-height: 60vh;
             }
 
             #answers-container {
@@ -137,7 +137,6 @@
         /* Force answer buttons to fill vertical space on mobile */
         @media (max-width: 576px) {
             #qa-section {
-                min-height: 70vh;
             }
 
             #answers-container {
@@ -662,6 +661,164 @@
         #stripe-widget.preload-hidden {
             display: none !important;
         }
+
+        #question-text {
+            font-size: clamp(18px, 2.5vw, 26px);
+            /* Add this for question text */
+        }
+
+        @media (max-width: 1280px) {
+            .answer-btn {
+                font-size: 1.05em !important;
+                min-height: 44px !important;
+                padding: 14px 8px !important;
+            }
+            #question-text {
+                font-size: 1.1em !important;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .answer-btn {
+                font-size: 1em !important;
+                min-height: 40px !important;
+                padding: 12px 6px !important;
+            }
+            #question-text {
+                font-size: 1em !important;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .answer-btn {
+                font-size: 0.95em !important;
+                min-height: 36px !important;
+                padding: 10px 4px !important;
+            }
+            #question-text {
+                font-size: 0.95em !important;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .answer-btn {
+                font-size: 0.9em !important;
+                min-height: 32px !important;
+                padding: 8px 2px !important;
+            }
+            #question-text {
+                font-size: 0.9em !important;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .navbar-nav .nav-link,
+            .navbar-nav .submit-flashcard-btn {
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+                padding-top: 12px !important;
+                padding-bottom: 12px !important;
+            }
+            .navbar-nav {
+                width: 100%;
+            }
+        }
+
+        /* Height-based responsive scaling */
+        .height-scaled {
+            transform-origin: top center;
+        }
+
+        /* Add these rules to handle viewport height constraints */
+        @media (max-height: 700px) {
+            #question-container {
+                min-height: auto;
+                padding-top: 10px !important;
+                padding-bottom: 10px !important;
+                margin-bottom: 5px;
+            }
+            
+            .answer-btn {
+                min-height: 30px !important;
+                padding-top: 8px !important;
+                padding-bottom: 8px !important;
+                margin-bottom: 4px !important; 
+            }
+            
+            #answers-container .col-12 {
+                margin-bottom: 4px !important;
+            }
+            
+            #question-text {
+                font-size: 0.95em !important;
+                margin-bottom: 0.5rem;
+            }
+            
+            #question-info {
+                margin-top: 0.5rem !important;
+            }
+        }
+        
+        @media (max-height: 600px) {
+            .container {
+                padding-top: 5px;
+                padding-bottom: 5px;
+            }
+            
+            .navbar {
+                margin-bottom: 5px !important; 
+                padding-top: 5px !important;
+                padding-bottom: 5px !important;
+            }
+            
+            #question-container {
+                padding: 8px !important;
+            }
+            
+            .answer-btn {
+                font-size: 0.9em !important;
+                min-height: 28px !important;
+                padding: 5px 2px !important;
+                margin-bottom: 3px !important;
+            }
+            
+            #answers-container .col-12 {
+                margin-bottom: 3px !important;
+            }
+            
+            #question-text {
+                font-size: 0.9em !important;
+                margin-bottom: 0.3rem;
+            }
+            
+            .select-container {
+                margin-bottom: 5px;
+            }
+            
+            footer {
+                padding: 5px 0 !important;
+            }
+        }
+        
+        /* For extremely small heights, scale everything proportionally */
+        @media (max-height: 500px) {
+            .content-wrapper {
+                transform: scale(0.85);
+                transform-origin: top center;
+            }
+            
+            body {
+                min-height: 520px; /* Force minimum height to prevent layout shifts */
+                overflow-y: auto;
+            }
+            
+            .answer-btn {
+                min-height: 24px !important;
+                padding: 4px !important;
+                margin-bottom: 2px !important;
+            }
+        }
+
     </style>
     <script>
         // Check localStorage immediately to prevent flashing of the widget
@@ -682,19 +839,27 @@
             <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
                 <div class="container-fluid">
                     <span class="navbar-brand">ECS Y1 Flashcards</span>
-                    <div class="navbar-nav ms-auto">
-                        <a class="nav-link" href="{{ url_for('leaderboard') }}">Leaderboard</a>
-                        {% if not session.user_id %}
-                        <a class="nav-link" href="{{ url_for('login') }}">Login with Discord</a>
-                        {% else %}
-                        <a class="nav-link" href="{{ url_for('stats') }}">My Stats</a>
-                        <a class="nav-link submit-flashcard-btn" id="submit-flashcard-navbar-btn"
-                            href="{{ url_for('submit_flashcard') }}">Submit Flashcards!</a>
-                        {% if session.user_id and is_user_admin(session.user_id) %}
-                        <a class="nav-link" href="{{ url_for('admin_review_flashcards') }}">Admin Dashboard</a>
-                        {% endif %}
-                        <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
-                        {% endif %}
+                    <!-- Hamburger toggler for mobile -->
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar"
+                        aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <!-- Collapsible nav links -->
+                    <div class="collapse navbar-collapse" id="mainNavbar">
+                        <div class="navbar-nav ms-auto">
+                            <a class="nav-link" href="{{ url_for('leaderboard') }}">Leaderboard</a>
+                            {% if not session.user_id %}
+                            <a class="nav-link" href="{{ url_for('login') }}">Login with Discord</a>
+                            {% else %}
+                            <a class="nav-link" href="{{ url_for('stats') }}">My Stats</a>
+                            <a class="nav-link submit-flashcard-btn" id="submit-flashcard-navbar-btn"
+                                href="{{ url_for('submit_flashcard') }}">Submit Flashcards!</a>
+                            {% if session.user_id and is_user_admin(session.user_id) %}
+                            <a class="nav-link" href="{{ url_for('admin_review_flashcards') }}">Admin Dashboard</a>
+                            {% endif %}
+                            <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </nav>
