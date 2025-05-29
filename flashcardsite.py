@@ -606,13 +606,73 @@ def get_question():
     answer_ids = [qid]
     # Distractor logic: pick random answers from other questions in the same module
     distractors_needed = NUMBER_OF_DISTRACTORS
-    distractor_rows = db.execute(
-        'SELECT id, answer FROM questions WHERE module_id = ? AND id != ? ORDER BY RANDOM() LIMIT ?',
-        (row['module_id'], qid, distractors_needed)
-    ).fetchall()
-    for dr in distractor_rows:
-        answers.append(dr['answer'])
-        answer_ids.append(dr['id'])
+    # Get all possible distractors in the same module (excluding this question)
+    distractor_candidates = db.execute('''
+        SELECT q.id, q.answer
+        FROM questions q
+        WHERE q.module_id = ? AND q.id != ?
+    ''', (row['module_id'], qid)).fetchall()
+
+    # Gather metadata for the current question
+    question_tags = set(tags)
+    question_subtopics = set(subtopics_list)
+    question_topics = set(topics_list)
+    correct_answer = row['answer']
+
+    # Build metadata for all candidates
+    scored_candidates = []
+    used_answers = set([correct_answer])
+    for cand in distractor_candidates:
+        cand_id = cand['id']
+        cand_answer = cand['answer']
+        if not cand_answer or cand_answer in used_answers:
+            continue  # No duplicates
+        cand_tags = set(get_tags_for_question(cand_id))
+        cand_subtopics = set(get_subtopics_for_question(cand_id))
+        cand_topics = set(get_topics_for_question(cand_id))
+        # Score: tags (weight 3), subtopic (weight 2), topic (weight 1)
+        tag_score = len(question_tags & cand_tags)
+        subtopic_score = len(question_subtopics & cand_subtopics)
+        topic_score = len(question_topics & cand_topics)
+        total_score = tag_score * 3 + subtopic_score * 2 + topic_score
+        scored_candidates.append({
+            'id': cand_id,
+            'answer': cand_answer,
+            'score': total_score,
+            'tag_score': tag_score,
+            'subtopic_score': subtopic_score,
+            'topic_score': topic_score
+        })
+
+    # Sort by score (desc), then randomize within ties
+    random.shuffle(scored_candidates)
+    scored_candidates.sort(key=lambda x: (x['score'], x['tag_score'], x['subtopic_score'], x['topic_score']), reverse=True)
+
+    # Select top N unique distractors
+    distractor_answers = []
+    distractor_ids = []
+    for cand in scored_candidates:
+        if len(distractor_answers) >= distractors_needed:
+            break
+        if cand['answer'] not in used_answers:
+            distractor_answers.append(cand['answer'])
+            distractor_ids.append(cand['id'])
+            used_answers.add(cand['answer'])
+
+    # If not enough, fill with random (but unique) from module
+    if len(distractor_answers) < distractors_needed:
+        remaining = [c for c in distractor_candidates if c['answer'] not in used_answers and c['answer']]
+        random.shuffle(remaining)
+        for cand in remaining:
+            if len(distractor_answers) >= distractors_needed:
+                break
+            distractor_answers.append(cand['answer'])
+            distractor_ids.append(cand['id'])
+            used_answers.add(cand['answer'])
+
+    # Final answer list: correct + distractors, shuffled
+    answers = [correct_answer] + distractor_answers
+    answer_ids = [qid] + distractor_ids
     combined = list(zip(answers, answer_ids))
     random.shuffle(combined)
     answers, answer_ids = zip(*combined)

@@ -1,1 +1,1610 @@
-[]
+[
+  {
+    "Question": "What mathematical operation combines vector addition and scalar multiplication to form a new vector from a set of given vectors?",
+    "Answer": "A linear combination",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Vectors and Linear Combinations",
+    "Tags": ["vector algebra", "linear combination", "scalar multiplication", "vector addition"]
+  },
+  {
+    "Question": "What geometric shape is formed by all possible scalar multiples (c times v) of a single non-zero vector v in 3D space?",
+    "Answer": "A straight line through the origin parallel to the vector v",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Vectors and Linear Combinations",
+    "Tags": ["vectors", "scalar multiplication", "geometric interpretation", "lines in 3D"]
+  },
+  {
+    "Question": "What geometric object is typically spanned by all linear combinations (c times v + d times w) of two linearly independent vectors v and w in 3D space, assuming they are not collinear?",
+    "Answer": "A plane through the origin",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Vectors and Linear Combinations",
+    "Tags": ["vectors", "linear combination", "span", "planes in 3D", "geometric interpretation"]
+  },
+  {
+    "Question": "What do all possible linear combinations (c times v + d times w + e times z) of three linearly independent vectors v, w, and z typically fill in 3D space?",
+    "Answer": "The entire 3D space",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Vectors and Linear Combinations",
+    "Tags": ["vectors", "linear combination", "span", "3D space", "geometric interpretation"]
+  },
+  {
+    "Question": "What is the magnitude (norm) of a standard basis vector e_i in a Euclidean space?",
+    "Answer": "Always 1",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Vectors, Lengths, and Angles",
+    "Tags": ["vectors", "basis vectors", "norm", "magnitude"]
+  },
+  {
+    "Question": "What is the angle between two distinct standard basis vectors e_i and e_j (where i is not equal to j)?",
+    "Answer": "90 degrees (or pi/2 radians)",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Vectors, Lengths, and Angles",
+    "Tags": ["vectors", "basis vectors", "orthogonality", "angle between vectors"]
+  },
+  {
+    "Question": "What is the angle between a standard basis vector e_i and itself?",
+    "Answer": "Zero",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Vectors, Lengths, and Angles",
+    "Tags": ["vectors", "basis vectors", "angle between vectors"]
+  },
+  {
+    "Question": "For a 2D vector v = (v1, v2), what is the expression for the cosine of the angle it makes with the standard basis vector e1 = (1,0)?",
+    "Answer": "v1 / sqrt(v1^2 + v2^2)",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Vectors, Lengths, and Angles",
+    "Tags": ["vectors", "angle between vectors", "dot product", "basis vectors"]
+  },
+  {
+    "Question": "If a 2D vector w = (w1, w2) is perpendicular to vector v = (v1, v2), what is a general form for w in terms of v1 and v2, up to a scalar multiple?",
+    "Answer": "(-v2, v1) or (v2, -v1)",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Vectors, Lengths, and Angles",
+    "Tags": ["vectors", "orthogonality", "perpendicular vectors", "dot product"]
+  },
+  {
+    "Question": "How can the line in the 2D plane passing through the origin and the point (a,b) be represented using a single vector and a scalar parameter?",
+    "Answer": "All scalar multiples of the vector (a,b)",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Vectors and Geometry",
+    "Tags": ["vectors", "lines in 2D", "parametric equation", "linear combinations"]
+  },
+  {
+    "Question": "How is a line that starts at a point P_0 and extends in the direction of vector v for non-negative scalars represented?",
+    "Answer": "P_0 + c * v, for all non-negative real numbers c",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Vectors and Geometry",
+    "Tags": ["vectors", "lines", "parametric equation", "vector addition"]
+  },
+  {
+    "Question": "How can the xy-plane in R^3 be described as a linear combination of two standard basis vectors, typically e1 and e2?",
+    "Answer": "c * (1,0,0) + d * (0,1,0) for all real numbers c and d",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Vectors and Geometry",
+    "Tags": ["vectors", "planes in 3D", "span", "basis vectors", "linear combinations"]
+  },
+  {
+    "Question": "How can a plane that passes through a point P_0 and is parallel to the plane spanned by vectors v1 and v2 be represented?",
+    "Answer": "P_0 + c * v1 + d * v2 for all real numbers c and d",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Vectors and Geometry",
+    "Tags": ["vectors", "planes in 3D", "parametric equation", "linear combinations"]
+  },
+  {
+    "Question": "Is a map T from R^n to R^m defined by T(v) = v + c (where c is a non-zero constant vector) a linear map?",
+    "Answer": "No, because T(0) is not the zero vector, or it fails additivity/homogeneity when c is non-zero.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Linear Maps and Matrices",
+    "Tags": ["linear maps", "linearity conditions", "vector translation"]
+  },
+  {
+    "Question": "Is a map that takes any vector and projects it onto the x-axis considered a linear map?",
+    "Answer": "Yes, it satisfies the properties of additivity and homogeneity.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Linear Maps and Matrices",
+    "Tags": ["linear maps", "projection", "linearity conditions"]
+  },
+  {
+    "Question": "What is the general form of the matrix P that represents the projection of a vector onto the first coordinate axis (x-axis) in an n-dimensional space?",
+    "Answer": "A matrix with 1 in the (1,1) position and zeros in all other entries.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Linear Maps and Matrices",
+    "Tags": ["matrix representation", "projection matrix", "linear transformation"]
+  },
+  {
+    "Question": "If P is the matrix that projects vectors onto the x-axis, what is the result of applying this projection multiple times, such as P raised to the power of 50?",
+    "Answer": "P itself",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Linear Maps and Matrices",
+    "Tags": ["projection matrix", "idempotent matrix", "matrix powers"]
+  },
+  {
+    "Question": "Is a map that rotates a 2D vector by a fixed angle theta (clockwise or anti-clockwise) about the origin considered a linear map?",
+    "Answer": "Yes, it preserves vector addition and scalar multiplication.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Linear Maps and Matrices",
+    "Tags": ["linear maps", "rotation", "geometric transformations", "linearity conditions"]
+  },
+  {
+    "Question": "What is the 2x2 matrix representation for a linear map that rotates a 2D vector by an angle theta in the clockwise direction around the origin?",
+    "Answer": "[[cos(theta), sin(theta)], [-sin(theta), cos(theta)]]",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Linear Maps and Matrices",
+    "Tags": ["matrix representation", "rotation matrix", "clockwise rotation"]
+  },
+  {
+    "Question": "What fundamental condition must a map T from a vector space V to a vector space W satisfy for it to be classified as linear, involving scalars a, b and vectors x, y?",
+    "Answer": "T(a*x + b*y) = a*T(x) + b*T(y)",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Linear Maps and Matrices",
+    "Tags": ["linear maps", "definition of linearity", "vector spaces"]
+  },
+  {
+    "Question": "A map T uniformly stretches any 2D vector by a constant factor k (i.e., T((v1, v2)) = (k*v1, k*v2)). Is this map linear?",
+    "Answer": "Yes, as it satisfies the additivity and homogeneity properties.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Linear Maps and Matrices",
+    "Tags": ["linear maps", "scaling transformation", "linearity conditions"]
+  },
+  {
+    "Question": "An m x n matrix A defines a linear mapping from which vector space to which vector space through the matrix-vector product Ax?",
+    "Answer": "From R^n to R^m",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Linear Maps and Matrices",
+    "Tags": ["matrix multiplication", "linear transformation", "vector spaces", "domain", "codomain"]
+  },
+  {
+    "Question": "How can the i-th component of the product vector Ax be expressed using the rows of matrix A and the vector x?",
+    "Answer": "As the dot product of the i-th row of A and the vector x.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Linear Maps and Matrices",
+    "Tags": ["matrix multiplication", "dot product", "row vectors"]
+  },
+  {
+    "Question": "When an m x n matrix A is multiplied by the j-th standard coordinate vector e_j in R^n, what specific part of matrix A is the resulting vector in R^m?",
+    "Answer": "The j-th column vector of the matrix A.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Linear Maps and Matrices",
+    "Tags": ["matrix multiplication", "basis vectors", "column vectors"]
+  },
+  {
+    "Question": "What fundamental property of matrix multiplication is demonstrated by showing A(alpha*x + beta*y) = alpha*A(x) + beta*A(y)?",
+    "Answer": "That matrix multiplication itself represents a linear map.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Linear Maps and Matrices",
+    "Tags": ["matrix multiplication", "linear maps", "linearity properties"]
+  },
+  {
+    "Question": "If a linear map represented by an n x m matrix A is followed by a linear map represented by an m x p matrix B, what single matrix C represents the combined sequential transformation, and what are its dimensions?",
+    "Answer": "The matrix product BA, with dimensions n x p.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Matrix Products",
+    "Tags": ["matrix multiplication", "composition of linear maps", "matrix dimensions"]
+  },
+  {
+    "Question": "In index notation, how is the element C_ij of the matrix product C=BA calculated using the elements of B (B_ik) and A (A_kj), involving a summation?",
+    "Answer": "The sum over k of (B_ik times A_kj).",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Matrix Products",
+    "Tags": ["matrix multiplication", "index notation", "summation"]
+  },
+  {
+    "Question": "In three-dimensional space, what geometric object is a hyperplane?",
+    "Answer": "A plane, which is a two-dimensional subset.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Hyperplanes",
+    "Tags": ["hyperplanes", "geometry", "planes in 3D"]
+  },
+  {
+    "Question": "If r0 is a position vector to a point on a plane and n is a normal vector to that plane, what is the dot product condition for any point r on the plane involving these vectors?",
+    "Answer": "The dot product of n and (r - r0) is zero.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Hyperplanes",
+    "Tags": ["hyperplanes", "planes", "normal vector", "dot product", "vector equation of a plane"]
+  },
+  {
+    "Question": "Expanding the dot product n . (r - r0) = 0 for a plane in 3D (where n=(a,b,c), r=(x,y,z), r0=(x0,y0,z0)) yields what standard equation form?",
+    "Answer": "a(x-x0) + b(y-y0) + c(z-z0) = 0",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Hyperplanes",
+    "Tags": ["hyperplanes", "equation of a plane", "scalar equation of a plane"]
+  },
+  {
+    "Question": "In Gaussian elimination, what is the primary strategy for transforming a system of linear equations into a more easily solvable form?",
+    "Answer": "To create a triangular form of the equations (row echelon form).",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Gaussian Elimination",
+    "Tags": ["Gaussian elimination", "systems of linear equations", "row operations", "triangular form"]
+  },
+  {
+    "Question": "After performing row operations in Gaussian elimination to obtain an upper triangular system, what is the subsequent step to find the values of the variables?",
+    "Answer": "Back-substitution",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Gaussian Elimination",
+    "Tags": ["Gaussian elimination", "systems of linear equations", "back-substitution"]
+  },
+  {
+    "Question": "What is the term for the first non-zero entry in a non-zero row of a matrix that is in row echelon form?",
+    "Answer": "A pivot (or leading coefficient).",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Row Echelon Form and Pivots",
+    "Tags": ["row echelon form", "pivot", "matrix terminology"]
+  },
+  {
+    "Question": "What are the defining characteristics of a matrix in row echelon form regarding non-zero rows, pivots, and elements below pivots?",
+    "Answer": "All non-zero rows are above zero rows; pivots move to the right in successive rows; all elements below pivots are zero.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Row Echelon Form and Pivots",
+    "Tags": ["row echelon form", "matrix properties", "pivots"]
+  },
+  {
+    "Question": "In addition to being in row echelon form, what two extra conditions must a matrix satisfy to be in reduced row echelon form?",
+    "Answer": "The leading entry (pivot) in each non-zero row is 1, and each leading 1 is the only non-zero entry in its column.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Row Echelon Form and Pivots",
+    "Tags": ["reduced row echelon form", "matrix properties", "pivots"]
+  },
+  {
+    "Question": "After applying Gaussian elimination to an augmented matrix, if a row on the left-hand side is entirely zeros but the corresponding right-hand side entry is non-zero, what does this indicate about the system's solutions?",
+    "Answer": "There is a contradiction, therefore no solution exists.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "No Solutions and Infinite Solutions",
+    "Tags": ["Gaussian elimination", "systems of linear equations", "inconsistent system", "no solution"]
+  },
+  {
+    "Question": "If, after Gaussian elimination on an augmented matrix, a row is entirely zeros on both the left-hand side and the right-hand side, and there are fewer pivot columns than variables, what does this imply about the number of solutions?",
+    "Answer": "There are infinitely many solutions.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "No Solutions and Infinite Solutions",
+    "Tags": ["Gaussian elimination", "systems of linear equations", "dependent system", "infinite solutions", "free variables"]
+  },
+  {
+    "Question": "How is a (d-1)-dimensional hyperplane in a d-dimensional space typically represented by a linear equation involving variables x1 to xd and constants a0 to ad?",
+    "Answer": "a0 + a1*x1 + a2*x2 + ... + ad*xd = 0",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Hyperplanes",
+    "Tags": ["hyperplanes", "linear equations", "algebraic geometry"]
+  },
+  {
+    "Question": "To find the Cartesian equation of a plane in R^3 given three non-collinear points A, B, and C on the plane, what vector operation can be used on vectors (B-A) and (C-A) to find the normal vector to the plane?",
+    "Answer": "The cross product of (B-A) and (C-A).",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Hyperplanes",
+    "Tags": ["equation of a plane", "normal vector", "cross product", "vector geometry"]
+  },
+  {
+    "Question": "If a system of linear equations is represented in matrix form as Ax = b, how can the solution x be found if the matrix A is invertible?",
+    "Answer": "By calculating x = A_inverse * b.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Solving Systems of Linear Equations",
+    "Tags": ["systems of linear equations", "matrix inversion", "matrix algebra"]
+  },
+  {
+    "Question": "When attempting to find the inverse of a matrix using Gaussian elimination on an augmented matrix [A | I], what does the right-hand side become when the left-hand side is transformed into I?",
+    "Answer": "The inverse of A (A_inverse).",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Matrix Inversion",
+    "Tags": ["matrix inversion", "Gaussian elimination", "identity matrix", "augmented matrix"]
+  },
+  {
+    "Question": "If Gaussian elimination applied to the augmented matrix [A | b] results in a row [0 0 ... 0 | k] where k is non-zero, what can be concluded about the solutions to Ax=b?",
+    "Answer": "The system has no solutions.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Solving Systems of Linear Equations",
+    "Tags": ["systems of linear equations", "Gaussian elimination", "inconsistent system"]
+  },
+  {
+    "Question": "What does it mean for a set of vectors {v1, v2, ..., vk} to be linearly dependent?",
+    "Answer": "At least one vector in the set can be expressed as a linear combination of the other vectors.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Linear Independence",
+    "Tags": ["linear independence", "linear dependence", "vector spaces", "linear combinations"]
+  },
+  {
+    "Question": "Alternatively, a set of vectors {v1, ..., vk} is linearly dependent if there exist scalars c1, ..., ck, not all zero, such that what equation holds?",
+    "Answer": "c1*v1 + c2*v2 + ... + ck*vk = 0 (the zero vector).",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Linear Independence",
+    "Tags": ["linear independence", "linear dependence", "zero vector", "scalar multiplication"]
+  },
+  {
+    "Question": "If a set of vectors is not linearly dependent, what is it called?",
+    "Answer": "Linearly independent.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Linear Independence",
+    "Tags": ["linear independence", "vector sets"]
+  },
+  {
+    "Question": "To determine if the columns of a matrix A are linearly independent, what property of the homogeneous system Ax = 0 is investigated?",
+    "Answer": "Whether only the trivial solution (x=0) exists.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Linear Independence and Systems of Equations",
+    "Tags": ["linear independence", "homogeneous systems", "matrix columns", "trivial solution"]
+  },
+  {
+    "Question": "If the system Ax = 0 has non-trivial solutions, what does this imply about the linear dependence of the columns of A?",
+    "Answer": "The columns of A are linearly dependent.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Linear Independence and Systems of Equations",
+    "Tags": ["linear dependence", "homogeneous systems", "non-trivial solution", "matrix columns"]
+  },
+  {
+    "Question": "In an m-dimensional space (R^m), what is the maximum number of vectors that can form a linearly independent set?",
+    "Answer": "m vectors.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Rules for Linear Independence",
+    "Tags": ["linear independence", "dimension", "vector spaces"]
+  },
+  {
+    "Question": "According to the dimension rule, any set of more than m vectors in R^m must be what?",
+    "Answer": "Linearly dependent.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Rules for Linear Independence",
+    "Tags": ["linear dependence", "dimension rule", "vector spaces"]
+  },
+  {
+    "Question": "When are two non-zero vectors considered linearly dependent?",
+    "Answer": "If one is a scalar multiple of the other.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Rules for Linear Independence",
+    "Tags": ["linear dependence", "scalar multiple", "collinear vectors"]
+  },
+  {
+    "Question": "When using row reduction (Gaussian elimination) on a matrix formed by vectors as columns, what relationship between the number of pivot columns and the number of vectors indicates linear independence?",
+    "Answer": "If the number of pivot columns equals the number of vectors.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Rules for Linear Independence",
+    "Tags": ["linear independence", "row reduction", "pivot columns", "Gaussian elimination"]
+  },
+  {
+    "Question": "For a square matrix formed by n vectors in R^n, what condition on its determinant indicates that the vectors are linearly independent?",
+    "Answer": "The determinant is non-zero.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Rules for Linear Independence",
+    "Tags": ["linear independence", "determinant", "square matrix"]
+  },
+  {
+    "Question": "If the determinant of an n x n matrix (formed by n vectors in R^n) is zero, what does this imply about the linear dependence of these vectors?",
+    "Answer": "They are linearly dependent.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Rules for Linear Independence",
+    "Tags": ["linear dependence", "determinant", "square matrix", "singular matrix"]
+  },
+  {
+    "Question": "What is the nullspace (or kernel) of a matrix A defined as?",
+    "Answer": "The set of all vectors x such that Ax = 0.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Kernel or Nullspace of a Matrix",
+    "Tags": ["nullspace", "kernel", "homogeneous systems", "matrix algebra"]
+  },
+  {
+    "Question": "What does the nullspace of a matrix A represent in terms of the linear transformation defined by A?",
+    "Answer": "All vectors that are mapped to the zero vector by the transformation A.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Kernel or Nullspace of a Matrix",
+    "Tags": ["nullspace", "kernel", "linear transformation", "zero vector"]
+  },
+  {
+    "Question": "How is the nullspace of a matrix A typically found?",
+    "Answer": "By using Gaussian elimination to solve the homogeneous system Ax = 0.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Kernel or Nullspace of a Matrix",
+    "Tags": ["nullspace", "Gaussian elimination", "homogeneous systems"]
+  },
+  {
+    "Question": "If you have n vectors in a p-dimensional space, and n > p, what can be concluded about the linear dependence of these n vectors?",
+    "Answer": "The n vectors are linearly dependent.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Linear Dependence of n vectors of dimension p",
+    "Tags": ["linear dependence", "dimension", "vector spaces"]
+  },
+  {
+    "Question": "What does it mean for a vector w to be in the span of a set of vectors V = {v1, v2, ...}?",
+    "Answer": "Vector w can be expressed as a linear combination of the vectors in V.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Span of a set of vectors",
+    "Tags": ["span", "linear combination", "vector spaces"]
+  },
+  {
+    "Question": "What are the two fundamental properties that a subset B of a vector space V must satisfy to be considered a basis for V?",
+    "Answer": "B must be linearly independent and span(B) = V.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Basis",
+    "Tags": ["basis", "linear independence", "span", "vector spaces"]
+  },
+  {
+    "Question": "If B = {b1, ..., bn} is a basis for a vector space V, how can any vector v in V be expressed in terms of the basis vectors and some scalars alpha_i?",
+    "Answer": "v = alpha_1*b1 + alpha_2*b2 + ... + alpha_n*bn",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Basis",
+    "Tags": ["basis", "coordinates", "linear combination", "vector decomposition"]
+  },
+  {
+    "Question": "What are the scalars alpha_i called when a vector v is expressed as a linear combination of basis vectors from B, as in v = sum(alpha_i * b_i)?",
+    "Answer": "The coordinates of v in the basis B.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Basis",
+    "Tags": ["basis", "coordinates", "vector representation"]
+  },
+  {
+    "Question": "Describe the structure of the vectors in the canonical (or standard) basis for a d-dimensional vector space R^d.",
+    "Answer": "Each basis vector e_i has a 1 in the i-th position and 0s elsewhere.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Canonical Basis",
+    "Tags": ["canonical basis", "standard basis", "basis vectors", "R^d"]
+  },
+  {
+    "Question": "What are two key geometric properties of the vectors in the canonical basis in Euclidean space?",
+    "Answer": "All basis vectors are mutually orthogonal (form right angles) and have a length of 1 (unit vectors).",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Canonical Basis",
+    "Tags": ["canonical basis", "orthonormal basis", "unit vectors", "orthogonality"]
+  },
+  {
+    "Question": "If a set of vectors in R^2 contains 4 vectors, what can be immediately concluded about their linear dependence based on the dimension theorem?",
+    "Answer": "The set is linearly dependent.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Linear Independence",
+    "Tags": ["linear dependence", "dimension theorem", "R^2"]
+  },
+  {
+    "Question": "If the determinant of a 3x3 matrix formed by three vectors is 0, what does this imply about the linear dependence of these three vectors?",
+    "Answer": "The three vectors are linearly dependent.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Linear Independence",
+    "Tags": ["linear dependence", "determinant", "3x3 matrix"]
+  },
+  {
+    "Question": "If a vector v is given in a canonical basis, and we want to find its coordinates in a new basis B, what matrix operation involving the basis transformation matrix M (from B to canonical) is needed?",
+    "Answer": "Multiply the inverse of M (M_inverse) by the vector v.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Coordinate Transformations",
+    "Tags": ["coordinate transformation", "change of basis", "basis transformation matrix", "matrix inversion"]
+  },
+  {
+    "Question": "For an orthonormal basis, how can the j-th coordinate of a vector v in that basis be found using a scalar product?",
+    "Answer": "By taking the scalar product of vector v with the j-th orthonormal basis vector.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Coordinates in Orthonormal Bases",
+    "Tags": ["orthonormal basis", "coordinates", "scalar product", "projection"]
+  },
+  {
+    "Question": "How are the columns of the matrix representation T of a linear transformation T (T_ij) typically constructed with respect to the standard basis vectors e_i?",
+    "Answer": "Each column T_i is the image of the standard basis vector e_i under the transformation T, i.e., T(e_i).",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Finding Matrices for Linear Maps",
+    "Tags": ["matrix representation", "linear transformation", "standard basis", "image of basis vectors"]
+  },
+  {
+    "Question": "If A_b is the matrix of a linear transformation in an old basis, and M is the change of basis matrix from a new basis to the old basis, what is the formula to find A_r, the matrix representation in the new basis?",
+    "Answer": "A_r = (M_inverse) * A_b * M",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Transforming Matrices",
+    "Tags": ["matrix transformation", "change of basis", "similarity transformation"]
+  },
+  {
+    "Question": "What scalar value, computed from the elements of a square matrix, encodes properties like the scaling factor of the corresponding linear transformation?",
+    "Answer": "The determinant.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "The Determinant",
+    "Tags": ["determinant", "square matrix", "linear transformation", "scaling factor"]
+  },
+  {
+    "Question": "Geometrically, what does the absolute value of the determinant of a 2x2 matrix represent?",
+    "Answer": "The scale factor by which area is transformed when the matrix is applied.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "The Determinant",
+    "Tags": ["determinant", "2x2 matrix", "area transformation", "geometric interpretation"]
+  },
+  {
+    "Question": "What does a determinant of zero indicate about a square matrix concerning its invertibility and the transformation it represents?",
+    "Answer": "The matrix is singular (not invertible) and the transformation squashes space into a lower dimension.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "The Determinant",
+    "Tags": ["determinant", "singular matrix", "invertible matrix", "degenerate transformation"]
+  },
+  {
+    "Question": "For a 2x2 matrix [[a,b],[c,d]], what is the formula for its determinant?",
+    "Answer": "a*d - b*c",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "The Determinant",
+    "Tags": ["determinant", "2x2 matrix", "matrix algebra"]
+  },
+  {
+    "Question": "A square matrix is non-invertible if its determinant is equal to what value?",
+    "Answer": "Zero.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Linear Independence and Determinants",
+    "Tags": ["determinant", "invertible matrix", "singular matrix", "linear dependence"]
+  },
+  {
+    "Question": "In the context of calculating determinants, what is the minor M_ij of an entry a_ij in a square matrix A?",
+    "Answer": "The determinant of the submatrix formed by deleting the i-th row and j-th column of A.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Minors and Cofactors",
+    "Tags": ["determinant", "minors", "matrix algebra"]
+  },
+  {
+    "Question": "How is the cofactor C_ij of an entry a_ij related to its minor M_ij?",
+    "Answer": "C_ij = ((-1)^(i+j)) * M_ij",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Minors and Cofactors",
+    "Tags": ["determinant", "cofactors", "minors", "matrix algebra"]
+  },
+  {
+    "Question": "How is the determinant of an n x n matrix A computed using cofactor expansion along the i-th row?",
+    "Answer": "As the sum from j=1 to n of (a_ij * C_ij), where C_ij is the cofactor of a_ij.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Cofactor Expansion",
+    "Tags": ["determinant", "cofactor expansion", "Laplace expansion", "matrix algebra"]
+  },
+  {
+    "Question": "What is the relationship between the determinant of a matrix A and the determinant of its transpose A^T?",
+    "Answer": "det(A) = det(A^T).",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Properties of Determinants",
+    "Tags": ["determinant", "transpose", "matrix properties"]
+  },
+  {
+    "Question": "What is the determinant of a triangular matrix (either upper or lower)?",
+    "Answer": "The product of the values on its main diagonal.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Properties of Determinants",
+    "Tags": ["determinant", "triangular matrix", "diagonal elements"]
+  },
+  {
+    "Question": "For two n x n square matrices A and B, what is the relationship between det(AB), det(A), and det(B)?",
+    "Answer": "det(AB) = det(A) * det(B).",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Properties of Determinants",
+    "Tags": ["determinant", "matrix product", "matrix properties"]
+  },
+  {
+    "Question": "If matrix A is invertible (det(A) is not zero), what is the determinant of its inverse, det(A_inverse), in terms of det(A)?",
+    "Answer": "(det(A))_inverse or 1/det(A).",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Properties of Determinants",
+    "Tags": ["determinant", "inverse matrix", "matrix properties"]
+  },
+  {
+    "Question": "If matrix B is obtained from matrix A by swapping two rows, how does det(B) relate to det(A)?",
+    "Answer": "det(B) = -det(A).",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Properties of Determinants",
+    "Tags": ["determinant", "row operations", "matrix properties"]
+  },
+  {
+    "Question": "If matrix B is obtained from A by adding a multiple of one row to another row, how does det(B) relate to det(A)?",
+    "Answer": "det(B) = det(A).",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Properties of Determinants",
+    "Tags": ["determinant", "row operations", "matrix properties"]
+  },
+  {
+    "Question": "If matrix B is obtained from A by multiplying one row of A by a scalar k, how does det(B) relate to det(A)?",
+    "Answer": "det(B) = k * det(A).",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Properties of Determinants",
+    "Tags": ["determinant", "row operations", "scalar multiplication", "matrix properties"]
+  },
+  {
+    "Question": "What is an eigenvector of a square matrix A?",
+    "Answer": "A non-zero vector v such that when A acts on v, the result is a scalar multiple of v (Av = lambda*v).",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Eigenvalues and Eigenvectors",
+    "Tags": ["eigenvectors", "eigenvalues", "matrix algebra", "linear transformations"]
+  },
+  {
+    "Question": "In the equation Av = lambda*v defining an eigenvector v and eigenvalue lambda, what does the scalar lambda represent?",
+    "Answer": "The eigenvalue associated with the eigenvector v.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Eigenvalues and Eigenvectors",
+    "Tags": ["eigenvalues", "eigenvectors", "scalar factor"]
+  },
+  {
+    "Question": "To find the eigenvalues (lambda) of a matrix A, what determinant equation involving A, lambda, and the identity matrix I must be solved?",
+    "Answer": "det(A - lambda*I) = 0.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Finding Eigenvalues",
+    "Tags": ["eigenvalues", "characteristic equation", "determinant", "identity matrix"]
+  },
+  {
+    "Question": "The equation det(A - lambda*I) = 0 is known by what name?",
+    "Answer": "The characteristic equation of matrix A.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Finding Eigenvalues",
+    "Tags": ["characteristic equation", "eigenvalues", "polynomial"]
+  },
+  {
+    "Question": "Once an eigenvalue lambda is found for matrix A, how are the corresponding eigenvectors v found?",
+    "Answer": "By solving the homogeneous system (A - lambda*I)v = 0 for non-trivial solutions v.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Finding Eigenvectors",
+    "Tags": ["eigenvectors", "eigenvalues", "homogeneous systems", "nullspace"]
+  },
+  {
+    "Question": "What does it mean for a square matrix A to be diagonalizable?",
+    "Answer": "There exists an invertible matrix P and a diagonal matrix D such that A = P*D*(P_inverse).",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Diagonalization of Matrices",
+    "Tags": ["diagonalization", "eigenvectors", "eigenvalues", "matrix decomposition"]
+  },
+  {
+    "Question": "In the diagonalization A = P*D*(P_inverse), what do the columns of matrix P typically consist of?",
+    "Answer": "The eigenvectors of matrix A.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Diagonalization of Matrices",
+    "Tags": ["diagonalization", "eigenvectors", "matrix P"]
+  },
+  {
+    "Question": "In the diagonalization A = P*D*(P_inverse), what are the entries of the diagonal matrix D?",
+    "Answer": "The eigenvalues of matrix A, corresponding to the eigenvectors in P.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Diagonalization of Matrices",
+    "Tags": ["diagonalization", "eigenvalues", "matrix D"]
+  },
+  {
+    "Question": "If a matrix A is diagonalizable as A = P*D*(P_inverse), how can A raised to a power k (A^k) be computed efficiently using P, D, and P_inverse?",
+    "Answer": "A^k = P * (D^k) * (P_inverse).",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Matrix Exponentiation via Diagonalization",
+    "Tags": ["matrix exponentiation", "diagonalization", "matrix powers"]
+  },
+  {
+    "Question": "What are the two binary operations that must be defined for a non-empty set V to be a vector space over the real numbers R?",
+    "Answer": "Vector addition (+) and scalar multiplication (*).",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Vector Spaces Axioms",
+    "Tags": ["vector spaces", "axioms", "vector addition", "scalar multiplication"]
+  },
+  {
+    "Question": "List three axioms of vector addition that must hold in a vector space.",
+    "Answer": "Associativity (u+(v+w)=(u+v)+w), Commutativity (u+v=v+u), Identity element (v+0=v). (Also Inverse element v+(-v)=0)",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Vector Spaces Axioms",
+    "Tags": ["vector spaces", "axioms", "vector addition"]
+  },
+  {
+    "Question": "What is the general formula for the distance or norm (length) of a vector x = (a1, a2, a3, ...) in Euclidean space?",
+    "Answer": "sqrt(a1^2 + a2^2 + a3^2 + ...)",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Distance Function (Norms)",
+    "Tags": ["vector norm", "magnitude", "Euclidean distance", "Pythagorean theorem"]
+  },
+  {
+    "Question": "What does it mean to normalize a non-zero vector x?",
+    "Answer": "To create a unit vector (length 1) in the same direction as x, by dividing x by its norm.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Normalizing Vectors",
+    "Tags": ["vector normalization", "unit vector", "vector norm"]
+  },
+  {
+    "Question": "How is the scalar (dot) product of two vectors x = (x1, x2, ...) and y = (y1, y2, ...) defined in terms of their components?",
+    "Answer": "x1*y1 + x2*y2 + x3*y3 + ...",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Scalar or Dot Products",
+    "Tags": ["dot product", "scalar product", "vector components"]
+  },
+  {
+    "Question": "How can the norm (length) of a vector x be expressed using the scalar product?",
+    "Answer": "sqrt(x dot x).",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Scalar or Dot Products",
+    "Tags": ["vector norm", "dot product", "magnitude"]
+  },
+  {
+    "Question": "What is the relationship between the dot product of two vectors x and y, their norms, and the cosine of the angle (theta) between them?",
+    "Answer": "x dot y = ||x|| * ||y|| * cos(theta).",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Scalar or Dot Products",
+    "Tags": ["dot product", "angle between vectors", "vector norm", "cosine rule"]
+  },
+  {
+    "Question": "State the Cauchy-Schwarz Inequality relating the absolute value of the dot product of two vectors x and y to their individual norms.",
+    "Answer": "|x dot y| <= ||x|| * ||y||.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Cauchy-Schwarz Inequality",
+    "Tags": ["Cauchy-Schwarz inequality", "dot product", "vector norms", "inequalities"]
+  },
+  {
+    "Question": "State the Triangle Inequality for vector norms, relating the norm of the sum of two vectors (x+y) to the sum of their individual norms.",
+    "Answer": "||x + y|| <= ||x|| + ||y||.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Triangle Inequality",
+    "Tags": ["triangle inequality", "vector norms", "vector addition", "inequalities"]
+  },
+  {
+    "Question": "For two polynomial functions a(x) and b(x), how can a scalar product be defined using a definite integral over an interval, say [0,1]?",
+    "Answer": "The integral from 0 to 1 of (a(x) times b(x)) dx.",
+    "Module": "Mathematics II",
+    "Topic": "Linear Algebra",
+    "Sub-Topic": "Scalar Products for Functions",
+    "Tags": ["scalar product", "function spaces", "inner product space", "definite integrals", "polynomials"]
+  },
+  {
+    "Question": "What does the left-hand limit, lim x->a^- f(x), describe about the behavior of a function f(x)?",
+    "Answer": "The behavior of the function as x approaches a specific point 'a' from values less than 'a'.",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Single Variable)",
+    "Sub-Topic": "One-Sided Limits",
+    "Tags": ["limits", "one-sided limits", "function behavior", "left-hand limit"]
+  },
+  {
+    "Question": "What does the right-hand limit, lim x->a^+ f(x), describe about the behavior of a function f(x)?",
+    "Answer": "The behavior of the function as x approaches a specific point 'a' from values greater than 'a'.",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Single Variable)",
+    "Sub-Topic": "One-Sided Limits",
+    "Tags": ["limits", "one-sided limits", "function behavior", "right-hand limit"]
+  },
+  {
+    "Question": "What three conditions must a function f(x) satisfy to be continuous at a point x=a?",
+    "Answer": "f(a) must be defined; the limit of f(x) as x approaches a must exist; and this limit must equal f(a).",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Single Variable)",
+    "Sub-Topic": "Continuity",
+    "Tags": ["continuity", "limits", "function properties", "definition of continuity"]
+  },
+  {
+    "Question": "What is the limit definition of the derivative of a function f(x), denoted f'(x)?",
+    "Answer": "lim h->0 of (f(x+h) - f(x)) / h.",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Single Variable)",
+    "Sub-Topic": "Derivative Definition",
+    "Tags": ["derivatives", "limits", "definition of derivative", "rate of change"]
+  },
+  {
+    "Question": "What does the derivative f'(c) represent in terms of the rate of change of the function f(x) at the value c?",
+    "Answer": "The instantaneous rate of change of f(x) at c.",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Single Variable)",
+    "Sub-Topic": "Derivative Interpretation",
+    "Tags": ["derivatives", "instantaneous rate of change", "slope of tangent"]
+  },
+  {
+    "Question": "For a function to be differentiable at a point n, what condition must its one-sided derivatives satisfy at that point?",
+    "Answer": "The left-hand derivative must equal the right-hand derivative at n.",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Single Variable)",
+    "Sub-Topic": "Differentiability",
+    "Tags": ["differentiability", "one-sided derivatives", "smoothness"]
+  },
+  {
+    "Question": "If a function f(x) is differentiable at a point c, what can be concluded about its continuity at c?",
+    "Answer": "The function f(x) is continuous at c.",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Single Variable)",
+    "Sub-Topic": "Differentiability and Continuity",
+    "Tags": ["differentiability", "continuity", "implications"]
+  },
+  {
+    "Question": "Does continuity of a function at a point imply differentiability at that point? Provide an example if not.",
+    "Answer": "No, for example, f(x) = |x| is continuous at x=0 but not differentiable at x=0.",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Single Variable)",
+    "Sub-Topic": "Differentiability and Continuity",
+    "Tags": ["continuity", "differentiability", "counterexample", "absolute value function"]
+  },
+  {
+    "Question": "What is the derivative of a constant function f(x) = c?",
+    "Answer": "0.",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Single Variable)",
+    "Sub-Topic": "Derivative Rules (Constant Rule)",
+    "Tags": ["derivatives", "constant rule", "differentiation"]
+  },
+  {
+    "Question": "According to the power rule, what is the derivative of f(x) = x^n?",
+    "Answer": "n * x^(n-1).",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Single Variable)",
+    "Sub-Topic": "Derivative Rules (Power Rule)",
+    "Tags": ["derivatives", "power rule", "differentiation"]
+  },
+  {
+    "Question": "If f(x) = e^(g(x)), what is its derivative f'(x) using the chain rule?",
+    "Answer": "g'(x) * e^(g(x)).",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Single Variable)",
+    "Sub-Topic": "Derivative Rules (Exponential Derivative)",
+    "Tags": ["derivatives", "exponential function", "chain rule", "differentiation"]
+  },
+  {
+    "Question": "What is the derivative of f(x) = log_b(x) (log base b of x)?",
+    "Answer": "1 / (x * ln(b)).",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Single Variable)",
+    "Sub-Topic": "Derivative Rules (Logarithm Rule)",
+    "Tags": ["derivatives", "logarithmic functions", "differentiation"]
+  },
+  {
+    "Question": "If f(x) = a^(g(x)), what is its derivative f'(x)?",
+    "Answer": "g'(x) * a^(g(x)) * ln(a).",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Single Variable)",
+    "Sub-Topic": "Derivative Rules (General Exponential Rule)",
+    "Tags": ["derivatives", "exponential function", "chain rule", "logarithms", "differentiation"]
+  },
+  {
+    "Question": "If f(x) = log_a(g(x)), what is its derivative f'(x)?",
+    "Answer": "g'(x) / (g(x) * ln(a)).",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Single Variable)",
+    "Sub-Topic": "Derivative Rules (General Logarithmic Rule)",
+    "Tags": ["derivatives", "logarithmic functions", "chain rule", "differentiation"]
+  },
+  {
+    "Question": "According to the sum rule, what is the derivative of f(x) = g(x) + h(x)?",
+    "Answer": "g'(x) + h'(x).",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Single Variable)",
+    "Sub-Topic": "Derivative Rules (Sum Rule)",
+    "Tags": ["derivatives", "sum rule", "linearity of differentiation"]
+  },
+  {
+    "Question": "According to the product rule, what is the derivative of f(x) = g(x) * h(x)?",
+    "Answer": "g'(x)*h(x) + g(x)*h'(x).",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Single Variable)",
+    "Sub-Topic": "Derivative Rules (Product Rule)",
+    "Tags": ["derivatives", "product rule", "differentiation"]
+  },
+  {
+    "Question": "According to the quotient rule, what is the derivative of f(x) = g(x) / h(x)?",
+    "Answer": "(g'(x)*h(x) - g(x)*h'(x)) / (h(x)^2).",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Single Variable)",
+    "Sub-Topic": "Derivative Rules (Quotient Rule)",
+    "Tags": ["derivatives", "quotient rule", "differentiation"]
+  },
+  {
+    "Question": "When differentiating an implicit function where y is treated as a function of x, what factor must be multiplied by terms involving y due to the chain rule?",
+    "Answer": "dy/dx.",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Single Variable)",
+    "Sub-Topic": "Implicit Differentiation",
+    "Tags": ["implicit differentiation", "chain rule", "derivatives"]
+  },
+  {
+    "Question": "What are the general steps to find dy/dx for an implicit equation relating x and y?",
+    "Answer": "Differentiate both sides with respect to x (using chain rule for y terms), collect dy/dx terms, and solve for dy/dx.",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Single Variable)",
+    "Sub-Topic": "Implicit Differentiation",
+    "Tags": ["implicit differentiation", "procedure", "derivatives"]
+  },
+  {
+    "Question": "In problems involving related rates, if two quantities x and y are related by an equation f(x) = g(y), and both change with time t, how is their relationship differentiated with respect to t?",
+    "Answer": "f'(x)*(dx/dt) = g'(y)*(dy/dt).",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Single Variable)",
+    "Sub-Topic": "Related Rates",
+    "Tags": ["related rates", "implicit differentiation", "chain rule", "time derivatives"]
+  },
+  {
+    "Question": "What is Newton's method primarily used for?",
+    "Answer": "Finding approximate roots (solutions) of a function f(x)=0.",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Single Variable)",
+    "Sub-Topic": "Newton's Method",
+    "Tags": ["Newton's method", "root finding", "numerical methods", "iteration"]
+  },
+  {
+    "Question": "What is the iterative formula for Newton's method to find successive approximations x_(n+1) to a root, given the current approximation x_n and the function f(x)?",
+    "Answer": "x_n - (f(x_n) / f'(x_n)).",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Single Variable)",
+    "Sub-Topic": "Newton's Method",
+    "Tags": ["Newton's method", "iterative formula", "derivatives", "root finding"]
+  },
+  {
+    "Question": "Under what conditions can L'Hopital's Rule be applied to evaluate the limit of a quotient f(x)/g(x) as x approaches c?",
+    "Answer": "If the limit is of an indeterminate form like 0/0 or infinity/infinity.",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Single Variable)",
+    "Sub-Topic": "L'Hopital's Rule",
+    "Tags": ["L'Hopital's rule", "limits", "indeterminate forms", "derivatives"]
+  },
+  {
+    "Question": "If L'Hopital's Rule is applicable, how is the limit of f(x)/g(x) related to the limit of their derivatives?",
+    "Answer": "lim (f(x)/g(x)) = lim (f'(x)/g'(x)), provided the latter limit exists.",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Single Variable)",
+    "Sub-Topic": "L'Hopital's Rule",
+    "Tags": ["L'Hopital's rule", "limits", "derivatives"]
+  },
+  {
+    "Question": "What is a relative extremum (local maximum or minimum) of a function?",
+    "Answer": "A point where the function's value is greater (maximum) or smaller (minimum) than all nearby points within a certain neighborhood.",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Single Variable)",
+    "Sub-Topic": "Extrema of a Function",
+    "Tags": ["extrema", "local maximum", "local minimum", "calculus of variations"]
+  },
+  {
+    "Question": "What is an absolute extremum (global maximum or minimum) of a function over its entire domain?",
+    "Answer": "The highest (maximum) or lowest (minimum) value the function achieves across its whole domain.",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Single Variable)",
+    "Sub-Topic": "Extrema of a Function",
+    "Tags": ["extrema", "global maximum", "global minimum", "optimization"]
+  },
+  {
+    "Question": "What are critical points of a function, and what two conditions on the derivative f'(x) can identify them?",
+    "Answer": "Points where f'(x) = 0 or where f'(x) is undefined (but f(x) is defined).",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Single Variable)",
+    "Sub-Topic": "Critical Points",
+    "Tags": ["critical points", "derivatives", "extrema", "stationary points"]
+  },
+  {
+    "Question": "According to the first derivative test, if f'(x) changes sign from positive to negative at a critical point c, what kind of extremum is f(c)?",
+    "Answer": "A local maximum.",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Single Variable)",
+    "Sub-Topic": "First Derivative Test",
+    "Tags": ["first derivative test", "local maximum", "critical points", "increasing decreasing functions"]
+  },
+  {
+    "Question": "According to the first derivative test, if f'(x) changes sign from negative to positive at a critical point c, what kind of extremum is f(c)?",
+    "Answer": "A local minimum.",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Single Variable)",
+    "Sub-Topic": "First Derivative Test",
+    "Tags": ["first derivative test", "local minimum", "critical points", "increasing decreasing functions"]
+  },
+  {
+    "Question": "If the first derivative f'(x) is increasing over an interval I, what can be said about the concavity of the function f(x) over I?",
+    "Answer": "f(x) is concave up over I.",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Single Variable)",
+    "Sub-Topic": "Concavity",
+    "Tags": ["concavity", "first derivative", "second derivative", "graph shape"]
+  },
+  {
+    "Question": "If the first derivative f'(x) is decreasing over an interval I, what can be said about the concavity of the function f(x) over I?",
+    "Answer": "f(x) is concave down over I.",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Single Variable)",
+    "Sub-Topic": "Concavity",
+    "Tags": ["concavity", "first derivative", "second derivative", "graph shape"]
+  },
+  {
+    "Question": "In the second derivative test, if f'(c)=0 and f''(c) > 0, what kind of extremum is f(c)?",
+    "Answer": "A local minimum.",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Single Variable)",
+    "Sub-Topic": "Second Derivative Test",
+    "Tags": ["second derivative test", "local minimum", "concavity"]
+  },
+  {
+    "Question": "In the second derivative test, if f'(c)=0 and f''(c) < 0, what kind of extremum is f(c)?",
+    "Answer": "A local maximum.",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Single Variable)",
+    "Sub-Topic": "Second Derivative Test",
+    "Tags": ["second derivative test", "local maximum", "concavity"]
+  },
+  {
+    "Question": "What is a point of inflection of a function f(x)?",
+    "Answer": "A point where the function is continuous and its concavity changes.",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Single Variable)",
+    "Sub-Topic": "Point of Inflection",
+    "Tags": ["point of inflection", "concavity", "second derivative", "graph shape"]
+  },
+  {
+    "Question": "How is a Riemann sum for a function f(x) over a closed interval [a,b] defined, involving n subintervals of width Delta_x and sample points x_i*?",
+    "Answer": "The sum from i=1 to n of (f(x_i*) * Delta_x).",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Single Variable)",
+    "Sub-Topic": "Riemann Sums",
+    "Tags": ["Riemann sums", "definite integrals", "area approximation", "calculus"]
+  },
+  {
+    "Question": "In a Riemann sum, how is the width Delta_x of each of the n regular subintervals of [a,b] calculated?",
+    "Answer": "(b - a) / n.",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Single Variable)",
+    "Sub-Topic": "Riemann Sums",
+    "Tags": ["Riemann sums", "subintervals", "integration"]
+  },
+  {
+    "Question": "What is the Upper Riemann Sum U(f,P) obtained by using for f(x) in each subinterval?",
+    "Answer": "The supremum (maximum value) of f(x) in each subinterval.",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Single Variable)",
+    "Sub-Topic": "Upper and Lower Sums",
+    "Tags": ["Riemann sums", "upper sum", "supremum", "integration"]
+  },
+  {
+    "Question": "What is the Lower Riemann Sum L(f,P) obtained by using for f(x) in each subinterval?",
+    "Answer": "The infimum (minimum value) of f(x) in each subinterval.",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Single Variable)",
+    "Sub-Topic": "Upper and Lower Sums",
+    "Tags": ["Riemann sums", "lower sum", "infimum", "integration"]
+  },
+  {
+    "Question": "How does the definite integral of f(x) from a to b relate to the limit of its Riemann sums as the number of subintervals n approaches infinity?",
+    "Answer": "The definite integral is the limit of the Riemann sums as n approaches infinity.",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Single Variable)",
+    "Sub-Topic": "Area under Curves (Definite Integral)",
+    "Tags": ["definite integrals", "Riemann sums", "limit definition of integral", "area"]
+  },
+  {
+    "Question": "If a function f(x) is continuous over [a,b] and F(x) is defined as the integral of f(t)dt from a to x, what is the relationship F'(x) according to the Fundamental Theorem of Calculus (Part 1)?",
+    "Answer": "F'(x) = f(x).",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Single Variable)",
+    "Sub-Topic": "Fundamental Theorem of Calculus",
+    "Tags": ["Fundamental Theorem of Calculus", "derivatives", "integrals", "antiderivative"]
+  },
+  {
+    "Question": "According to the Fundamental Theorem of Calculus (Part 2), if F(x) is any antiderivative of f(x), how is the definite integral of f(x) from a to b evaluated?",
+    "Answer": "F(b) - F(a).",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Single Variable)",
+    "Sub-Topic": "Fundamental Theorem of Calculus",
+    "Tags": ["Fundamental Theorem of Calculus", "definite integrals", "antiderivative", "evaluation theorem"]
+  },
+  {
+    "Question": "How is the average value of a continuous function f(x) over an interval [a,b] calculated using a definite integral?",
+    "Answer": "(1/(b-a)) times the integral of f(x) from a to b.",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Single Variable)",
+    "Sub-Topic": "Average value of a function",
+    "Tags": ["average value", "definite integrals", "mean value theorem for integrals"]
+  },
+  {
+    "Question": "For an even function f(x) (where f(-x)=f(x)), how can the integral from -a to a be simplified in terms of an integral from 0 to a?",
+    "Answer": "It is equal to 2 times the integral of f(x) from 0 to a.",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Single Variable)",
+    "Sub-Topic": "Area of Symmetric Functions (Even)",
+    "Tags": ["even functions", "definite integrals", "symmetry", "integration properties"]
+  },
+  {
+    "Question": "For an odd function f(x) (where f(-x)=-f(x)), what is the value of its definite integral from -a to a?",
+    "Answer": "0.",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Single Variable)",
+    "Sub-Topic": "Area of Symmetric Functions (Odd)",
+    "Tags": ["odd functions", "definite integrals", "symmetry", "integration properties"]
+  },
+  {
+    "Question": "How is the area between two curves f(x) (upper) and g(x) (lower) from x=a to x=b calculated using a definite integral?",
+    "Answer": "The integral from a to b of |f(x) - g(x)| dx, or f(x)-g(x) if f(x) >= g(x) on [a,b].",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Single Variable)",
+    "Sub-Topic": "Area between curves",
+    "Tags": ["area between curves", "definite integrals", "integration applications"]
+  },
+  {
+    "Question": "What is the substitution rule for indefinite integrals, if u = g(x) is a differentiable function?",
+    "Answer": "The integral of f(g(x))*g'(x)dx equals the integral of f(u)du.",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Single Variable)",
+    "Sub-Topic": "Integration Techniques (Substitution Rule)",
+    "Tags": ["substitution rule", "u-substitution", "integration techniques", "indefinite integrals"]
+  },
+  {
+    "Question": "When using the substitution rule u = g(x) for a definite integral from a to b, what do the limits of integration become in terms of u?",
+    "Answer": "From g(a) to g(b).",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Single Variable)",
+    "Sub-Topic": "Integration Techniques (Substitution Rule for Definite Integrals)",
+    "Tags": ["substitution rule", "u-substitution", "definite integrals", "change of limits"]
+  },
+  {
+    "Question": "State the formula for integration by parts for an indefinite integral of u dv.",
+    "Answer": "u*v - integral of v*du.",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Single Variable)",
+    "Sub-Topic": "Integration Techniques (Integration by Parts)",
+    "Tags": ["integration by parts", "integration techniques", "product rule for integration"]
+  },
+  {
+    "Question": "What is the formula for the derivative with respect to x of a definite integral from u(x) to v(x) of f(t)dt, involving f, u', and v'?",
+    "Answer": "f(v(x))*v'(x) - f(u(x))*u'(x).",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Single Variable)",
+    "Sub-Topic": "FTC and Chain Rule (Leibniz Integral Rule)",
+    "Tags": ["Fundamental Theorem of Calculus", "chain rule", "Leibniz integral rule", "differentiation under integral sign"]
+  },
+  {
+    "Question": "When dealing with a function of more than one independent input variable, what is the process of finding the rate of change with respect to one variable while holding all others constant called?",
+    "Answer": "Partial differentiation.",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Multivariable)",
+    "Sub-Topic": "Partial Derivatives Introduction",
+    "Tags": ["partial derivatives", "multivariable calculus", "rate of change"]
+  },
+  {
+    "Question": "For a function f(x,y), how is the partial derivative of f with respect to x obtained, and how is y treated during this process?",
+    "Answer": "By differentiating f(x,y) with respect to x in the usual way, treating the y-variable as if it were constant.",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Multivariable)",
+    "Sub-Topic": "First-Order Partial Derivatives (w.r.t x)",
+    "Tags": ["partial derivatives", "differentiation", "multivariable functions"]
+  },
+  {
+    "Question": "For a function f(x,y), how is the partial derivative of f with respect to y obtained, and how is x treated during this process?",
+    "Answer": "By differentiating f(x,y) with respect to y in the usual way, treating the x-variable as if it were constant.",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Multivariable)",
+    "Sub-Topic": "First-Order Partial Derivatives (w.r.t y)",
+    "Tags": ["partial derivatives", "differentiation", "multivariable functions"]
+  },
+  {
+    "Question": "What is the limit definition of the partial derivative of f(x,y) with respect to x?",
+    "Answer": "lim h->0 of (f(x+h, y) - f(x,y)) / h.",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Multivariable)",
+    "Sub-Topic": "Representation using Limits (Partial Derivatives)",
+    "Tags": ["partial derivatives", "limit definition", "multivariable calculus"]
+  },
+  {
+    "Question": "What is the limit definition of the partial derivative of f(x,y) with respect to y?",
+    "Answer": "lim k->0 of (f(x, y+k) - f(x,y)) / k.",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Multivariable)",
+    "Sub-Topic": "Representation using Limits (Partial Derivatives)",
+    "Tags": ["partial derivatives", "limit definition", "multivariable calculus"]
+  },
+  {
+    "Question": "For a function of n variables, how many second-order partial derivatives are there in total?",
+    "Answer": "n squared (n^2).",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Multivariable)",
+    "Sub-Topic": "Second-Order Partial Derivatives",
+    "Tags": ["second-order partial derivatives", "higher-order derivatives", "multivariable calculus"]
+  },
+  {
+    "Question": "What does the notation f_xy (or d^2f / dy dx) represent for a function f(x,y)?",
+    "Answer": "The partial derivative of (the partial derivative of f with respect to x) with respect to y.",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Multivariable)",
+    "Sub-Topic": "Second-Order Partial Derivatives (Mixed Partials)",
+    "Tags": ["mixed partial derivatives", "second-order derivatives", "Clairaut's theorem"]
+  },
+  {
+    "Question": "What is the gradient of a multivariate function f(x, y, ...), and what does it represent geometrically?",
+    "Answer": "A vector containing all partial derivatives of the function; it points in the direction of the steepest increase of the function.",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Multivariable)",
+    "Sub-Topic": "Gradient of a Multivariate Function",
+    "Tags": ["gradient", "partial derivatives", "vector calculus", "directional derivative", "steepest ascent"]
+  },
+  {
+    "Question": "What is the domain of the function f(x,y,z) = 1 / sqrt(x^2 + y^2 + z^2 - 25)?",
+    "Answer": "The set of all points (x,y,z) such that x^2 + y^2 + z^2 > 25.",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Multivariable)",
+    "Sub-Topic": "Domain of Multivariate Functions",
+    "Tags": ["domain", "multivariable functions", "inequalities", "spheres"]
+  },
+  {
+    "Question": "For the function f(x,y) = sqrt(x^2 + y^2), what geometric shapes are its level curves (f(x,y) = k, for a constant k)?",
+    "Answer": "Circles centered at the origin with radius k (for k >= 0).",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Multivariable)",
+    "Sub-Topic": "Level Curves",
+    "Tags": ["level curves", "contour lines", "multivariable functions", "circles"]
+  },
+  {
+    "Question": "When evaluating the limit of a multivariate function f(x,y) as (x,y) approaches (0,0), if different paths of approach (e.g., y=x, y=0) yield different limit values, what can be concluded?",
+    "Answer": "The limit does not exist at (0,0).",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Multivariable)",
+    "Sub-Topic": "Multivariate Limits",
+    "Tags": ["multivariate limits", "path dependence", "limit existence"]
+  },
+  {
+    "Question": "For a multivariate function f(x,y) to be continuous at a point (a,b), what conditions regarding the function's value, its limit, and their relationship must be met?",
+    "Answer": "f(a,b) must be defined, the limit as (x,y) approaches (a,b) must exist, and this limit must equal f(a,b).",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Multivariable)",
+    "Sub-Topic": "Multivariate Continuity",
+    "Tags": ["multivariate continuity", "limits", "definition of continuity"]
+  },
+  {
+    "Question": "If z = f(x,y) where x = g(t) and y = h(t), how can dz/dt be found using the chain rule for multivariable functions?",
+    "Answer": "(partial f / partial x)*(dx/dt) + (partial f / partial y)*(dy/dt).",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Multivariable)",
+    "Sub-Topic": "Chain Rule for Multivariable Functions",
+    "Tags": ["chain rule", "multivariable calculus", "total derivative", "partial derivatives"]
+  },
+  {
+    "Question": "How is the directional derivative of a function f(x,y) at a point (a,b) in the direction of a unit vector u calculated using the gradient of f?",
+    "Answer": "As the dot product of the gradient of f at (a,b) and the unit vector u.",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Multivariable)",
+    "Sub-Topic": "Directional Derivative",
+    "Tags": ["directional derivative", "gradient", "dot product", "rate of change"]
+  },
+  {
+    "Question": "What does a Probability Density Function (PDF), f(x), define for a continuous random variable X?",
+    "Answer": "The relative likelihood that the random variable X takes on a particular value (or falls within a small interval around that value).",
+    "Module": "Mathematics II",
+    "Topic": "Statistics and Probability",
+    "Sub-Topic": "Probability Density Functions (PDF)",
+    "Tags": ["probability density function", "pdf", "continuous random variables", "probability"]
+  },
+  {
+    "Question": "What is the normalization condition that any valid Probability Density Function f(x) must satisfy over its entire domain Omega?",
+    "Answer": "The integral of f(x)dx over Omega must equal 1.",
+    "Module": "Mathematics II",
+    "Topic": "Statistics and Probability",
+    "Sub-Topic": "Probability Density Functions (PDF)",
+    "Tags": ["pdf", "normalization", "total probability", "integration"]
+  },
+  {
+    "Question": "How is the expectation (mean) E(X) of a continuous random variable X calculated using its PDF f(x) over the domain Omega?",
+    "Answer": "The integral of (x * f(x))dx over Omega.",
+    "Module": "Mathematics II",
+    "Topic": "Statistics and Probability",
+    "Sub-Topic": "Expectation (Continuous Variables)",
+    "Tags": ["expectation", "mean", "pdf", "continuous random variables", "integration"]
+  },
+  {
+    "Question": "How is the variance Var(X) of a continuous random variable X calculated using its k-th moments M_k (specifically M1 and M2)?",
+    "Answer": "M2 - (M1)^2.",
+    "Module": "Mathematics II",
+    "Topic": "Statistics and Probability",
+    "Sub-Topic": "Variance (Continuous Variables)",
+    "Tags": ["variance", "moments", "pdf", "continuous random variables"]
+  },
+  {
+    "Question": "What does a Cumulative Distribution Function (CDF), F(x), represent for a random variable X?",
+    "Answer": "The probability that the random variable X takes on a value less than or equal to x, i.e., P(X <= x).",
+    "Module": "Mathematics II",
+    "Topic": "Statistics and Probability",
+    "Sub-Topic": "Cumulative Distribution Function (CDF)",
+    "Tags": ["cumulative distribution function", "cdf", "probability", "random variables"]
+  },
+  {
+    "Question": "How is the CDF F(x) for a continuous random variable X obtained from its PDF f(t)?",
+    "Answer": "By integrating f(t)dt from negative infinity up to x.",
+    "Module": "Mathematics II",
+    "Topic": "Statistics and Probability",
+    "Sub-Topic": "Cumulative Distribution Function (CDF)",
+    "Tags": ["cdf", "pdf", "integration", "continuous random variables"]
+  },
+  {
+    "Question": "For a continuous random variable X with CDF F(x), how is the probability P(a < X < b) calculated using F(x)?",
+    "Answer": "F(b) - F(a).",
+    "Module": "Mathematics II",
+    "Topic": "Statistics and Probability",
+    "Sub-Topic": "Cumulative Distribution Function (CDF)",
+    "Tags": ["cdf", "probability calculation", "interval probability"]
+  },
+  {
+    "Question": "What characteristic shape does the Probability Density Function (PDF) of a Normal (Gaussian) distribution have?",
+    "Answer": "A bell curve.",
+    "Module": "Mathematics II",
+    "Topic": "Statistics and Probability",
+    "Sub-Topic": "The Gaussian/Normal Distribution",
+    "Tags": ["normal distribution", "Gaussian distribution", "bell curve", "pdf"]
+  },
+  {
+    "Question": "What two parameters define a specific Normal distribution, often denoted as N(mu, sigma^2)?",
+    "Answer": "The mean (mu) and the variance (sigma^2).",
+    "Module": "Mathematics II",
+    "Topic": "Statistics and Probability",
+    "Sub-Topic": "The Gaussian/Normal Distribution",
+    "Tags": ["normal distribution", "mean", "variance", "parameters"]
+  },
+  {
+    "Question": "How is a random variable X with mean mu and standard deviation sigma standardized to a random variable Z?",
+    "Answer": "Z = (X - mu) / sigma.",
+    "Module": "Mathematics II",
+    "Topic": "Statistics and Probability",
+    "Sub-Topic": "Standardizing The Normal Distribution",
+    "Tags": ["standard normal distribution", "z-score", "standardization", "mean", "standard deviation"]
+  },
+  {
+    "Question": "What are the mean and standard deviation of the standardized normal random variable Z?",
+    "Answer": "Mean = 0, Standard deviation = 1.",
+    "Module": "Mathematics II",
+    "Topic": "Statistics and Probability",
+    "Sub-Topic": "Standardizing The Normal Distribution",
+    "Tags": ["standard normal distribution", "z-score", "mean", "standard deviation"]
+  },
+  {
+    "Question": "According to the 68-95-99.7 rule for normal distributions, approximately what percentage of data falls within one standard deviation of the mean (mu +/- sigma)?",
+    "Answer": "68.2%.",
+    "Module": "Mathematics II",
+    "Topic": "Statistics and Probability",
+    "Sub-Topic": "68-95-99.7 rule",
+    "Tags": ["normal distribution", "empirical rule", "standard deviation", "probability"]
+  },
+  {
+    "Question": "According to the 68-95-99.7 rule, approximately what percentage of data falls within two standard deviations of the mean (mu +/- 2*sigma)?",
+    "Answer": "95.4%.",
+    "Module": "Mathematics II",
+    "Topic": "Statistics and Probability",
+    "Sub-Topic": "68-95-99.7 rule",
+    "Tags": ["normal distribution", "empirical rule", "standard deviation", "probability"]
+  },
+  {
+    "Question": "If X ~ N(mu, sigma^2) and Y = aX + b, what is the distribution of Y according to the closure property of normal distributions?",
+    "Answer": "Y ~ N(a*mu + b, (a*sigma)^2).",
+    "Module": "Mathematics II",
+    "Topic": "Statistics and Probability",
+    "Sub-Topic": "Properties of Normal Distribution (Closure)",
+    "Tags": ["normal distribution", "linear transformation", "closure property", "mean", "variance"]
+  },
+  {
+    "Question": "If X1 ~ N(mu1, sigma1^2) and X2 ~ N(mu2, sigma2^2) are independent normal distributions, what is the distribution of their sum X1 + X2?",
+    "Answer": "N(mu1 + mu2, sigma1^2 + sigma2^2).",
+    "Module": "Mathematics II",
+    "Topic": "Statistics and Probability",
+    "Sub-Topic": "Properties of Normal Distribution (Addition)",
+    "Tags": ["normal distribution", "sum of random variables", "mean", "variance", "independence"]
+  },
+  {
+    "Question": "What does the function Phi(z) typically represent when using Z-tables for a standardized normal variable Z?",
+    "Answer": "The probability P(Z <= z).",
+    "Module": "Mathematics II",
+    "Topic": "Statistics and Probability",
+    "Sub-Topic": "Using Z-Tables",
+    "Tags": ["z-tables", "standard normal distribution", "cdf", "probability calculation"]
+  },
+  {
+    "Question": "What is the difference between a population and a sample in statistics?",
+    "Answer": "A population includes all possible data objects in a situation, while a sample is a smaller subset used for inference.",
+    "Module": "Mathematics II",
+    "Topic": "Statistics and Probability",
+    "Sub-Topic": "Samples vs Populations",
+    "Tags": ["sampling", "population", "sample", "statistical inference"]
+  },
+  {
+    "Question": "How is the sample mean (x_bar) calculated from n individual sample values (x_i)?",
+    "Answer": "The sum of all x_i divided by n.",
+    "Module": "Mathematics II",
+    "Topic": "Statistics and Probability",
+    "Sub-Topic": "Sample Mean",
+    "Tags": ["sample mean", "average", "descriptive statistics"]
+  },
+  {
+    "Question": "When calculating sample variance, why is Bessel's correction (dividing by n-1 instead of n) used?",
+    "Answer": "To provide an unbiased estimator of the population variance, accounting for the degree of freedom lost when using the sample mean.",
+    "Module": "Mathematics II",
+    "Topic": "Statistics and Probability",
+    "Sub-Topic": "Sample Variance (Bessel's Correction)",
+    "Tags": ["sample variance", "Bessel's correction", "unbiased estimator", "degrees of freedom"]
+  },
+  {
+    "Question": "What does the Central Limit Theorem (CLT) state about the distribution of sample means (X_bar) for large sample sizes (n), even if the original population is not normally distributed?",
+    "Answer": "X_bar is approximately normally distributed with mean mu and variance sigma^2/n.",
+    "Module": "Mathematics II",
+    "Topic": "Statistics and Probability",
+    "Sub-Topic": "Central Limit Theorem",
+    "Tags": ["Central Limit Theorem", "clt", "sampling distribution", "sample mean", "normal approximation"]
+  },
+  {
+    "Question": "What is the standard deviation of the distribution of sample means called, and how is it calculated from the population standard deviation (sigma) and sample size (n)?",
+    "Answer": "Standard Error; calculated as sigma / sqrt(n).",
+    "Module": "Mathematics II",
+    "Topic": "Statistics and Probability",
+    "Sub-Topic": "Standard Error",
+    "Tags": ["standard error", "sampling distribution", "sample mean", "precision"]
+  },
+  {
+    "Question": "If X_bar is the sample mean from a population with mean E(X) and variance V(X), what are E(X_bar) and V(X_bar) in terms of E(X), V(X), and sample size n?",
+    "Answer": "E(X_bar) = E(X) and V(X_bar) = V(X)/n.",
+    "Module": "Mathematics II",
+    "Topic": "Statistics and Probability",
+    "Sub-Topic": "Derivation of CLT Properties",
+    "Tags": ["sample mean", "expectation", "variance", "sampling distribution"]
+  },
+  {
+    "Question": "What is a confidence interval in the context of estimating a population parameter like the mean?",
+    "Answer": "A range of values, derived from sample data, that is likely to contain the true population parameter with a certain level of confidence.",
+    "Module": "Mathematics II",
+    "Topic": "Statistics and Probability",
+    "Sub-Topic": "Confidence Intervals",
+    "Tags": ["confidence interval", "estimation", "population mean", "statistical inference"]
+  },
+  {
+    "Question": "For a normally distributed population with a known standard deviation, how is a 95% confidence interval for the population mean (mu) calculated using the sample mean (X_bar), population standard deviation (S), and sample size (n)?",
+    "Answer": "X_bar +/- 1.96 * (S / sqrt(n)).",
+    "Module": "Mathematics II",
+    "Topic": "Statistics and Probability",
+    "Sub-Topic": "Computing Confidence Intervals",
+    "Tags": ["confidence interval", "normal distribution", "z-score", "sample mean", "standard error"]
+  },
+  {
+    "Question": "What is the conditional probability P(A|B) defined as in terms of P(A intersect B) and P(B)?",
+    "Answer": "P(A intersect B) / P(B), assuming P(B) is not zero.",
+    "Module": "Mathematics II",
+    "Topic": "Statistics and Probability",
+    "Sub-Topic": "Conditional Probability",
+    "Tags": ["conditional probability", "Bayes' theorem", "probability theory"]
+  },
+  {
+    "Question": "If two events A and B are independent, what is the relationship between P(A|B) and P(A)?",
+    "Answer": "P(A|B) = P(A).",
+    "Module": "Mathematics II",
+    "Topic": "Statistics and Probability",
+    "Sub-Topic": "Independence and Conditional Probability",
+    "Tags": ["independence", "conditional probability", "probability theory"]
+  },
+  {
+    "Question": "If events A and B are independent, what is P(A intersect B) in terms of P(A) and P(B)?",
+    "Answer": "P(A) * P(B).",
+    "Module": "Mathematics II",
+    "Topic": "Statistics and Probability",
+    "Sub-Topic": "Independence",
+    "Tags": ["independence", "joint probability", "probability theory"]
+  },
+  {
+    "Question": "State Bayes' Theorem, expressing P(B|A) in terms of P(A|B), P(B), and P(A).",
+    "Answer": "(P(A|B) * P(B)) / P(A).",
+    "Module": "Mathematics II",
+    "Topic": "Statistics and Probability",
+    "Sub-Topic": "Bayes' Theorem",
+    "Tags": ["Bayes' theorem", "conditional probability", "belief updating", "statistical inference"]
+  },
+  {
+    "Question": "In Bayes' Theorem, P(B|A) = (P(A|B)P(B)) / P(A), how can P(A) be expanded using the law of total probability if B and not-B form a partition of the sample space?",
+    "Answer": "P(A|B)P(B) + P(A|not-B)P(not-B).",
+    "Module": "Mathematics II",
+    "Topic": "Statistics and Probability",
+    "Sub-Topic": "Bayes' Theorem (Expanded Form)",
+    "Tags": ["Bayes' theorem", "law of total probability", "partition"]
+  },
+  {
+    "Question": "What is the purpose of the 'basis step' in a proof by mathematical induction?",
+    "Answer": "To show that the statement holds for the initial value (e.g., n=1 or some starting integer).",
+    "Module": "Mathematics II",
+    "Topic": "Mathematical Proof Techniques",
+    "Sub-Topic": "Mathematical Induction (Basis Step)",
+    "Tags": ["mathematical induction", "proof techniques", "basis case"]
+  },
+  {
+    "Question": "What is the 'assumption step' (or inductive hypothesis) in a proof by mathematical induction?",
+    "Answer": "To assume that the statement is true for an arbitrary integer k (where k >= initial value).",
+    "Module": "Mathematics II",
+    "Topic": "Mathematical Proof Techniques",
+    "Sub-Topic": "Mathematical Induction (Assumption Step)",
+    "Tags": ["mathematical induction", "proof techniques", "inductive hypothesis"]
+  },
+  {
+    "Question": "What is the goal of the 'inductive step' in a proof by mathematical induction?",
+    "Answer": "To use the assumption that the statement is true for n=k to prove that it is also true for n=k+1.",
+    "Module": "Mathematics II",
+    "Topic": "Mathematical Proof Techniques",
+    "Sub-Topic": "Mathematical Induction (Inductive Step)",
+    "Tags": ["mathematical induction", "proof techniques", "deductive reasoning"]
+  },
+  {
+    "Question": "In the context of multivariate limits, what is a common strategy if direct substitution results in an indeterminate form?",
+    "Answer": "Try algebraic simplification or test the limit along several distinct paths.",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Multivariable)",
+    "Sub-Topic": "Procedure for Multivariate Limits",
+    "Tags": ["multivariate limits", "indeterminate forms", "path testing", "algebraic manipulation"]
+  },
+  {
+    "Question": "If testing a multivariate limit along different paths yields different values, what conclusion can be drawn about the existence of the overall limit?",
+    "Answer": "The limit does not exist.",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Multivariable)",
+    "Sub-Topic": "Procedure for Multivariate Limits",
+    "Tags": ["multivariate limits", "path dependence", "limit non-existence"]
+  },
+  {
+    "Question": "What coordinate system conversion can be useful for evaluating multivariate limits if other methods are inconclusive, especially when approaching the origin?",
+    "Answer": "Conversion to polar coordinates (x = r*cos(theta), y = r*sin(theta)).",
+    "Module": "Mathematics II",
+    "Topic": "Calculus (Multivariable)",
+    "Sub-Topic": "Procedure for Multivariate Limits (Polar Coordinates)",
+    "Tags": ["multivariate limits", "polar coordinates", "limit evaluation"]
+  }
+]
