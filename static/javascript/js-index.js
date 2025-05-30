@@ -62,13 +62,17 @@ function showAnswerButtonsWithDelay() {
             $container.prepend($countdownDiv);
         }
         function renderCountdown() {
-            $countdownDiv.html(
-                `<span>Showing answers in <b>${countdown}</b> second${countdown !== 1 ? 's' : ''}...</span>
-                    <button id="pause-delay-btn" class="btn btn-sm btn-outline-secondary ms-2">Pause</button>
-                    <button id="skip-delay-btn" class="btn btn-sm btn-outline-primary ms-2">See answers now</button>`
-            );
             if (paused) {
-                $countdownDiv.find('span').html(`<b>Paused</b>`);
+                $countdownDiv.html(
+                    `<span><b>Paused</b></span>
+                    <button id="skip-delay-btn" class="delay-action-btn ms-2">Show answers now</button>`
+                );
+            } else {
+                $countdownDiv.html(
+                    `<span>Showing answers in <b>${countdown}</b> second${countdown !== 1 ? 's' : ''}...</span>
+                    <button id="pause-delay-btn" class="delay-action-btn pause ms-2">Pause</button>
+                    <button id="skip-delay-btn" class="delay-action-btn ms-2">Show answers now</button>`
+                );
             }
         }
         renderCountdown();
@@ -213,6 +217,8 @@ function updateDropdownLabel($dropdownBtn, selected, defaultLabel) {
 
 function getNewQuestion(specificQuestionId = null) {
     resetDelayCountdown();
+    // Hide manual continue button on new question
+    $('#manual-continue-btn-row').hide();
     const data = {
         module: currentSelections.module,
         topics: currentSelections.topics,
@@ -254,6 +260,12 @@ function getNewQuestion(specificQuestionId = null) {
             $('#module-info').text(response.module);
             $('#topic-info').text(response.topic);
             $('#subtopic-info').text(response.subtopic);
+
+            // Remove tags display
+            // $('#tags-container').empty();
+            // response.tags.forEach(tag => {
+            //     $('#tags-container').append(`<span class="tag">${tag}</span>`);
+            // });
 
             // Reset buttons state
             $('.answer-btn').removeClass('btn-success btn-danger disabled')
@@ -389,6 +401,8 @@ function getNewQuestion(specificQuestionId = null) {
 
             // --- Delay showing answers if needed ---
             showAnswerButtonsWithDelay();
+            // Do NOT hide manual continue button here, only hide on new question fetch
+            // $('#manual-continue-btn-row').hide(); // <-- REMOVE this line if present
         }
     });
 }
@@ -398,6 +412,7 @@ $(document).off('click', '.answer-btn').on('click', '.answer-btn', function () {
     const $btn = $(this);
     if ($btn.prop('disabled')) return;
     const selectedAnswer = $btn.text();
+    updateManualContinueState(); // <-- Ensure manualContinue is up-to-date before using
     // Send the token with the answer
     $.ajax({
         url: '/check_answer',
@@ -411,10 +426,15 @@ $(document).off('click', '.answer-btn').on('click', '.answer-btn', function () {
             if (response.correct) {
                 $btn.removeClass('btn-primary').addClass('btn-success');
                 $('.answer-btn').prop('disabled', true);
-                // Auto-advance after 1 second
-                setTimeout(function () {
-                    getNewQuestion();
-                }, 1000);
+                if (manualContinue) {
+                    // Show manual continue button
+                    $('#manual-continue-btn-row').show();
+                } else {
+                    // Auto-advance after 1 second
+                    setTimeout(function () {
+                        getNewQuestion();
+                    }, 1000);
+                }
             } else {
                 // Only disable and mark the clicked button as incorrect
                 $btn.removeClass('btn-primary').addClass('btn-danger disabled').prop('disabled', true);
@@ -427,6 +447,12 @@ $(document).off('click', '.answer-btn').on('click', '.answer-btn', function () {
             }
         }
     });
+});
+
+// Manual continue button handler
+$(document).off('click', '#manual-continue-btn').on('click', '#manual-continue-btn', function () {
+    $('#manual-continue-btn-row').hide();
+    getNewQuestion();
 });
 
 // --- Edit answer button logic (admin only) ---
@@ -841,4 +867,28 @@ $(document).ready(function () {
             }, 300);
         });
     }
+});
+
+// --- Manual continue state with toggle button ---
+let manualContinue = false;
+function setManualContinueUI(state) {
+    manualContinue = !!state;
+    localStorage.setItem('manualContinue', manualContinue ? 'true' : 'false');
+    const $btn = $('#manual-continue-toggle');
+    if (manualContinue) {
+        $btn.addClass('active');
+    } else {
+        $btn.removeClass('active');
+    }
+}
+function updateManualContinueState() {
+    // Always sync manualContinue with UI state
+    manualContinue = $('#manual-continue-toggle').hasClass('active');
+}
+$(document).ready(function () {
+    setManualContinueUI(localStorage.getItem('manualContinue') === 'true');
+    // Attach click handler for toggle button
+    $('#manual-continue-toggle').off('click').on('click', function () {
+        setManualContinueUI(!manualContinue);
+    });
 });

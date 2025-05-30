@@ -809,3 +809,219 @@
                 margin-bottom: 2px !important;
             }
         }
+
+        #manual-continue-btn-row {
+            margin-top: 28px; /* Increased spacing for separation from answer cards */
+        }
+
+        #manual-continue-btn {
+            font-size: 1.1em;
+            padding: 12px 0;
+            border-radius: 14px;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(40, 167, 69, 0.08);
+            transition: background 0.15s, box-shadow 0.15s;
+        }
+
+        #manual-continue-btn:hover, #manual-continue-btn:focus {
+            background: #218838 !important;
+            color: #fff !important;
+            box-shadow: 0 4px 16px rgba(40, 167, 69, 0.18);
+        }
+
+        @media (max-width: 576px) {
+            #manual-continue-btn {
+                font-size: 1em;
+                padding: 10px 0;
+            }
+            #manual-continue-btn-row {
+                margin-top: 18px; /* Also increase spacing on mobile */
+            }
+        }
+
+        /* Align manual continue checkbox inline with delay group */
+        .delay-answers-group + .form-check {
+            display: flex;
+            align-items: center;
+            margin-left: 10px;
+            margin-bottom: 0;
+        }
+
+        .delay-answers-group + .form-check .form-check-input {
+            margin-top: 0;
+            margin-right: 4px;
+        }
+
+        /* --- Modernized QA controls row --- */
+.qa-controls-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    margin-top: 12px;
+    margin-bottom: 0;
+}
+
+/* Modern pill style for all controls in the row */
+.qa-controls-row > * {
+    border-radius: 999px !important;
+    box-shadow: 0 2px 8px rgba(13, 110, 253, 0.04);
+    background: #f8faff !important;
+    margin-bottom: 0 !important;
+    transition: box-shadow 0.13s, border 0.13s, background 0.13s;
+}
+
+/* --- Find Lecture Notes button --- */
+#pdfsDropdown,
+#pdfsDropdown.btn {
+    border: 1.5px solid #b3c6e0 !important;
+    color: #0d6efd !important;
+    background: #e7f1ff !important;
+    font-weight: 600;
+    font-size: 1.07em;
+    padding: 8px 22px;
+    border-radius: 999px !important;
+    box-shadow: 0 2px 8px rgba(13, 110, 253, 0.08);
+    transition: background 0.13s, color 0.13s, border 0.13s;
+}
+#pdfsDropdown:hover, #pdfsDropdown:focus {
+    background: #d6eaff !important;
+    color: #0a58ca !important;
+    border-color: #0d6efd !important;
+}
+
+/* --- Report Question button --- */
+#report-question-btn {
+    border: 1.5px solid #e67e22 !important;
+    background: #fff7f0 !important;
+    color: #d35400 !important;
+    font-weight: 600;
+    font-size: 1.07em;
+    padding: 8px 22px;
+    border-radius: 999px !important;
+    box-shadow: 0 2px 8px rgba(211, 84, 0, 0.08);
+    transition: background 0.13s, color 0.13s, border 0.13s;
+}
+#report-question-btn:hover, #report-question-btn:focus {
+    background: #ffe0c2 !important;
+    color: #b34700 !important;
+    border-color: #d35400 !important;
+}
+
+/* --- Pondering Time input group --- */
+.delay-answers-group {
+    display: flex;
+    align-items: center;
+    background: #f8faff;
+    border-radius: 999px !important;
+    padding: 2px 14px 2px 14px;
+    margin-left: 0;
+    box-shadow: 0 2px 8px rgba(13, 110, 253, 0.04);
+    border: 1.5px solid #b3c6e0;
+    height: 38px;
+    min-width: 120px;
+    max-width: 200px;
+    font-size: 1.07em;
+    font-weight: 500;
+    gap: 8px;
+}
+.delay-answers-label {
+    font-size: 1em;
+    color: #555;
+    font-weight: 600;
+    margin-right: 4px;
+    white-space: nowrap;
+}
+#delay-answers-input {
+    width: 48px;
+    min-width: 36px;
+    max-width: 60px;
+    border-radius: 8px;
+    border: 1.5px solid #b3c6e0;
+    background: #fff;
+    font-size: 1em;
+    padding: 2px 8px;
+    margin-right: 0;
+    margin-left: 0;
+    text-align: center;
+    box-shadow: none;
+    transition: border 0.13s, box-shadow 0.13s;
+}
+#delay-answers-input:focus {
+    outline: none;
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 2px #b3d1ff66;
+}
+
+/* --- Manual Continue toggle button --- */
+.manual-continue-toggle {
+    display: flex;
+    align-items: center;
+    border-radius: 999px !important;
+    border: 1.5px solid #b3c6e0;
+    background: #f8faff;
+    color: #555;
+    font-size: 1.07em;
+    font-weight: 600;
+    padding: 6px 22px;
+    box-shadow: 0 2px 8px rgba(13, 110, 253, 0.04);
+    margin-left: 0;
+    margin-bottom: 0;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border 0.15s;
+    outline: none;
+    gap: 8px;
+    border-width: 2px;
+    user-select: none;
+}
+.manual-continue-toggle:hover, .manual-continue-toggle:focus {
+    background: #e7f1ff !important;
+    color: #0d6efd !important;
+    border-color: #0d6efd !important;
+}
+.manual-continue-toggle.active,
+.manual-continue-toggle.active:hover,
+.manual-continue-toggle.active:focus {
+    background: #e7fbe7 !important;
+    color: #218838 !important;
+    border-color: #218838 !important;
+}
+.manual-continue-tick {
+    display: none !important;
+}
+
+/* --- Delay countdown action buttons --- */
+#delay-countdown .delay-action-btn {
+    border-radius: 999px !important;
+    font-weight: 600;
+    font-size: 1em;
+    padding: 6px 18px;
+    margin-left: 6px;
+    margin-right: 0;
+    border: 1.5px solid #b3c6e0;
+    background: #f8faff;
+    color: #0d6efd;
+    box-shadow: 0 2px 8px rgba(13, 110, 253, 0.04);
+    transition: background 0.13s, color 0.13s, border 0.13s;
+    outline: none;
+    display: inline-block;
+}
+#delay-countdown .delay-action-btn:hover,
+#delay-countdown .delay-action-btn:focus {
+    background: #e7f1ff !important;
+    color: #0a58ca !important;
+    border-color: #0d6efd !important;
+}
+
+/* Pause button: grey style */
+#delay-countdown .delay-action-btn.pause {
+    color: #555;
+    border-color: #b3c6e0;
+    background: #f1f3f7;
+}
+#delay-countdown .delay-action-btn.pause:hover,
+#delay-countdown .delay-action-btn.pause:focus {
+    background: #e2e6ea !important;
+    color: #222 !important;
+    border-color: #b3c6e0 !important;
+}

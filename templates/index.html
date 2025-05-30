@@ -33,7 +33,7 @@
             <!-- Add navigation bar -->
             <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
                 <div class="container-fluid">
-                    <span class="navbar-brand">ECS Y1 Flashcards</span>
+                    <span class="navbar-brand">flashcards.112000000.xyz</span>
                     <!-- Hamburger toggler for mobile -->
                     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar"
                         aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -130,25 +130,29 @@
                         <span id="topic-info"></span> |
                         <span id="subtopic-info"></span>
                     </div>
-                    <div id="tags-container" class="mt-2"></div>
-                    <!-- Button group: Related PDFs, Next Question, Report Question, Delay Answers -->
-                    <div class="d-flex flex-wrap gap-2 mt-2 align-items-center">
+                    <!-- Remove tags container -->
+                    <!-- <div id="tags-container" class="mt-2"></div> -->
+                    <!-- Button group: Relevant PDFs, Next Question, Report Question, Delay Answers -->
+                    <div class="qa-controls-row">
                         <div class="dropdown" id="pdfs-dropdown-container" style="display:none;">
-                            <button class="btn btn-secondary dropdown-toggle" type="button" id="pdfsDropdown"
+                            <button class="btn" type="button" id="pdfsDropdown"
                                 data-bs-toggle="dropdown" aria-expanded="false" data-question-id="">
                                 Relevant Lecture Notes
                             </button>
                             <ul class="dropdown-menu" aria-labelledby="pdfsDropdown" id="pdfs-dropdown-list"></ul>
                         </div>
                         <button id="new-question-btn" class="btn btn-primary">Next Question</button>
-                        <button id="report-question-btn" class="btn btn-report">Report Question</button>
-                        <!-- Delay Answers Input (restyled, no "sec" text) -->
+                        <button id="report-question-btn" class="btn">Report Question</button>
                         <div class="delay-answers-group" title="Delay before showing answers (seconds)">
                             <span class="delay-answers-label">Pondering Time</span>
                             <input type="number" min="0" max="60" step="1" id="delay-answers-input"
                                 class="form-control form-control-sm" value="0" aria-label="Delay answers in seconds"
                                 inputmode="numeric" pattern="[0-9]*">
                         </div>
+                        <!-- Manual continue toggle button -->
+                        <button type="button" id="manual-continue-toggle" class="manual-continue-toggle" title="Toggle manual continue">
+                            Manual continue
+                        </button>
                     </div>
                 </div>
 
@@ -158,6 +162,10 @@
                         <button class="btn btn-primary w-100 answer-btn" disabled></button>
                     </div>
                     {% endfor %}
+                    <!-- Manual continue button, hidden by default -->
+                    <div class="col-12" id="manual-continue-btn-row" style="display:none;">
+                        <button class="btn btn-success w-100" id="manual-continue-btn">Continue to next question</button>
+                    </div>
                 </div>
             </div>
         </div>
