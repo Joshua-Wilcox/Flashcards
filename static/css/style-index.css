@@ -1,0 +1,811 @@
+.answer-btn {
+            margin: 5px 0;
+            white-space: normal;
+            word-wrap: break-word;
+            padding: 18px 10px;
+            height: 100%;
+            font-size: clamp(16px, 2.5vw, 24px);
+            /* Reduced max font size */
+            min-height: 48px;
+            /* Reduced min-height */
+            border-radius: 16px;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .tag {
+            display: inline-block;
+            background-color: #e9ecef;
+            padding: 2px 8px;
+            margin: 2px;
+            border-radius: 12px;
+            font-size: 0.9em;
+        }
+
+        #question-container {
+            min-height: 150px;
+            margin-bottom: 10px;
+        }
+
+        .content-wrapper {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .answers-section {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            margin: 10px 0;
+        }
+
+        #answers-container {
+            /* Removed flex styles that cause overlap */
+        }
+
+        #answers-container>div {
+            /* Removed flex styles that cause overlap */
+        }
+
+        /* Adjust footer to stay at bottom */
+        footer {
+            margin-top: auto;
+            padding: 10px 0;
+        }
+
+        /* Responsive: mobile-friendly styles */
+        @media (max-width: 768px) {
+
+            html,
+            body {
+                height: auto; /* was 100% */
+                margin: 0;
+                padding: 0;
+            }
+
+            .content-wrapper {
+                /* min-height: 100vh; */
+                /* height: 100vh; */
+                /* REMOVE these lines to allow content to fit naturally */
+            }
+
+            .container {
+                padding-left: 4px;
+                padding-right: 4px;
+            }
+
+            .select-container {
+                margin-bottom: 10px;
+            }
+
+            .form-select {
+                font-size: 1.1em;
+                min-height: 48px;
+            }
+
+            .form-select[multiple] {
+                min-height: 120px;
+                font-size: 1em;
+            }
+
+            #question-container {
+                padding: 12px !important;
+                font-size: 1.1em;
+            }
+
+            .answer-btn {
+                font-size: 1.1em;
+                min-height: 60px;
+                padding: 18px 10px;
+            }
+
+            #qa-section {
+                flex: 1 1 auto;
+                display: flex;
+                flex-direction: column;
+                justify-content: stretch;
+            }
+
+            #answers-container {
+                /* Removed flex styles that cause overlap */
+            }
+
+            #answers-container>div {
+                /* Removed flex styles that cause overlap */
+            }
+
+            .welcome-section {
+                min-height: 180px;
+                margin-top: 20px;
+                margin-bottom: 20px;
+            }
+        }
+
+        /* Force answer buttons to fill vertical space on mobile */
+        @media (max-width: 576px) {
+            #qa-section {
+            }
+
+            #answers-container {
+                /* Removed gap, spacing will be handled by mb-2 */
+            }
+
+            .answer-btn {
+                font-size: 1.2em;
+                min-height: 60px;
+                padding: 20px 8px;
+            }
+        }
+
+        /* Welcome section styling */
+        .welcome-section {
+            min-height: 250px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            margin-top: 40px;
+            margin-bottom: 40px;
+        }
+
+        .welcome-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #0d6efd;
+        }
+
+        .welcome-desc {
+            font-size: 1.2rem;
+            color: #555;
+            margin-top: 10px;
+            margin-bottom: 0;
+        }
+
+        /* Custom styles for multi-select dropdowns */
+        .dropdown-menu-multiselect {
+            max-height: 320px;
+            overflow-y: auto;
+            min-width: 260px;
+            border-radius: 14px;
+            box-shadow: 0 4px 16px rgba(13, 110, 253, 0.08), 0 1.5px 4px rgba(0, 0, 0, 0.04);
+            border: 1px solid #e3eafc;
+            padding: 6px 0;
+            background: #f8faff;
+            width: 100%;
+            white-space: normal;
+        }
+
+        .dropdown-item-checkbox,
+        .dropdown-item-module {
+            cursor: pointer;
+            user-select: none;
+            display: block;
+            padding: 10px 18px 10px 18px;
+            border-radius: 8px;
+            margin: 2px 8px;
+            transition: background 0.13s, color 0.13s;
+            font-size: 1.05em;
+            font-weight: 500;
+            color: #222;
+            white-space: normal;
+            word-break: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .dropdown-item-checkbox.selected,
+        .dropdown-item-module.selected {
+            background: #e7f1ff;
+            color: #0d6efd;
+        }
+
+        .dropdown-item-checkbox:hover,
+        .dropdown-item-checkbox:focus-within,
+        .dropdown-item-module:hover,
+        .dropdown-item-module:focus-within {
+            background: #e7f1ff;
+            color: #0d6efd;
+        }
+
+        .dropdown-toggle-multiselect,
+        .dropdown-toggle-module {
+            text-align: left;
+            white-space: normal;
+            border-radius: 14px !important;
+            border: 1.5px solid #b3c6e0 !important;
+            background: #f8faff !important;
+            color: #222 !important;
+            font-weight: 500;
+            font-size: 1.07em;
+            box-shadow: 0 1.5px 4px rgba(13, 110, 253, 0.04);
+            transition: border 0.13s, box-shadow 0.13s;
+        }
+
+        .dropdown-toggle-multiselect:focus,
+        .dropdown-toggle-multiselect.active,
+        .dropdown-toggle-multiselect[aria-expanded="true"],
+        .dropdown-toggle-module:focus,
+        .dropdown-toggle-module.active,
+        .dropdown-toggle-module[aria-expanded="true"] {
+            border-color: #0d6efd !important;
+            box-shadow: 0 0 0 2px #b3d1ff66;
+            background: #e7f1ff !important;
+            color: #0d6efd !important;
+        }
+
+        .dropdown-toggle-multiselect[disabled],
+        .dropdown-toggle-module[disabled] {
+            background: #f1f3f7 !important;
+            color: #b3b3b3 !important;
+            border-color: #e0e0e0 !important;
+            opacity: 0.7;
+        }
+
+        @media (max-width: 576px) {
+            .dropdown-menu-multiselect {
+                min-width: 98vw;
+                font-size: 1em;
+            }
+
+            .dropdown-item-checkbox,
+            .dropdown-item-module {
+                font-size: 1em;
+                padding: 10px 10px 10px 12px;
+            }
+        }
+
+        .btn-report {
+            background-color: #d35400 !important;
+            color: #fff !important;
+            border: none;
+        }
+
+        .btn-report:hover,
+        .btn-report:focus {
+            background-color: #b34700 !important;
+            color: #fff !important;
+        }
+
+        .delay-answers-group {
+            display: flex;
+            align-items: center;
+            background: #f8f9fa;
+            border-radius: 18px;
+            padding: 2px 10px 2px 10px;
+            margin-left: 8px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+            border: 1px solid #e0e0e0;
+            height: 36px;
+            min-width: 120px;
+            max-width: 180px;
+        }
+
+        .delay-answers-label {
+            font-size: 0.98em;
+            color: #555;
+            margin-right: 6px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        #delay-answers-input {
+            width: 48px;
+            min-width: 36px;
+            max-width: 60px;
+            border-radius: 8px;
+            border: 1px solid #ced4da;
+            background: #fff;
+            font-size: 1em;
+            padding: 2px 6px;
+            margin-right: 0;
+            margin-left: 0;
+            text-align: center;
+            /* Hide number input arrows for Chrome, Safari, Edge, Opera */
+            -webkit-appearance: none;
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+
+        #delay-answers-input::-webkit-outer-spin-button,
+        #delay-answers-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        #delay-answers-input[type="number"]::-ms-input {
+            appearance: textfield;
+        }
+
+        #delay-answers-input:focus {
+            outline: none;
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 2px rgba(13, 110, 253, .15);
+        }
+
+        /* Responsive tweaks */
+        @media (max-width: 576px) {
+            .delay-answers-group {
+                min-width: 90px;
+                max-width: 120px;
+                padding: 2px 6px;
+            }
+
+            .delay-answers-label {
+                font-size: 0.95em;
+            }
+
+            #delay-answers-input {
+                font-size: 0.98em;
+                width: 36px;
+            }
+        }
+
+        /* Pill style for all navbar links */
+        .navbar-nav .nav-link {
+            border-radius: 999px !important;
+            padding: 8px 22px !important;
+            margin-left: 6px;
+            margin-right: 6px;
+            font-weight: 600;
+            transition: background 0.15s, color 0.15s, box-shadow 0.15s, transform 0.15s;
+            background: #f8f9fa !important;
+            color: #444 !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            position: relative;
+            z-index: 1;
+        }
+
+        .navbar-nav .nav-link:hover,
+        .navbar-nav .nav-link:focus {
+            background: #e2e6ea !important;
+            color: #222 !important;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            transform: scale(1.04);
+        }
+
+        /* Highlighted button for submitting flashcards (must come after .nav-link for specificity) */
+        .navbar-nav .submit-flashcard-btn {
+            background: #94bfff !important;
+            color: #222 !important;
+            font-weight: 700;
+            border-radius: 999px !important;
+            box-shadow: 0 2px 8px rgba(255, 183, 0, 0.18), 0 0 0 4px #b3d1ff66;
+            /* Add a subtle glowing effect */
+            animation: submit-flashcard-glow 2.2s infinite alternate;
+            transition: transform 0.15s, box-shadow 0.15s;
+            position: relative;
+            z-index: 2;
+        }
+
+        .navbar-nav .submit-flashcard-btn:hover,
+        .navbar-nav .submit-flashcard-btn:focus {
+            background: #66a3fe !important;
+            color: #222 !important;
+            box-shadow: 0 4px 16px rgba(255, 183, 0, 0.22), 0 0 0 6px #b3d1ff99;
+            transform: scale(1.06);
+        }
+
+        @keyframes submit-flashcard-glow {
+            0% {
+                box-shadow: 0 2px 8px rgba(255, 183, 0, 0.18), 0 0 0 4px #b3d1ff66;
+            }
+
+            100% {
+                box-shadow: 0 4px 16px rgba(255, 183, 0, 0.22), 0 0 12px 8px #b3d1ff44;
+            }
+        }
+
+        /* Responsive adjustments for navbar */
+        @media (max-width: 576px) {
+            .navbar-nav .nav-link {
+                padding: 8px 16px !important;
+                font-size: 0.9em;
+            }
+
+            .navbar-nav .submit-flashcard-btn {
+                padding: 8px 16px !important;
+                font-size: 0.9em;
+            }
+        }
+
+        /* Remove wiggle animation */
+        /* .wiggle { animation: wiggle 0.7s; } */
+
+        /* Style for PDF dropdown items */
+        #pdfs-dropdown-list .dropdown-item {
+            white-space: normal;
+            padding: 8px 16px;
+            position: relative;
+        }
+
+        #pdfs-dropdown-list .dropdown-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        #pdfs-dropdown-list .text-muted {
+            font-size: 0.85em;
+        }
+        
+        .match-pill {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: 600;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+        
+        .match-high {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .match-medium {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .match-low {
+            background-color: #f8f9fa;
+            color: #6c757d;
+        }
+
+        /* Ko-fi widget styling */
+        #stripe-widget {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 330px;
+            max-width: 90vw;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        #stripe-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background-color: #6772E5; /* Stripe purple */
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+            border-radius: 12px 12px 0 0;
+        }
+
+        #stripe-header-text {
+            font-size: 16px;
+        }
+
+        #stripe-header-actions {
+            display: flex;
+            align-items: center;
+        }
+
+        #stripe-toggle-btn, #stripe-close-btn {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 0;
+            margin-left: 12px;
+            font-size: 20px;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+        }
+
+        #stripe-toggle-btn:hover, #stripe-close-btn:hover {
+            opacity: 0.8;
+        }
+
+        #stripe-container {
+            padding: 20px;
+            transition: height 0.3s ease;
+            overflow: hidden;
+        }
+
+        #stripe-widget.minimized #stripe-container {
+            height: 0;
+            padding: 0;
+        }
+
+        #stripe-widget.minimized {
+            width: 220px;
+        }
+
+        /* Animation for widget appearing */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translate3d(0, 20px, 0);
+            }
+            to {
+                opacity: 1;
+                transform: translate3d(0, 0, 0);
+            }
+        }
+
+        #stripe-widget {
+            animation: fadeInUp 0.4s ease-out;
+        }
+
+        .amount-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .amount-option {
+            flex: 1;
+            min-width: 60px;
+            padding: 8px;
+            text-align: center;
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .amount-option:hover {
+            background: #e6e6fa;
+            border-color: #6772E5;
+        }
+
+        .amount-option.selected {
+            background: #6772E5;
+            color: white;
+            border-color: #6772E5;
+        }
+
+        .custom-amount {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .custom-amount input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .custom-amount input:focus {
+            outline: none;
+            border-color: #6772E5;
+            box-shadow: 0 0 0 1px rgba(103, 114, 229, 0.3);
+        }
+
+        .support-button {
+            width: 100%;
+            padding: 12px;
+            background: #6772E5;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .support-button:hover {
+            background: #5469d4;
+        }
+
+        .support-button:disabled {
+            background: #a1a8e5;
+            cursor: not-allowed;
+        }
+
+        .support-message {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #4a5568;
+            text-align: center;
+        }
+
+        /* Make sure the widget is properly sized on different devices */
+        @media (max-width: 768px) {
+            #stripe-widget {
+                width: 300px;
+                bottom: 15px;
+                right: 15px;
+            }
+
+            #stripe-widget.minimized {
+                width: 200px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            #stripe-widget {
+                width: 280px;
+                bottom: 10px;
+                right: 10px;
+            }
+
+            #stripe-widget.minimized {
+                width: 180px;
+            }
+        }
+
+        /* Hide the widget initially if 'never-show-payment-widget' is set to true in localStorage */
+        #stripe-widget.preload-hidden {
+            display: none !important;
+        }
+
+        #question-text {
+            font-size: clamp(18px, 2.5vw, 26px);
+            /* Add this for question text */
+        }
+
+        @media (max-width: 1280px) {
+            .answer-btn {
+                font-size: 1.05em !important;
+                min-height: 44px !important;
+                padding: 14px 8px !important;
+            }
+            #question-text {
+                font-size: 1.1em !important;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .answer-btn {
+                font-size: 1em !important;
+                min-height: 40px !important;
+                padding: 12px 6px !important;
+            }
+            #question-text {
+                font-size: 1em !important;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .answer-btn {
+                font-size: 0.95em !important;
+                min-height: 36px !important;
+                padding: 10px 4px !important;
+            }
+            #question-text {
+                font-size: 0.95em !important;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .answer-btn {
+                font-size: 0.9em !important;
+                min-height: 32px !important;
+                padding: 8px 2px !important;
+            }
+            #question-text {
+                font-size: 0.9em !important;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .navbar-nav .nav-link,
+            .navbar-nav .submit-flashcard-btn {
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+                padding-top: 12px !important;
+                padding-bottom: 12px !important;
+            }
+            .navbar-nav {
+                width: 100%;
+            }
+        }
+
+        /* Height-based responsive scaling */
+        .height-scaled {
+            transform-origin: top center;
+        }
+
+        /* Add these rules to handle viewport height constraints */
+        @media (max-height: 700px) {
+            #question-container {
+                min-height: auto;
+                padding-top: 10px !important;
+                padding-bottom: 10px !important;
+                margin-bottom: 5px;
+            }
+            
+            .answer-btn {
+                min-height: 30px !important;
+                padding-top: 8px !important;
+                padding-bottom: 8px !important;
+                margin-bottom: 4px !important; 
+            }
+            
+            #answers-container .col-12 {
+                margin-bottom: 4px !important;
+            }
+            
+            #question-text {
+                font-size: 0.95em !important;
+                margin-bottom: 0.5rem;
+            }
+            
+            #question-info {
+                margin-top: 0.5rem !important;
+            }
+        }
+        
+        @media (max-height: 600px) {
+            .container {
+                padding-top: 5px;
+                padding-bottom: 5px;
+            }
+            
+            .navbar {
+                margin-bottom: 5px !important; 
+                padding-top: 5px !important;
+                padding-bottom: 5px !important;
+            }
+            
+            #question-container {
+                padding: 8px !important;
+            }
+            
+            .answer-btn {
+                font-size: 0.9em !important;
+                min-height: 28px !important;
+                padding: 5px 2px !important;
+                margin-bottom: 3px !important;
+            }
+            
+            #answers-container .col-12 {
+                margin-bottom: 3px !important;
+            }
+            
+            #question-text {
+                font-size: 0.9em !important;
+                margin-bottom: 0.3rem;
+            }
+            
+            .select-container {
+                margin-bottom: 5px;
+            }
+            
+            footer {
+                padding: 5px 0 !important;
+            }
+        }
+        
+        /* For extremely small heights, scale everything proportionally */
+        @media (max-height: 500px) {
+            .content-wrapper {
+                transform: scale(0.85);
+                transform-origin: top center;
+            }
+            
+            body {
+                min-height: 520px; /* Force minimum height to prevent layout shifts */
+                overflow-y: auto;
+            }
+            
+            .answer-btn {
+                min-height: 24px !important;
+                padding: 4px !important;
+                margin-bottom: 2px !important;
+            }
+        }
