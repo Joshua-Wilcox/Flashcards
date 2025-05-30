@@ -18,7 +18,7 @@ import hmac
 import stripe
 
 load_dotenv()  # Load variables from .env
-
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'  # Required for Cloudflare tunnel setup
 app = Flask(__name__)
 
 # --- Testing/Production Discord App Selection ---
