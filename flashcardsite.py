@@ -744,7 +744,7 @@ def admin_review_flashcard(submission_id):
     modules = get_all_modules()
     if not submission:
         flash('Submission not found.')
-        return redirect(url_for('admin_review_flashcards'))
+        return redirect(url_for('admin.admin_review_flashcards'))
     if request.method == 'POST':
         action = request.form.get('action')
         question = request.form.get('question', '').strip()
@@ -796,12 +796,12 @@ def admin_review_flashcard(submission_id):
             db.execute('DELETE FROM submitted_flashcards WHERE id = ?', (submission_id,))
             db.commit()
             flash('Flashcard approved and added to the database.')
-            return redirect(url_for('admin_review_flashcards'))
+            return redirect(url_for('admin.admin_review_flashcards'))
         elif action == 'reject':
             db.execute('DELETE FROM submitted_flashcards WHERE id = ?', (submission_id,))
             db.commit()
             flash('Flashcard submission rejected and removed.')
-            return redirect(url_for('admin_review_flashcards'))
+            return redirect(url_for('admin.admin_review_flashcards'))
     return render_template('admin_review_flashcard.html', submission=submission, modules=[m['name'] for m in modules])
 
 @app.route('/report_question', methods=['GET', 'POST'])
@@ -1192,7 +1192,7 @@ def admin_review_report(report_id):
     report = db.execute('SELECT * FROM reported_questions WHERE id = ?', (report_id,)).fetchone()
     if not report:
         flash('Report not found.')
-        return redirect(url_for('admin_review_flashcards'))
+        return redirect(url_for('admin.admin_review_flashcards'))
     
     # Try to get the original question row
     question_row = None
@@ -1216,7 +1216,7 @@ def admin_review_report(report_id):
             db.execute('DELETE FROM reported_questions WHERE id = ?', (report_id,))
             db.commit()
             flash('Report discarded.')
-            return redirect(url_for('admin_review_flashcards'))
+            return redirect(url_for('admin.admin_review_flashcards'))
         elif action == 'update':
             # Main question update
             new_question = request.form.get('question', '').strip()
@@ -1253,7 +1253,7 @@ def admin_review_report(report_id):
             db.execute('DELETE FROM reported_questions WHERE id = ?', (report_id,))
             db.commit()
             flash('Changes have been applied and report resolved.')
-            return redirect(url_for('admin_review_flashcards'))
+            return redirect(url_for('admin.admin_review_flashcards'))
     
     return render_template('admin_review_report.html', report=report, question_row=question_row, distractors=distractors)
 
@@ -1265,7 +1265,7 @@ def admin_review_pdf_request(request_id):
     req = db.execute('SELECT * FROM requests_to_access WHERE id = ?', (request_id,)).fetchone()
     if not req:
         flash('PDF access request not found.')
-        return redirect(url_for('admin_review_flashcards'))
+        return redirect(url_for('admin.admin_review_flashcards'))
     if request.method == 'POST':
         action = request.form.get('action')
         discord_id = req['discord_id']
@@ -1286,7 +1286,7 @@ def admin_review_pdf_request(request_id):
             flash('Request approved and user added to whitelist.')
         else:
             flash('Request denied and deleted.')
-        return redirect(url_for('admin_review_flashcards'))
+        return redirect(url_for('admin.admin_review_flashcards'))
     return render_template('admin_review_pdf_request.html', req=req)
 
 @app.template_filter('datetimeformat')
@@ -1888,7 +1888,7 @@ def admin_review_distractor(submission_id):
     
     if not submission:
         flash('Distractor submission not found.')
-        return redirect(url_for('admin_review_flashcards'))
+        return redirect(url_for('admin.admin_review_flashcards'))
     
     if request.method == 'POST':
         action = request.form.get('action')
@@ -1920,7 +1920,7 @@ def admin_review_distractor(submission_id):
             db.commit()
             flash('Distractor submission rejected.')
         
-        return redirect(url_for('admin_review_flashcards'))
+        return redirect(url_for('admin.admin_review_flashcards'))
     
     return render_template('admin_review_distractor.html', submission=submission)
 

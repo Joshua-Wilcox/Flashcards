@@ -42,17 +42,17 @@
                     <!-- Collapsible nav links -->
                     <div class="collapse navbar-collapse" id="mainNavbar">
                         <div class="navbar-nav ms-auto">
-                            <a class="nav-link" href="{{ url_for('leaderboard') }}">Leaderboard</a>
+                            <a class="nav-link" href="{{ url_for('user.leaderboard') }}">Leaderboard</a>
                             {% if not session.user_id %}
-                            <a class="nav-link" href="{{ url_for('login') }}">Login with Discord</a>
+                            <a class="nav-link" href="{{ url_for('auth.login') }}">Login with Discord</a>
                             {% else %}
-                            <a class="nav-link" href="{{ url_for('stats') }}">My Stats</a>
+                            <a class="nav-link" href="{{ url_for('user.stats') }}">My Stats</a>
                             <a class="nav-link submit-flashcard-btn" id="submit-flashcard-navbar-btn"
-                                href="{{ url_for('submit_flashcard') }}">Submit Flashcards!</a>
+                                href="{{ url_for('main.submit_flashcard') }}">Submit Flashcards!</a>
                             {% if session.user_id and is_user_admin(session.user_id) %}
-                            <a class="nav-link" href="{{ url_for('admin_review_flashcards') }}">Admin Dashboard</a>
+                            <a class="nav-link" href="{{ url_for('admin.admin_review_flashcards') }}">Admin Dashboard</a>
                             {% endif %}
-                            <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                            <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
                             {% endif %}
                         </div>
                     </div>
@@ -173,7 +173,7 @@
 
         <footer class="text-center">
             <p>made with ❤️ by <a href="https://github.com/joshua-wilcox">Josh Wilcox</a></p>
-            <p>New update to <a href="{{ url_for('submit_flashcard') }}">flashcard submission!</a> Take a look!</p>
+            <p>New update to <a href="{{ url_for('main.submit_flashcard') }}">flashcard submission!</a> Take a look!</p>
         </footer>
     </div>
 
@@ -199,7 +199,7 @@
             </div>
             <button id="checkout-button" class="support-button">Support Now</button>
             <div class="support-message">
-                Any amount would be greatly appreciated for the upkeep of the site ❤️ <br> If you can't donate, please consider <a href="{{ url_for('submit_flashcard') }}">submitting some flashcards</a>
+                Any amount would be greatly appreciated for the upkeep of the site ❤️ <br> If you can't donate, please consider <a href="{{ url_for('main.submit_flashcard') }}">submitting some flashcards</a>
             </div>
             <div class="text-center mt-3">
                 <button id="never-show-widget-btn" class="btn btn-link btn-sm text-muted" style="font-size: 0.75rem; text-decoration: none; padding: 0;">Do not show again</button>

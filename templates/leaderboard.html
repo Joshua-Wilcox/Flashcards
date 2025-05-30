@@ -114,12 +114,12 @@
             <div class="container-fluid">
                 <span class="navbar-brand">Flashcards</span>
                 <div class="navbar-nav ms-auto">
-                    <a class="nav-link" href="{{ url_for('index') }}">Back to Flashcards</a>
+                    <a class="nav-link" href="{{ url_for('main.index') }}">Back to Flashcards</a>
                     {% if session.user_id %}
-                        <a class="nav-link" href="{{ url_for('stats') }}">My Stats</a>
-                        <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                        <a class="nav-link" href="{{ url_for('user.stats') }}">My Stats</a>
+                        <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
                     {% else %}
-                        <a class="nav-link" href="{{ url_for('login') }}">Login with Discord</a>
+                        <a class="nav-link" href="{{ url_for('auth.login') }}">Login with Discord</a>
                     {% endif %}
                 </div>
             </div>
@@ -200,7 +200,7 @@
                     {% for user in leaderboard %}
                     <tr>
                         <td class="rank-badge">{{ loop.index }}</td>
-                        <td><a href="{{ url_for('user_stats', user_id=user.user_id) }}" class="username-link">{{ user.username }}</a></td>
+                        <td><a href="{{ url_for('user.user_stats', user_id=user.user_id) }}" class="username-link">{{ user.username }}</a></td>
                         <td>{{ user.correct_answers }}</td>
                         <td>{{ user.total_answers }}</td>
                         <td>{{ (user.accuracy * 100) | round(1) }}%</td>

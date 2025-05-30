@@ -36,8 +36,8 @@
                 <div class="container-fluid">
                     <span class="navbar-brand">Admin Dashboard</span>
                     <div class="navbar-nav ms-auto">
-                        <a class="nav-link" href="{{ url_for('index') }}">Back to Flashcards</a>
-                        <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                        <a class="nav-link" href="{{ url_for('main.index') }}">Back to Flashcards</a>
+                        <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
                     </div>
                 </div>
             </nav>
@@ -68,7 +68,7 @@
                             <td><span class="submitted-at" data-timestamp="{{ sub['timestamp'] }}"></span></td>
                             <td>{{ sub['module'] }}</td>
                             <td>
-                                <a class="btn btn-primary btn-sm" href="{{ url_for('admin_review_flashcard', submission_id=sub['id']) }}">Review</a>
+                                <a class="btn btn-primary btn-sm" href="{{ url_for('admin.admin_review_flashcard', submission_id=sub['id']) }}">Review</a>
                             </td>
                         </tr>
                         {% else %}
@@ -101,7 +101,7 @@
                             <td><span class="reported-at" data-timestamp="{{ rep['timestamp'] }}"></span></td>
                             <td>{{ rep['question'][:64] }}{% if rep['question']|length > 64 %}...{% endif %}</td>
                             <td>
-                                <a class="btn btn-warning btn-sm" href="{{ url_for('admin_review_report', report_id=rep['id']) }}">Review</a>
+                                <a class="btn btn-warning btn-sm" href="{{ url_for('admin.admin_review_report', report_id=rep['id']) }}">Review</a>
                             </td>
                         </tr>
                         {% else %}
@@ -136,7 +136,7 @@
                             <td>{{ distractor['question'][:50] }}{% if distractor['question']|length > 50 %}...{% endif %}</td>
                             <td>{{ distractor['distractor_text'][:30] }}{% if distractor['distractor_text']|length > 30 %}...{% endif %}</td>
                             <td>
-                                <a class="btn btn-primary btn-sm" href="{{ url_for('admin_review_distractor', submission_id=distractor['id']) }}">Review</a>
+                                <a class="btn btn-primary btn-sm" href="{{ url_for('admin.admin_review_distractor', submission_id=distractor['id']) }}">Review</a>
                             </td>
                         </tr>
                         {% else %}
@@ -172,7 +172,7 @@
                             <td>{{ req['message'] or '' }}</td>
                             <td><span class="pdf-requested-at" data-timestamp="{{ req['timestamp'] }}"></span></td>
                             <td>
-                                <a class="btn btn-info btn-sm" href="{{ url_for('admin_review_pdf_request', request_id=req['id']) }}">Review</a>
+                                <a class="btn btn-info btn-sm" href="{{ url_for('admin.admin_review_pdf_request', request_id=req['id']) }}">Review</a>
                             </td>
                         </tr>
                         {% else %}

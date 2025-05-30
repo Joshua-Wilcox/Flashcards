@@ -39,13 +39,13 @@
                 <div class="container-fluid">
                     <span class="navbar-brand">Flashcards</span>
                     <div class="navbar-nav ms-auto">
-                        <a class="nav-link" href="{{ url_for('index') }}">Back to Flashcards</a>
-                        <a class="nav-link" href="{{ url_for('leaderboard') }}">Leaderboard</a>
+                        <a class="nav-link" href="{{ url_for('main.index') }}">Back to Flashcards</a>
+                        <a class="nav-link" href="{{ url_for('user.leaderboard') }}">Leaderboard</a>
                         {% if session.user_id %}
-                            <a class="nav-link" href="{{ url_for('stats') }}">My Stats</a>
-                            <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                            <a class="nav-link" href="{{ url_for('user.stats') }}">My Stats</a>
+                            <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
                         {% else %}
-                            <a class="nav-link" href="{{ url_for('login') }}">Login with Discord</a>
+                            <a class="nav-link" href="{{ url_for('auth.login') }}">Login with Discord</a>
                         {% endif %}
                     </div>
                 </div>
