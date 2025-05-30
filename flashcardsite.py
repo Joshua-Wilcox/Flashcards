@@ -533,168 +533,161 @@ def get_pdfs_for_question(question_id, max_pdfs=3):
 @app.route('/get_question', methods=['POST'])
 def get_question():
     if 'user_id' not in session:
-        return jsonify({'error': 'You must be logged in'}), 401
+        return jsonify({'error': 'Please log in to access flashcards.'}), 401
     
     data = request.get_json()
-    module_name = data.get('module')
+    module = data.get('module')
     topics = data.get('topics', [])
     subtopics = data.get('subtopics', [])
-    question_id = data.get('question_id')
+    tags = data.get('tags', [])
+    specific_question_id = data.get('question_id')
+    
+    if not module:
+        return jsonify({'error': 'Module is required'})
     
     db = get_db()
-    module_id = None
-    if module_name:
-        row = db.execute('SELECT id FROM modules WHERE name = ?', (module_name,)).fetchone()
-        if row:
-            module_id = row['id']
-
-    # Build the query using the normalized schema
-    query = '''
-        SELECT DISTINCT q.* 
-        FROM questions q
-    '''
-    params = []
-
-    if module_id:
-        query += ' WHERE q.module_id = ?'
-        params.append(module_id)
     
+    # Get module ID
+    module_row = db.execute('SELECT id FROM modules WHERE name = ?', (module,)).fetchone()
+    if not module_row:
+        return jsonify({'error': 'Module not found'})
+    
+    module_id = module_row['id']
+    
+    # Build the query for the normalized schema
+    base_query = '''
+        SELECT DISTINCT q.id, q.question, q.answer, q.module_id
+        FROM questions q
+        WHERE q.module_id = ?
+    '''
+    params = [module_id]
+    
+    # Add topic filters if specified
     if topics:
-        placeholders = ','.join('?' * len(topics))
-        query += f'''
+        topic_placeholders = ','.join(['?' for _ in topics])
+        base_query += f'''
             AND EXISTS (
                 SELECT 1 FROM question_topics qt
                 JOIN topics t ON qt.topic_id = t.id
-                WHERE qt.question_id = q.id
-                AND t.name IN ({placeholders})
+                WHERE qt.question_id = q.id AND t.name IN ({topic_placeholders})
             )
         '''
         params.extend(topics)
     
+    # Add subtopic filters if specified
     if subtopics:
-        placeholders = ','.join('?' * len(subtopics))
-        query += f'''
+        subtopic_placeholders = ','.join(['?' for _ in subtopics])
+        base_query += f'''
             AND EXISTS (
                 SELECT 1 FROM question_subtopics qs
                 JOIN subtopics s ON qs.subtopic_id = s.id
-                WHERE qs.question_id = q.id
-                AND s.name IN ({placeholders})
+                WHERE qs.question_id = q.id AND s.name IN ({subtopic_placeholders})
             )
         '''
         params.extend(subtopics)
-
-    if question_id:
-        query += ' AND q.id = ?'
-        params.append(question_id)
-
-    rows = db.execute(query, params).fetchall()
-    if not rows:
-        return jsonify({'error': 'No questions found matching these criteria'})
-
-    row = rows[0] if question_id else random.choice(rows)
-    qid = row['id']
-    tags = get_tags_for_question(qid)
     
-    # Get initial PDFs for the question (max 3)
-    pdfs = get_pdfs_for_question(qid, max_pdfs=3)
+    # Add tag filters if specified
+    if tags:
+        tag_placeholders = ','.join(['?' for _ in tags])
+        base_query += f'''
+            AND EXISTS (
+                SELECT 1 FROM question_tags qtg
+                JOIN tags tg ON qtg.tag_id = tg.id
+                WHERE qtg.question_id = q.id AND tg.name IN ({tag_placeholders})
+            )
+        '''
+        params.extend(tags)
     
-    topics_list = get_topics_for_question(qid)
-    subtopics_list = get_subtopics_for_question(qid)
-    module_display = get_module_name_by_id(db, row['module_id'])
-    correct_answer = row['answer']
-    answers = [correct_answer]
-    answer_ids = [qid]
-    # Distractor logic: pick random answers from other questions in the same module
-    distractors_needed = NUMBER_OF_DISTRACTORS
-    # Get all possible distractors in the same module (excluding this question)
-    distractor_candidates = db.execute('''
-        SELECT q.id, q.answer
-        FROM questions q
-        WHERE q.module_id = ? AND q.id != ?
-    ''', (row['module_id'], qid)).fetchall()
-
-    # Gather metadata for the current question
-    question_tags = set(tags)
-    question_subtopics = set(subtopics_list)
-    question_topics = set(topics_list)
-    correct_answer = row['answer']
-
-    # Build metadata for all candidates
-    scored_candidates = []
-    used_answers = set([correct_answer])
-    for cand in distractor_candidates:
-        cand_id = cand['id']
-        cand_answer = cand['answer']
-        if not cand_answer or cand_answer in used_answers:
-            continue  # No duplicates
-        cand_tags = set(get_tags_for_question(cand_id))
-        cand_subtopics = set(get_subtopics_for_question(cand_id))
-        cand_topics = set(get_topics_for_question(cand_id))
-        # Score: tags (weight 3), subtopic (weight 2), topic (weight 1)
-        tag_score = len(question_tags & cand_tags)
-        subtopic_score = len(question_subtopics & cand_subtopics)
-        topic_score = len(question_topics & cand_topics)
-        total_score = tag_score * 3 + subtopic_score * 2 + topic_score
-        scored_candidates.append({
-            'id': cand_id,
-            'answer': cand_answer,
-            'score': total_score,
-            'tag_score': tag_score,
-            'subtopic_score': subtopic_score,
-            'topic_score': topic_score
-        })
-
-    # Sort by score (desc), then randomize within ties
-    random.shuffle(scored_candidates)
-    scored_candidates.sort(key=lambda x: (x['score'], x['tag_score'], x['subtopic_score'], x['topic_score']), reverse=True)
-
-    # Select top N unique distractors
-    distractor_answers = []
-    distractor_ids = []
-    for cand in scored_candidates:
-        if len(distractor_answers) >= distractors_needed:
-            break
-        if cand['answer'] not in used_answers:
-            distractor_answers.append(cand['answer'])
-            distractor_ids.append(cand['id'])
-            used_answers.add(cand['answer'])
-
-    # If not enough, fill with random (but unique) from module
-    if len(distractor_answers) < distractors_needed:
-        remaining = [c for c in distractor_candidates if c['answer'] not in used_answers and c['answer']]
-        random.shuffle(remaining)
-        for cand in remaining:
-            if len(distractor_answers) >= distractors_needed:
-                break
-            distractor_answers.append(cand['answer'])
-            distractor_ids.append(cand['id'])
-            used_answers.add(cand['answer'])
-
-    # Final answer list: correct + distractors, shuffled
-    answers = [correct_answer] + distractor_answers
-    answer_ids = [qid] + distractor_ids
+    # Get question (either specific or random)
+    if specific_question_id:
+        question = db.execute(base_query + ' AND q.id = ?', params + [specific_question_id]).fetchone()
+    else:
+        question = db.execute(base_query + ' ORDER BY RANDOM() LIMIT 1', params).fetchone()
+    
+    if not question:
+        return jsonify({'error': 'No questions found for the selected criteria.'})
+    
+    # Get the question's topics, subtopics, and tags for display
+    question_topics = get_topics_for_question(question['id'])
+    question_subtopics = get_subtopics_for_question(question['id'])
+    question_tags = get_tags_for_question(question['id'])
+    
+    # Get module name
+    module_name = get_module_name_by_id(db, question['module_id'])
+    
+    # First, get manual distractors for this question
+    manual_distractors = db.execute('''
+        SELECT distractor_text 
+        FROM manual_distractors 
+        WHERE question_id = ?
+        ORDER BY created_at ASC
+    ''', (question['id'],)).fetchall()
+    
+    # Start building our answer list with the correct answer first
+    answers = [question['answer']]
+    answer_ids = [question['id']]  # Track which question each answer belongs to
+    
+    # Add manual distractors
+    for distractor in manual_distractors:
+        if len(answers) <= NUMBER_OF_DISTRACTORS:  # Don't exceed total number of answers
+            answers.append(distractor['distractor_text'])
+            answer_ids.append(None)  # Manual distractors don't have question IDs
+    
+    # If we need more distractors, get them using the existing scoring system
+    remaining_needed = NUMBER_OF_DISTRACTORS + 1 - len(answers)  # +1 for correct answer
+    
+    if remaining_needed > 0:
+        # Get additional distractors using scoring based on module, topic, subtopic matches
+        primary_topic = question_topics[0] if question_topics else ''
+        primary_subtopic = question_subtopics[0] if question_subtopics else ''
+        
+        scored_distractors = db.execute('''
+            SELECT q.id, q.answer,
+                   (CASE WHEN q.module_id = ? THEN 3 ELSE 0 END) +
+                   (CASE WHEN EXISTS (
+                       SELECT 1 FROM question_topics qt JOIN topics t ON qt.topic_id = t.id 
+                       WHERE qt.question_id = q.id AND t.name = ?
+                   ) THEN 2 ELSE 0 END) +
+                   (CASE WHEN EXISTS (
+                       SELECT 1 FROM question_subtopics qs JOIN subtopics s ON qs.subtopic_id = s.id 
+                       WHERE qs.question_id = q.id AND s.name = ?
+                   ) THEN 1 ELSE 0 END) as score
+            FROM questions q
+            WHERE q.id != ?
+            ORDER BY score DESC, RANDOM()
+            LIMIT ?
+        ''', (module_id, primary_topic, primary_subtopic, question['id'], remaining_needed)).fetchall()
+        
+        # Add the scored distractors
+        for distractor in scored_distractors:
+            answers.append(distractor['answer'])
+            answer_ids.append(distractor['id'])
+    
+    # Shuffle the answers (but keep track of the correct one)
+    correct_answer = answers[0]
     combined = list(zip(answers, answer_ids))
     random.shuffle(combined)
-    answers, answer_ids = zip(*combined)
-    answers = list(answers)
-    answer_ids = list(answer_ids)
-    token = generate_signed_token(qid, session['user_id'])
-    if 'used_tokens' not in session:
-        session['used_tokens'] = []
-    response = {
-        'question': row['question'],
-        'answers': answers,
-        'answer_ids': answer_ids,
-        'module': module_display,
-        'topic': topics_list[0] if topics_list else '',
-        'subtopic': subtopics_list[0] if subtopics_list else '',
-        'tags': tags,
+    shuffled_answers, shuffled_answer_ids = zip(*combined)
+    
+    # Generate signed token
+    token = generate_signed_token(question['id'], session['user_id'])
+    
+    # Get PDFs for this question
+    pdfs = get_pdfs_for_question(question['id'])
+    
+    return jsonify({
+        'question': question['question'],
+        'answers': list(shuffled_answers),
+        'answer_ids': list(shuffled_answer_ids),
+        'module': module_name,
+        'topic': ', '.join(question_topics),
+        'subtopic': ', '.join(question_subtopics),
+        'tags': question_tags,
         'pdfs': pdfs,
+        'question_id': question['id'],
         'token': token,
-        'question_id': qid,
-        'is_admin': is_user_admin(session.get('user_id')) if 'user_id' in session else False
-    }
-    return jsonify(response)
+        'is_admin': is_user_admin(session['user_id'])
+    })
 
 # Add a new route for on-demand PDF loading
 @app.route('/load_pdfs_by_tags', methods=['POST'])
@@ -1179,7 +1172,17 @@ def admin_review_flashcards():
     rows = db.execute('SELECT * FROM submitted_flashcards ORDER BY timestamp ASC').fetchall()
     reports = db.execute('SELECT * FROM reported_questions ORDER BY timestamp ASC').fetchall()
     pdf_requests = db.execute('SELECT * FROM requests_to_access ORDER BY timestamp ASC').fetchall()
-    return render_template('admin_review_flashcards.html', submissions=rows, reports=reports, pdf_requests=pdf_requests)
+    distractor_submissions = db.execute('''
+        SELECT sd.*, q.question 
+        FROM submitted_distractors sd
+        JOIN questions q ON sd.question_id = q.id
+        ORDER BY sd.timestamp ASC
+    ''').fetchall()
+    return render_template('admin_review_flashcards.html', 
+                         submissions=rows, 
+                         reports=reports, 
+                         pdf_requests=pdf_requests,
+                         distractor_submissions=distractor_submissions)
 
 @app.route('/admin_review_report/<int:report_id>', methods=['GET', 'POST'])
 def admin_review_report(report_id):
@@ -1820,7 +1823,107 @@ def user_has_enough_answers(user_id, minimum=10):
     
     return (row['correct_answers'] or 0) >= minimum
 
-if __name__ == '__main__':
+@app.route('/submit_distractor', methods=['GET', 'POST'])
+def submit_distractor():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    if request.method == 'GET':
+        question_id = request.args.get('question_id')
+        if not question_id:
+            flash('No question specified.')
+            return redirect(url_for('index'))
+        
+        db = get_db()
+        question = db.execute('SELECT * FROM questions WHERE id = ?', (question_id,)).fetchone()
+        if not question:
+            flash('Question not found.')
+            return redirect(url_for('index'))
+        
+        return render_template('submit_distractor.html', 
+                             question=question, 
+                             NUMBER_OF_DISTRACTORS=NUMBER_OF_DISTRACTORS)
+    
+    if request.method == 'POST':
+        question_id = request.form.get('question_id')
+        distractors = []
+        
+        # Collect non-empty distractors
+        for i in range(NUMBER_OF_DISTRACTORS):
+            distractor = request.form.get(f'distractor_{i}', '').strip()
+            if distractor:
+                distractors.append(distractor)
+        
+        if not distractors:
+            flash('Please provide at least one distractor.')
+            return redirect(request.url)
+        
+        db = get_db()
+        
+        # Insert submission
+        for distractor in distractors:
+            db.execute('''
+                INSERT INTO submitted_distractors 
+                (user_id, username, question_id, distractor_text, timestamp)
+                VALUES (?, ?, ?, ?, ?)
+            ''', (session['user_id'], session.get('username', ''), 
+                  question_id, distractor, int(time.time())))
+        
+        db.commit()
+        flash(f'Thank you! Your {len(distractors)} distractor(s) have been submitted for review.')
+        return redirect(url_for('index'))
+
+@app.route('/admin_review_distractor/<int:submission_id>', methods=['GET', 'POST'])
+def admin_review_distractor(submission_id):
+    if 'user_id' not in session or not is_user_admin(session['user_id']):
+        return redirect(url_for('index'))
+    
+    db = get_db()
+    submission = db.execute('''
+        SELECT sd.*, q.question, q.answer 
+        FROM submitted_distractors sd
+        JOIN questions q ON sd.question_id = q.id
+        WHERE sd.id = ?
+    ''', (submission_id,)).fetchone()
+    
+    if not submission:
+        flash('Distractor submission not found.')
+        return redirect(url_for('admin_review_flashcards'))
+    
+    if request.method == 'POST':
+        action = request.form.get('action')
+        
+        if action == 'approve':
+            # Add to manual_distractors table
+            db.execute('''
+                INSERT INTO manual_distractors 
+                (question_id, distractor_text, created_by, created_at)
+                VALUES (?, ?, ?, ?)
+            ''', (submission['question_id'], submission['distractor_text'], 
+                  submission['user_id'], int(time.time())))
+            
+            # Update user stats for approved cards
+            db.execute('''
+                UPDATE user_stats 
+                SET approved_cards = COALESCE(approved_cards, 0) + 1
+                WHERE user_id = ?
+            ''', (submission['user_id'],))
+            
+            # Remove from submissions
+            db.execute('DELETE FROM submitted_distractors WHERE id = ?', (submission_id,))
+            db.commit()
+            
+            flash('Distractor approved and added!')
+            
+        elif action == 'reject':
+            db.execute('DELETE FROM submitted_distractors WHERE id = ?', (submission_id,))
+            db.commit()
+            flash('Distractor submission rejected.')
+        
+        return redirect(url_for('admin_review_flashcards'))
+    
+    return render_template('admin_review_distractor.html', submission=submission)
+
+if __name__ == "__main__":
     init_db()
-    os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
     app.run(host='127.0.0.1', debug=True, port=2456)

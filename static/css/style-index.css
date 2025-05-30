@@ -1025,3 +1025,21 @@
     color: #222 !important;
     border-color: #b3c6e0 !important;
 }
+
+/* --- Answer Obvious button --- */
+#answer-obvious-btn {
+    border: 1.5px solid #6f42c1 !important;
+    background: #f8f5ff !important;
+    color: #6f42c1 !important;
+    font-weight: 600;
+    font-size: 1.07em;
+    padding: 8px 22px;
+    border-radius: 999px !important;
+    box-shadow: 0 2px 8px rgba(111, 66, 193, 0.08);
+    transition: background 0.13s, color 0.13s, border 0.13s;
+}
+#answer-obvious-btn:hover, #answer-obvious-btn:focus {
+    background: #e9e0ff !important;
+    color: #5a2d91 !important;
+    border-color: #6f42c1 !important;
+}

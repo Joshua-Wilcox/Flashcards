@@ -113,6 +113,41 @@
                 </table>
             </div>
 
+            <!-- Distractor Submissions Table -->
+            <div class="table-responsive mt-5">
+                <h3>Distractor Submissions</h3>
+                <table class="table table-bordered table-striped align-middle">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Submitted By</th>
+                            <th>Submitted At</th>
+                            <th>Question</th>
+                            <th>Distractor</th>
+                            <th>Review</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for distractor in distractor_submissions %}
+                        <tr>
+                            <td>{{ distractor['id'] }}</td>
+                            <td>{{ distractor['username'] or distractor['user_id'] }}</td>
+                            <td><span class="distractor-submitted-at" data-timestamp="{{ distractor['timestamp'] }}"></span></td>
+                            <td>{{ distractor['question'][:50] }}{% if distractor['question']|length > 50 %}...{% endif %}</td>
+                            <td>{{ distractor['distractor_text'][:30] }}{% if distractor['distractor_text']|length > 30 %}...{% endif %}</td>
+                            <td>
+                                <a class="btn btn-primary btn-sm" href="{{ url_for('admin_review_distractor', submission_id=distractor['id']) }}">Review</a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center">No distractor submissions pending review.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
             <!-- PDF Access Requests Table -->
             <div class="table-responsive mt-5">
                 <h3>PDF Access Requests</h3>
@@ -190,6 +225,14 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
     document.querySelectorAll('.reported-at').forEach(function(el) {
+        const ts = el.getAttribute('data-timestamp');
+        if (ts && !isNaN(ts)) {
+            el.textContent = formatRelativeTime(Number(ts));
+        } else {
+            el.textContent = "Never";
+        }
+    });
+    document.querySelectorAll('.distractor-submitted-at').forEach(function(el) {
         const ts = el.getAttribute('data-timestamp');
         if (ts && !isNaN(ts)) {
             el.textContent = formatRelativeTime(Number(ts));

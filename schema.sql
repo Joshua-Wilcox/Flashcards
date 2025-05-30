@@ -134,3 +134,29 @@ CREATE TABLE IF NOT EXISTS module_stats (
     FOREIGN KEY (user_id) REFERENCES user_stats(user_id) ON DELETE CASCADE,
     FOREIGN KEY (module_id) REFERENCES modules(id) ON DELETE CASCADE
 );
+
+-- Manual distractors table
+CREATE TABLE IF NOT EXISTS manual_distractors (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    question_id INTEGER NOT NULL,
+    distractor_text TEXT NOT NULL,
+    created_by INTEGER NOT NULL,
+    created_at INTEGER NOT NULL,
+    FOREIGN KEY (question_id) REFERENCES questions (id),
+    FOREIGN KEY (created_by) REFERENCES user_stats (user_id)
+);
+
+-- Submitted distractors table for admin review
+CREATE TABLE IF NOT EXISTS submitted_distractors (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    username TEXT,
+    question_id INTEGER NOT NULL,
+    distractor_text TEXT NOT NULL,
+    timestamp INTEGER NOT NULL,
+    FOREIGN KEY (question_id) REFERENCES questions (id)
+);
+
+-- Create indexes for better performance
+CREATE INDEX IF NOT EXISTS idx_manual_distractors_question_id ON manual_distractors (question_id);
+CREATE INDEX IF NOT EXISTS idx_submitted_distractors_timestamp ON submitted_distractors (timestamp);

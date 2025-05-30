@@ -892,3 +892,10 @@ $(document).ready(function () {
         setManualContinueUI(!manualContinue);
     });
 });
+
+// Answer Obvious button handler
+$('#answer-obvious-btn').off('click').on('click', function () {
+    if (currentQuestionId) {
+        window.location.href = '/submit_distractor?question_id=' + currentQuestionId;
+    }
+});
