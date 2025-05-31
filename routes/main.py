@@ -172,7 +172,7 @@ def get_question():
     
     # First, get manual distractors for this question
     manual_distractors = db.execute('''
-        SELECT distractor_text 
+        SELECT id, distractor_text 
         FROM manual_distractors 
         WHERE question_id = ?
         ORDER BY created_at ASC
@@ -181,12 +181,16 @@ def get_question():
     # Start building our answer list with the correct answer first
     answers = [question['answer']]
     answer_ids = [question['id']]  # Track which question each answer belongs to
+    answer_types = ['question']  # Track the type of each answer (question or manual_distractor)
+    answer_metadata = [None]  # Track metadata for manual distractors (manual_distractor_id)
     
     # Add manual distractors
     for distractor in manual_distractors:
         if len(answers) <= Config.NUMBER_OF_DISTRACTORS:  # Don't exceed total number of answers
             answers.append(distractor['distractor_text'])
             answer_ids.append(None)  # Manual distractors don't have question IDs
+            answer_types.append('manual_distractor')
+            answer_metadata.append(distractor['id'])  # Store the manual distractor ID
     
     # If we need more distractors, get them using the existing scoring system
     remaining_needed = Config.NUMBER_OF_DISTRACTORS + 1 - len(answers)  # +1 for correct answer
@@ -211,18 +215,40 @@ def get_question():
         WHERE q.id != ? AND q.module_id = ?
         ORDER BY score DESC, RANDOM()
         LIMIT ?
-    ''', (module_id, primary_topic, primary_subtopic, question['id'],module_id, remaining_needed)).fetchall()
+    ''', (module_id, primary_topic, primary_subtopic, question['id'], module_id, remaining_needed)).fetchall()
         
         # Add the scored distractors
         for distractor in scored_distractors:
             answers.append(distractor['answer'])
             answer_ids.append(distractor['id'])
+            answer_types.append('question')
+            answer_metadata.append(None)
     
-    # Shuffle the answers (but keep track of the correct one)
-    correct_answer = answers[0]
-    combined = list(zip(answers, answer_ids))
+    # Remove all the complex duplicate detection logic that was causing issues
+    # Just filter out empty answers and shuffle
+    valid_answers = []
+    valid_answer_ids = []
+    valid_answer_types = []
+    valid_answer_metadata = []
+    
+    for i in range(len(answers)):
+        if answers[i] and answers[i].strip():
+            valid_answers.append(answers[i])
+            valid_answer_ids.append(answer_ids[i])
+            valid_answer_types.append(answer_types[i])
+            valid_answer_metadata.append(answer_metadata[i])
+    
+    # Ensure we have at least the correct answer
+    if not valid_answers:
+        valid_answers = [question['answer']]
+        valid_answer_ids = [question['id']]
+        valid_answer_types = ['question']
+        valid_answer_metadata = [None]
+    
+    # Shuffle the answers
+    combined = list(zip(valid_answers, valid_answer_ids, valid_answer_types, valid_answer_metadata))
     random.shuffle(combined)
-    shuffled_answers, shuffled_answer_ids = zip(*combined)
+    shuffled_answers, shuffled_answer_ids, shuffled_answer_types, shuffled_answer_metadata = zip(*combined)
     
     # Generate signed token
     token = generate_signed_token(question['id'], session['user_id'])
@@ -234,6 +260,8 @@ def get_question():
         'question': question['question'],
         'answers': list(shuffled_answers),
         'answer_ids': list(shuffled_answer_ids),
+        'answer_types': list(shuffled_answer_types),
+        'answer_metadata': list(shuffled_answer_metadata),
         'module': module_name,
         'topic': ', '.join(question_topics),
         'subtopic': ', '.join(question_subtopics),
@@ -407,6 +435,8 @@ def report_question():
     question = request.args.get('question', '')
     answer = request.args.get('answer', '')
     distractor_ids = request.args.get('distractor_ids', '')
+    distractor_types = request.args.get('distractor_types', '')
+    distractor_metadata = request.args.get('distractor_metadata', '')
     db = get_db()
     question_id = None
     
@@ -420,16 +450,33 @@ def report_question():
     
     # Fetch distractor information if we have IDs
     distractors = []
-    if distractor_ids:
+    if distractor_ids and distractor_types:
         distractor_id_list = distractor_ids.split(',')
-        for d_id in distractor_id_list:
-            if d_id and d_id != str(question_id):  # Skip the main question if it's in the list
+        distractor_type_list = distractor_types.split(',')
+        distractor_metadata_list = distractor_metadata.split(',') if distractor_metadata else [''] * len(distractor_id_list)
+        
+        for i, (d_id, d_type) in enumerate(zip(distractor_id_list, distractor_type_list)):
+            d_metadata = distractor_metadata_list[i] if i < len(distractor_metadata_list) else ''
+            
+            if d_type == 'question' and d_id and d_id != str(question_id):
+                # Regular question distractor
                 d_row = db.execute('SELECT id, question, answer FROM questions WHERE id = ?', (d_id,)).fetchone()
                 if d_row:
                     distractors.append({
                         'id': d_row['id'],
                         'question': d_row['question'],
-                        'answer': d_row['answer']
+                        'answer': d_row['answer'],
+                        'type': 'question'
+                    })
+            elif d_type == 'manual_distractor' and d_metadata:
+                # Manual distractor
+                d_row = db.execute('SELECT id, distractor_text FROM manual_distractors WHERE id = ?', (d_metadata,)).fetchone()
+                if d_row:
+                    distractors.append({
+                        'id': d_row['id'],
+                        'question': question,  # Same question as main
+                        'answer': d_row['distractor_text'],
+                        'type': 'manual_distractor'
                     })
     
     if request.method == 'POST':

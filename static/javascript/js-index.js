@@ -276,31 +276,21 @@ function getNewQuestion(specificQuestionId = null) {
             // Update answers while maintaining order for edits
             let $existingButtons = $('.answer-btn:visible');
             let existingAnswers = [];
-            // If this is a refresh after edit, get existing button order
-            if (specificQuestionId) {
-                $existingButtons.each(function () {
-                    existingAnswers.push($(this).text());
-                });
-            }
+            // Remove this problematic logic that tries to maintain button positions
+            // if (specificQuestionId) {
+            //     $existingButtons.each(function () {
+            //         existingAnswers.push($(this).text());
+            //     });
+            // }
 
-            // === NEW: Store answer_ids for each button ===
-            // response.answer_ids is an array of question IDs for each answer
+            // === Store answer_ids and metadata for each button ===
             response.answers.forEach((answer, index) => {
                 const $btn = $('.answer-btn').eq(index);
-                let finalAnswer = answer;
-                // For edited questions, try to maintain the same position
-                if (specificQuestionId && existingAnswers.length > 0) {
-                    if (existingAnswers[index] === finalAnswer) {
-                        // Same position, no change needed
-                    } else if (answer === response.answers[0]) {
-                        const oldCorrectIndex = existingAnswers.indexOf(response.answers[0]);
-                        if (oldCorrectIndex !== -1) {
-                            finalAnswer = existingAnswers[index];
-                        }
-                    }
-                }
-                $btn.text(finalAnswer)
+                // Always use the fresh answer from the server response - no position maintenance
+                $btn.text(answer)
                     .data('question-id', response.answer_ids ? response.answer_ids[index] : currentQuestionId)
+                    .data('answer-type', response.answer_types ? response.answer_types[index] : 'question')
+                    .data('answer-metadata', response.answer_metadata ? response.answer_metadata[index] : null)
                     .removeClass('disabled btn-success btn-danger')
                     .addClass('btn-primary')
                     .prop('disabled', false)
@@ -513,19 +503,31 @@ $(document).off('submit', '.edit-answer-form').on('submit', '.edit-answer-form',
     $cancelBtn.prop('disabled', true);
     $submitBtn.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...');
     const $answerBtn = $form.closest('.answer-row').find('.answer-btn');
-    const questionId = $answerBtn.data('question-id'); // Use the button's question ID
+    const questionId = $answerBtn.data('question-id');
+    const answerType = $answerBtn.data('answer-type');
+    const answerMetadata = $answerBtn.data('answer-metadata');
     const newText = $form.find('input').val();
+    
+    const requestData = {
+        new_text: newText,
+        edit_type: answerType
+    };
+    
+    if (answerType === 'manual_distractor') {
+        requestData.manual_distractor_id = answerMetadata;
+    } else {
+        requestData.question_id = questionId;
+    }
+    
     $.ajax({
         url: '/edit_answer',
         method: 'POST',
         contentType: 'application/json',
-        data: JSON.stringify({
-            question_id: questionId, // Use the correct question ID
-            new_text: newText
-        }),
+        data: JSON.stringify(requestData),
         success: function (resp) {
             if (resp.success) {
                 cleanupEditForms();
+                // Refresh the SAME question to show updated answers, not a new random question
                 getNewQuestion(currentQuestionId);
             } else {
                 alert('Failed to update answer.');
@@ -564,20 +566,36 @@ $('#report-question-btn').off('click').on('click', function () {
     // If not found, just use the first answer button's text
     if (!answerText) answerText = $('.answer-btn').first().text();
 
-    // Get distractor IDs from answer buttons' data attributes
+    // Get distractor data from answer buttons' data attributes
     let distractorIds = [];
+    let distractorTypes = [];
+    let distractorMetadata = [];
+    
     $('.answer-btn:visible').each(function () {
         const questionId = $(this).data('question-id');
-        if (questionId) {
-            distractorIds.push(questionId);
-        }
+        const answerType = $(this).data('answer-type') || 'question';
+        const answerMetadata = $(this).data('answer-metadata');
+        
+        distractorIds.push(questionId || '');
+        distractorTypes.push(answerType);
+        distractorMetadata.push(answerMetadata || '');
     });
 
     if (questionText) {
-        window.location.href = '/report_question?question=' + encodeURIComponent(questionText) +
-            '&answer=' + encodeURIComponent(answerText) +
-            '&distractor_ids=' + encodeURIComponent(distractorIds.join(','));
-        console.log("Redirecting to report page with distractor IDs:", distractorIds.join(','));
+        const params = new URLSearchParams({
+            question: questionText,
+            answer: answerText,
+            distractor_ids: distractorIds.join(','),
+            distractor_types: distractorTypes.join(','),
+            distractor_metadata: distractorMetadata.join(',')
+        });
+        
+        window.location.href = '/report_question?' + params.toString();
+        console.log("Redirecting to report page with distractor data:", {
+            ids: distractorIds.join(','),
+            types: distractorTypes.join(','),
+            metadata: distractorMetadata.join(',')
+        });
     }
 });
 

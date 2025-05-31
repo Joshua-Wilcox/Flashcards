@@ -85,22 +85,39 @@
                 <!-- Distractor Questions Sections -->
                 {% for i in range(distractors|length) %}
                 <div class="question-section distractor-section">
-                    <h2>Distractor {{ i + 1 }}</h2>
+                    <h2>{{ 'Manual Distractor' if distractors[i].get('type') == 'manual_distractor' else 'Distractor' }} {{ i + 1 }}</h2>
                     
+                    {% if distractors[i].get('type') == 'manual_distractor' %}
+                    <!-- Manual distractor - show question as read-only and allow editing of distractor text -->
+                    <div class="mb-3">
+                        <h3>Question (same as main)</h3>
+                        <textarea class="form-control" readonly style="background-color: #f8f9fa;">{{ distractors[i]['question'] }}</textarea>
+                        <input type="hidden" name="distractor_id_{{ i }}" value="{{ distractors[i]['id'] }}">
+                        <input type="hidden" name="distractor_type_{{ i }}" value="manual_distractor">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h3>Distractor Text</h3>
+                        <textarea class="form-control" name="distractor_answer_{{ i }}" rows="2">{{ distractors[i]['answer'] }}</textarea>
+                    </div>
+                    {% else %}
+                    <!-- Regular question distractor -->
                     <div class="mb-3">
                         <h3>Question</h3>
                         <textarea class="form-control" name="distractor_question_{{ i }}" rows="3">{{ distractors[i]['question'] }}</textarea>
                         <input type="hidden" name="distractor_id_{{ i }}" value="{{ distractors[i]['id'] }}">
+                        <input type="hidden" name="distractor_type_{{ i }}" value="question">
                     </div>
                     
                     <div class="mb-3">
                         <h3>Answer</h3>
                         <textarea class="form-control" name="distractor_answer_{{ i }}" rows="2">{{ distractors[i]['answer'] }}</textarea>
                     </div>
+                    {% endif %}
                     
                     <div class="mb-3 form-check">
                         <input type="checkbox" class="form-check-input" id="delete_distractor_{{ i }}" name="delete_distractor_{{ i }}" value="1">
-                        <label class="form-check-label text-danger" for="delete_distractor_{{ i }}">Delete this distractor from the database</label>
+                        <label class="form-check-label text-danger" for="delete_distractor_{{ i }}">Delete this {{ 'manual distractor' if distractors[i].get('type') == 'manual_distractor' else 'distractor' }} from the database</label>
                     </div>
                 </div>
                 {% endfor %}

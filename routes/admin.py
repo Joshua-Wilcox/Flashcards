@@ -155,7 +155,30 @@ def admin_review_report(report_id):
     distractors = []
     if report['distractors']:
         try:
-            distractors = json.loads(report['distractors'])
+            parsed_distractors = json.loads(report['distractors'])
+            for d in parsed_distractors:
+                if d.get('type') == 'manual_distractor':
+                    # Fetch current manual distractor data
+                    manual_d = db.execute('SELECT id, distractor_text FROM manual_distractors WHERE id = ?', 
+                                        (d['id'],)).fetchone()
+                    if manual_d:
+                        distractors.append({
+                            'id': manual_d['id'],
+                            'question': d['question'],
+                            'answer': manual_d['distractor_text'],
+                            'type': 'manual_distractor'
+                        })
+                else:
+                    # Regular question distractor
+                    question_d = db.execute('SELECT id, question, answer FROM questions WHERE id = ?', 
+                                          (d['id'],)).fetchone()
+                    if question_d:
+                        distractors.append({
+                            'id': question_d['id'],
+                            'question': question_d['question'],
+                            'answer': question_d['answer'],
+                            'type': 'question'
+                        })
         except:
             # Handle potential JSON parsing error
             pass
@@ -187,20 +210,30 @@ def admin_review_report(report_id):
             
             # Distractor updates
             for i in range(len(distractors)):
-                distractor_id = request.form.get(f'distractor_id_{i}', '')
+                distractor = distractors[i]
                 delete_distractor = request.form.get(f'delete_distractor_{i}') == '1'
                 
-                if distractor_id:
-                    if delete_distractor:
-                        # Delete this distractor
-                        db.execute('DELETE FROM questions WHERE id = ?', (distractor_id,))
-                        flash(f'Distractor {i+1} has been deleted.')
+                if delete_distractor:
+                    # Delete this distractor
+                    if distractor['type'] == 'manual_distractor':
+                        db.execute('DELETE FROM manual_distractors WHERE id = ?', (distractor['id'],))
+                        flash(f'Manual distractor {i+1} has been deleted.')
                     else:
-                        # Update this distractor
-                        distractor_question = request.form.get(f'distractor_question_{i}', '').strip()
-                        distractor_answer = request.form.get(f'distractor_answer_{i}', '').strip()
+                        db.execute('DELETE FROM questions WHERE id = ?', (distractor['id'],))
+                        flash(f'Distractor {i+1} has been deleted.')
+                else:
+                    # Update this distractor
+                    distractor_question = request.form.get(f'distractor_question_{i}', '').strip()
+                    distractor_answer = request.form.get(f'distractor_answer_{i}', '').strip()
+                    
+                    if distractor['type'] == 'manual_distractor':
+                        # Only update the distractor text for manual distractors
+                        db.execute('UPDATE manual_distractors SET distractor_text = ? WHERE id = ?', 
+                                  (distractor_answer, distractor['id']))
+                    else:
+                        # Update both question and answer for regular questions
                         db.execute('UPDATE questions SET question = ?, answer = ? WHERE id = ?', 
-                                  (distractor_question, distractor_answer, distractor_id))
+                                  (distractor_question, distractor_answer, distractor['id']))
             
             db.execute('DELETE FROM reported_questions WHERE id = ?', (report_id,))
             db.commit()
@@ -337,12 +370,25 @@ def edit_answer():
     data = request.get_json()
     question_id = data.get('question_id')
     new_text = data.get('new_text')
-    if not question_id or new_text is None:
+    edit_type = data.get('edit_type', 'question')  # 'question' or 'manual_distractor'
+    manual_distractor_id = data.get('manual_distractor_id')
+    
+    if not new_text:
         return jsonify({'error': 'Missing required data'}), 400
+    
     db = get_db()
     try:
-        db.execute('UPDATE questions SET answer = ? WHERE id = ?', (new_text, question_id))
-        db.commit()
+        if edit_type == 'manual_distractor' and manual_distractor_id:
+            # Edit manual distractor
+            db.execute('UPDATE manual_distractors SET distractor_text = ? WHERE id = ?', 
+                      (new_text, manual_distractor_id))
+        elif edit_type == 'question' and question_id:
+            # Edit regular question answer
+            db.execute('UPDATE questions SET answer = ? WHERE id = ?', (new_text, question_id))
+        else:
+            return jsonify({'error': 'Invalid edit type or missing ID'}), 400
+            
+        db.commit()  # Make sure this commits properly
         return jsonify({'success': True})
     except Exception as e:
         db.rollback()
