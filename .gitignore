@@ -3,6 +3,6 @@
 flashcards.db
 .env
 whitelist.json
-*.db
+*.db*
 */__pycache__/*
 *.pyc
