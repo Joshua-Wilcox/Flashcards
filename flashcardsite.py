@@ -119,7 +119,7 @@
 #     # Get module, topic, and subtopic names to enhance the results
 #     results = []
 #     for row in tag_rows:
-#         pdf_info = {'path': row['path'], 'name': os.path.basename(row['path'])}
+#         pdf_info = {'path': row['path'], 'name': os.path.basename(row['path'])
         
 #         # Add module name if available
 #         if row['module_id']:
