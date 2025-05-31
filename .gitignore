@@ -5,3 +5,4 @@ flashcards.db
 whitelist.json
 *.db*
 */__pycache__/*
+*.pyc
