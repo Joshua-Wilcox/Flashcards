@@ -60,22 +60,10 @@
             </nav>
             <div class="row">
                 <div class="col-12 col-md-4 select-container">
-                    <label for="module-dropdown">Module:</label>
-                    <div class="dropdown w-100">
-                        <button class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-module w-100"
-                            type="button" id="module-dropdown" data-bs-toggle="dropdown" aria-expanded="false" {% if not
-                            session.user_id %}disabled{% endif %}>
-                            Select Module
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-multiselect w-100" aria-labelledby="module-dropdown"
-                            id="module-dropdown-menu">
-                            {% for module in modules %}
-                            <li>
-                                <div class="dropdown-item-module" data-value="{{ module }}">{{ module }}</div>
-                            </li>
-                            {% endfor %}
-                        </ul>
-                    </div>
+                    {% set container_id = 'module-selector' %}
+                    {% set selected_module = '' %}
+                    {% set disabled = not session.user_id %}
+                    {% include 'components/module_selector.html' %}
                 </div>
                 <div class="col-12 col-md-4 select-container">
                     <label for="topic-dropdown">Topics:</label>
@@ -244,6 +232,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://js.stripe.com/v3/"></script>
+    <script src="{{ url_for('static', filename='javascript/module-selector.js') }}"></script>
     <script src="{{ url_for('static', filename='javascript/js-index.js') }}"></script>
 </body>
 

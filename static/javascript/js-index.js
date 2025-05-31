@@ -19,6 +19,7 @@ let currentSelections = {
 let currentQuestionToken = null; // Store the token for the current question
 let isAdmin = false;
 let currentQuestionId = null;
+let moduleSelector = null; // Module selector component instance
 // --- Delay answers state ---
 let delayAnswersSeconds = 0;
 let delayInterval = null;
@@ -599,61 +600,33 @@ $('#report-question-btn').off('click').on('click', function () {
     }
 });
 
-// --- Module dropdown logic (single select, styled like topics) ---
-function updateModuleDropdownLabel() {
-    const $btn = $('#module-dropdown');
-    if (!currentSelections.module) {
-        $btn.text('Select Module');
-    } else {
-        $btn.text(currentSelections.module);
-    }
-}
-function updateModuleDropdownSelection() {
-    $('#module-dropdown-menu .dropdown-item-module').each(function () {
-        const val = $(this).data('value');
-        if (val === currentSelections.module) {
-            $(this).addClass('selected').attr('aria-selected', 'true');
-        } else {
-            $(this).removeClass('selected').attr('aria-selected', 'false');
-        }
-    });
-}
-$(document).on('click', '#module-dropdown-menu .dropdown-item-module', function (e) {
-    const value = $(this).data('value');
-    if (currentSelections.module === value) {
-        currentSelections.module = '';
-    } else {
-        currentSelections.module = value;
-    }
-    currentSelections.topics = [];
-    currentSelections.subtopics = [];
-    updateModuleDropdownLabel();
-    updateModuleDropdownSelection();
-    updateFilters();
-
-    // Show/hide welcome and QA sections
-    if (currentSelections.module) {
-        $('#welcome-section').hide();
-        $('#qa-section').show();
-        getNewQuestion();
-    } else {
-        $('#qa-section').hide();
-        $('#welcome-section').show();
-    }
-});
-// Prevent dropdown from closing on selection
-$(document).on('mousedown', '#module-dropdown-menu .dropdown-item-module', function (e) {
-    e.preventDefault();
-});
-// Update label and selection on show
-$('#module-dropdown').on('show.bs.dropdown', function () {
-    updateModuleDropdownLabel();
-    updateModuleDropdownSelection();
-});
-// Also update on page load
+// --- Module selector initialization and event handlers ---
 $(document).ready(function () {
-    updateModuleDropdownLabel();
-    updateModuleDropdownSelection();
+    // Initialize module selector if it exists
+    if ($('#module-selector-dropdown').length > 0) {
+        moduleSelector = new ModuleSelector({
+            containerId: 'module-selector',
+            selectedModule: '',
+            allowDeselect: true,
+            onModuleChange: function(selectedModule) {
+                currentSelections.module = selectedModule;
+                currentSelections.topics = [];
+                currentSelections.subtopics = [];
+                
+                updateFilters();
+
+                // Show/hide welcome and QA sections
+                if (currentSelections.module) {
+                    $('#welcome-section').hide();
+                    $('#qa-section').show();
+                    getNewQuestion();
+                } else {
+                    $('#qa-section').hide();
+                    $('#welcome-section').show();
+                }
+            }
+        });
+    }
 });
 
 // --- Remove old <select> module logic ---
@@ -665,8 +638,10 @@ $(document).ready(function () {
     if (window.FLASHCARDS_CONFIG.session_user_id) {
         if (urlParams.has('module')) {
             currentSelections.module = urlParams.get('module');
-            updateModuleDropdownLabel();
-            updateModuleDropdownSelection();
+            // Set the module in the selector component if it exists
+            if (moduleSelector) {
+                moduleSelector.setModule(currentSelections.module);
+            }
             updateFilters();
             $('#welcome-section').hide();
             $('#qa-section').show();
