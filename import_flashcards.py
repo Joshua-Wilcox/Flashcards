@@ -9,6 +9,8 @@ JSON_PATH = 'flashcards.json'
 def get_db():
     db = sqlite3.connect(DB_PATH)
     db.row_factory = sqlite3.Row
+    # Enable foreign key constraints
+    db.execute('PRAGMA foreign_keys = ON')
     return db
 
 def get_module_id_by_name(db, module_name):

@@ -99,7 +99,7 @@ CREATE TABLE IF NOT EXISTS reported_questions (
     timestamp INTEGER,
     distractors TEXT, -- JSON string containing distractor questions and answers
     FOREIGN KEY (user_id) REFERENCES user_stats(user_id),
-    FOREIGN KEY (question_id) REFERENCES questions(id)
+    FOREIGN KEY (question_id) REFERENCES questions(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS used_tokens (
