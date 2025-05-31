@@ -2,13 +2,14 @@ from flask import Blueprint, render_template, jsonify, request, session, redirec
 from models.database import get_db, get_all_modules, get_module_name_by_id, get_unique_values
 from models.question import (get_tags_for_question, get_topics_for_question, 
                            get_subtopics_for_question, get_pdfs_for_question)
-from models.user import update_user_stats, user_has_enough_answers
+from models.user import update_user_stats, user_has_enough_answers, is_user_admin
 from utils.security import generate_signed_token, verify_signed_token
 from config import Config
 import time
 import json
 from datetime import datetime
 import pytz
+import random
 main_bp = Blueprint('main', __name__)
 
 @main_bp.route('/')
@@ -86,7 +87,6 @@ def get_filters():
 
 @main_bp.route('/get_question', methods=['POST'])
 def get_question():
-    """Get a question based on filters."""
     if 'user_id' not in session:
         return jsonify({'error': 'Please log in to access flashcards.'}), 401
     
@@ -197,21 +197,21 @@ def get_question():
         primary_subtopic = question_subtopics[0] if question_subtopics else ''
         
         scored_distractors = db.execute('''
-            SELECT q.id, q.answer,
-                   (CASE WHEN q.module_id = ? THEN 3 ELSE 0 END) +
-                   (CASE WHEN EXISTS (
-                       SELECT 1 FROM question_topics qt JOIN topics t ON qt.topic_id = t.id 
-                       WHERE qt.question_id = q.id AND t.name = ?
-                   ) THEN 2 ELSE 0 END) +
-                   (CASE WHEN EXISTS (
-                       SELECT 1 FROM question_subtopics qs JOIN subtopics s ON qs.subtopic_id = s.id 
-                       WHERE qs.question_id = q.id AND s.name = ?
-                   ) THEN 1 ELSE 0 END) as score
-            FROM questions q
-            WHERE q.id != ?
-            ORDER BY score DESC, RANDOM()
-            LIMIT ?
-        ''', (module_id, primary_topic, primary_subtopic, question['id'], remaining_needed)).fetchall()
+        SELECT q.id, q.answer,
+            (CASE WHEN q.module_id = ? THEN 3 ELSE 0 END) +
+            (CASE WHEN EXISTS (
+                SELECT 1 FROM question_topics qt JOIN topics t ON qt.topic_id = t.id 
+                WHERE qt.question_id = q.id AND t.name = ?
+            ) THEN 2 ELSE 0 END) +
+            (CASE WHEN EXISTS (
+                SELECT 1 FROM question_subtopics qs JOIN subtopics s ON qs.subtopic_id = s.id 
+                WHERE qs.question_id = q.id AND s.name = ?
+            ) THEN 1 ELSE 0 END) as score
+        FROM questions q
+        WHERE q.id != ? AND q.module_id = ?
+        ORDER BY score DESC, RANDOM()
+        LIMIT ?
+    ''', (module_id, primary_topic, primary_subtopic, question['id'],module_id, remaining_needed)).fetchall()
         
         # Add the scored distractors
         for distractor in scored_distractors:
@@ -221,7 +221,6 @@ def get_question():
     # Shuffle the answers (but keep track of the correct one)
     correct_answer = answers[0]
     combined = list(zip(answers, answer_ids))
-    import random
     random.shuffle(combined)
     shuffled_answers, shuffled_answer_ids = zip(*combined)
     
@@ -230,8 +229,6 @@ def get_question():
     
     # Get PDFs for this question
     pdfs = get_pdfs_for_question(question['id'])
-    
-    from models.user import is_user_admin
     
     return jsonify({
         'question': question['question'],

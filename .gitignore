@@ -4,3 +4,4 @@ flashcards.db
 .env
 whitelist.json
 *.db
+*/__pycache__/*
