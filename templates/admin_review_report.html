@@ -109,5 +109,40 @@
             </form>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get the main question delete checkbox
+            const deleteMainCheckbox = document.getElementById('delete_question');
+            
+            if (deleteMainCheckbox) {
+                deleteMainCheckbox.addEventListener('change', function() {
+                    // Find all distractor sections and handle manual distractors
+                    const distractorSections = document.querySelectorAll('.distractor-section');
+                    
+                    distractorSections.forEach(function(section) {
+                        // Check if this section contains a manual distractor
+                        const isManualDistractor = section.querySelector('input[value="manual_distractor"]');
+                        
+                        if (isManualDistractor) {
+                            // Find the delete checkbox in this section
+                            const deleteCheckbox = section.querySelector('[id^="delete_distractor_"]');
+                            if (deleteCheckbox) {
+                                if (this.checked) {
+                                    // Main question deletion is checked: check and disable manual distractor deletion
+                                    deleteCheckbox.checked = true;
+                                    deleteCheckbox.disabled = true;
+                                } else {
+                                    // Main question deletion is unchecked: re-enable manual distractor deletion
+                                    deleteCheckbox.disabled = false;
+                                    // Don't auto-uncheck - leave it as the user had it
+                                }
+                            }
+                        }
+                    }.bind(this));
+                });
+            }
+        });
+    </script>
 </body>
 </html>

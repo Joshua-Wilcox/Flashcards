@@ -5,6 +5,8 @@ def get_db():
     """Get database connection with row factory."""
     db = sqlite3.connect(Config.DATABASE_PATH)
     db.row_factory = sqlite3.Row
+    # Enable foreign key constraints
+    db.execute('PRAGMA foreign_keys = ON')
     return db
 
 def init_db():
