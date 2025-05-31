@@ -43,7 +43,7 @@ def callback():
                             VALUES (?, ?, 0, 0, 0)''',
                          (user.id, module_id))
         db.commit()
-        return redirect(url_for('index'))
+        return redirect(url_for('main.index'))
     except Exception as e:
         return f"An error occurred: {str(e)}"
 
