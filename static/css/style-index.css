@@ -63,6 +63,7 @@ footer {
         .content-wrapper {
             display: flex;
             flex-direction: column;
+            padding-bottom: 80px; /* Add padding to prevent content from being hidden behind fixed footer */
         }
 
         .answers-section {
@@ -72,18 +73,19 @@ footer {
             margin: 10px 0;
         }
 
-        #answers-container {
-            /* Removed flex styles that cause overlap */
-        }
-
-        #answers-container>div {
-            /* Removed flex styles that cause overlap */
-        }
-
         /* Adjust footer to stay at bottom */
         footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 900; /* Lower than stripe widget (1000) */
             margin-top: auto;
             padding: 10px 0;
+            background: #f8f9fa;
+            color: #444;
+            font-size: 1em;
+            box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
         }
 
         /* Responsive: mobile-friendly styles */
@@ -97,9 +99,7 @@ footer {
             }
 
             .content-wrapper {
-                /* min-height: 100vh; */
-                /* height: 100vh; */
-                /* REMOVE these lines to allow content to fit naturally */
+                padding-bottom: 80px; /* Keep padding for fixed footer */
             }
 
             .container {
@@ -139,14 +139,6 @@ footer {
                 justify-content: stretch;
             }
 
-            #answers-container {
-                /* Removed flex styles that cause overlap */
-            }
-
-            #answers-container>div {
-                /* Removed flex styles that cause overlap */
-            }
-
             .welcome-section {
                 min-height: 180px;
                 margin-top: 20px;
@@ -156,11 +148,8 @@ footer {
 
         /* Force answer buttons to fill vertical space on mobile */
         @media (max-width: 576px) {
-            #qa-section {
-            }
-
             #answers-container {
-                /* Removed gap, spacing will be handled by mb-2 */
+                margin-bottom: 10px; /* Add spacing instead of empty rule */
             }
 
             .answer-btn {
@@ -495,7 +484,7 @@ footer {
             border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
             z-index: 1000;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
             overflow: hidden;
         }
 
@@ -509,15 +498,18 @@ footer {
             cursor: pointer;
             font-weight: 600;
             border-radius: 12px 12px 0 0;
+            white-space: nowrap; /* Prevent text wrapping */
         }
 
         #stripe-header-text {
             font-size: 16px;
+            flex-shrink: 0; /* Prevent text from shrinking */
         }
 
         #stripe-header-actions {
             display: flex;
             align-items: center;
+            flex-shrink: 0; /* Prevent buttons from shrinking */
         }
 
         #stripe-toggle-btn, #stripe-close-btn {
@@ -534,41 +526,58 @@ footer {
             justify-content: center;
             width: 24px;
             height: 24px;
+            transition: all 0.25s cubic-bezier(0.4, 0.0, 0.2, 1);
         }
 
         #stripe-toggle-btn:hover, #stripe-close-btn:hover {
             opacity: 0.8;
+            transform: scale(1.1);
+        }
+
+        /* Rotate toggle arrow when minimized */
+        #stripe-widget.minimized #stripe-toggle-btn {
+            transform: rotate(180deg);
+        }
+
+        #stripe-widget.minimized #stripe-toggle-btn:hover {
+            transform: rotate(180deg) scale(1.1);
         }
 
         #stripe-container {
             padding: 20px;
-            transition: height 0.3s ease;
+            opacity: 1;
+            transform: translateY(0);
+            transition: all 0.35s cubic-bezier(0.4, 0.0, 0.2, 1);
             overflow: hidden;
+            max-height: 400px;
         }
 
         #stripe-widget.minimized #stripe-container {
-            height: 0;
-            padding: 0;
+            opacity: 0;
+            transform: translateY(-10px);
+            max-height: 0;
+            padding: 0 20px;
+            transition: all 0.35s cubic-bezier(0.4, 0.0, 0.2, 1);
         }
 
         #stripe-widget.minimized {
-            width: 220px;
+            width: 250px; /* Increased from 220px to accommodate text and buttons */
         }
 
         /* Animation for widget appearing */
         @keyframes fadeInUp {
             from {
                 opacity: 0;
-                transform: translate3d(0, 20px, 0);
+                transform: translateY(30px) scale(0.95);
             }
             to {
                 opacity: 1;
-                transform: translate3d(0, 0, 0);
+                transform: translateY(0) scale(1);
             }
         }
 
         #stripe-widget {
-            animation: fadeInUp 0.4s ease-out;
+            animation: fadeInUp 0.5s cubic-bezier(0.4, 0.0, 0.2, 1);
         }
 
         .amount-options {
@@ -661,7 +670,7 @@ footer {
             }
 
             #stripe-widget.minimized {
-                width: 200px;
+                width: 230px; /* Increased from 200px */
             }
         }
 
@@ -673,7 +682,11 @@ footer {
             }
 
             #stripe-widget.minimized {
-                width: 180px;
+                width: 210px; /* Increased from 180px */
+            }
+            
+            #stripe-header-text {
+                font-size: 15px; /* Slightly smaller text on mobile */
             }
         }
 

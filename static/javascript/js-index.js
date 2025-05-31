@@ -712,13 +712,7 @@ $(document).ready(function () {
         // Toggle widget expanded/minimized state
         function toggleStripeWidget() {
             $stripeWidget.toggleClass('minimized');
-
-            // Update the toggle button icon
-            if ($stripeWidget.hasClass('minimized')) {
-                $stripeToggleBtn.html('▲');
-            } else {
-                $stripeToggleBtn.html('▼');
-            }
+            // Note: Arrow rotation is handled by CSS, no need to change the symbol
         }
 
         // Close widget and remember for this session only
@@ -845,7 +839,7 @@ $(document).ready(function () {
             setTimeout(function () {
                 if ($('.answer-btn:visible').length > 0 && !$stripeWidget.hasClass('minimized')) {
                     $stripeWidget.addClass('minimized');
-                    $stripeToggleBtn.html('▲');
+                    // Note: Arrow rotation is handled by CSS
                 }
             }, 300);
         };
@@ -855,7 +849,7 @@ $(document).ready(function () {
             setTimeout(function () {
                 if ($('#qa-section:visible').length > 0 && !$stripeWidget.hasClass('minimized')) {
                     $stripeWidget.addClass('minimized');
-                    $stripeToggleBtn.html('▲');
+                    // Note: Arrow rotation is handled by CSS
                 }
             }, 300);
         });

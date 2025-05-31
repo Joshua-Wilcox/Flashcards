@@ -41,9 +41,17 @@
         .sort-arrow {
             font-size: 0.9em;
         }
+        /* Override the fixed footer from style-index.css for this page */
         footer {
+            position: relative !important;
             margin-top: 40px;
             padding: 10px 0;
+            box-shadow: none !important;
+        }
+        
+        /* Add bottom padding to prevent content overlap with fixed footer */
+        body {
+            padding-bottom: 80px;
         }
         @media (max-width: 768px) {
             .container {

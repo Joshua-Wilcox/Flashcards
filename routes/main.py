@@ -409,12 +409,37 @@ def submit_flashcard():
         tags = request.form.get('tags', '').strip()
         
         if question and answer and module and topic and subtopic and tags:
-            db.execute('''INSERT INTO submitted_flashcards 
+            # Insert the flashcard submission
+            cursor = db.execute('''INSERT INTO submitted_flashcards 
                 (user_id, username, timestamp, submitted_question, submitted_answer, module, submitted_topic, submitted_subtopic, submitted_tags_comma_separated)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)''',
                 (user.id, user.username, int(datetime.utcnow().timestamp()), question, answer, module, topic, subtopic, tags))
+            
+            # Get the ID of the just-inserted flashcard
+            flashcard_id = cursor.lastrowid
+            
+            # Check for distractor submissions
+            distractors = []
+            for i in range(Config.NUMBER_OF_DISTRACTORS):
+                distractor = request.form.get(f'distractor_{i}', '').strip()
+                if distractor:
+                    distractors.append(distractor)
+            
+            # If distractors were provided, submit them as well
+            # Note: We store the flashcard_id in a special way since the question doesn't exist yet
+            if distractors:
+                for distractor in distractors:
+                    db.execute('''
+                        INSERT INTO submitted_distractors 
+                        (user_id, username, question_id, distractor_text, timestamp)
+                        VALUES (?, ?, ?, ?, ?)
+                    ''', (user.id, user.username, f"flashcard_{flashcard_id}", distractor, int(datetime.utcnow().timestamp())))
+                
+                flash(f'Flashcard and {len(distractors)} distractor(s) submitted for review! Thank you.')
+            else:
+                flash('Flashcard submitted for review! Thank you.')
+            
             db.commit()
-            flash('Flashcard submitted for review! Thank you.')
             return render_template('submit_flashcard.html', modules=[m['name'] for m in modules], selected_module=module, clear_fields=True,
                                    prev_topic=topic, prev_subtopic=subtopic, prev_tags=tags)
         else:

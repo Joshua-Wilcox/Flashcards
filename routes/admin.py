@@ -54,7 +54,7 @@ def admin_review_flashcards():
     reports = db.execute('SELECT * FROM reported_questions ORDER BY timestamp ASC').fetchall()
     pdf_requests = db.execute('SELECT * FROM requests_to_access ORDER BY timestamp ASC').fetchall()
     distractor_submissions = db.execute('''
-        SELECT sd.*, q.question 
+        SELECT sd.*, q.question
         FROM submitted_distractors sd
         JOIN questions q ON sd.question_id = q.id
         ORDER BY sd.timestamp ASC
@@ -95,6 +95,28 @@ def admin_review_flashcard(submission_id):
             add_topic_and_link_question(db, question_id, topic)
             add_subtopic_and_link_question(db, question_id, subtopic)
             
+            # Handle any associated distractor submissions
+            flashcard_distractor_key = f"flashcard_{submission_id}"
+            pending_distractors = db.execute('''
+                SELECT id, distractor_text, user_id 
+                FROM submitted_distractors 
+                WHERE question_id = ?
+            ''', (flashcard_distractor_key,)).fetchall()
+            
+            # Update distractor submissions to point to the new approved question
+            # but don't auto-approve them - let admin review them separately
+            for distractor in pending_distractors:
+                db.execute('''
+                    UPDATE submitted_distractors 
+                    SET question_id = ?
+                    WHERE id = ?
+                ''', (question_id, distractor['id']))
+            
+            if pending_distractors:
+                flash(f'Flashcard approved and added to the database. {len(pending_distractors)} associated distractor(s) are now available for review in the "Distractor Submissions" section.')
+            else:
+                flash('Flashcard approved and added to the database.')
+            
             # Increment the user's approved cards counter
             user_id = submission['user_id']
             
@@ -126,12 +148,24 @@ def admin_review_flashcard(submission_id):
             
             db.execute('DELETE FROM submitted_flashcards WHERE id = ?', (submission_id,))
             db.commit()
-            flash('Flashcard approved and added to the database.')
             return redirect(url_for('admin.admin_review_flashcards'))
         elif action == 'reject':
+            # Also remove any associated distractor submissions
+            flashcard_distractor_key = f"flashcard_{submission_id}"
+            rejected_distractors = db.execute('''
+                SELECT COUNT(*) as count 
+                FROM submitted_distractors 
+                WHERE question_id = ?
+            ''', (flashcard_distractor_key,)).fetchone()
+            
             db.execute('DELETE FROM submitted_flashcards WHERE id = ?', (submission_id,))
+            db.execute('DELETE FROM submitted_distractors WHERE question_id = ?', (flashcard_distractor_key,))
             db.commit()
-            flash('Flashcard submission rejected and removed.')
+            
+            if rejected_distractors['count'] > 0:
+                flash(f'Flashcard submission rejected and removed. {rejected_distractors["count"]} associated distractor(s) also removed.')
+            else:
+                flash('Flashcard submission rejected and removed.')
             return redirect(url_for('admin.admin_review_flashcards'))
     return render_template('admin_review_flashcard.html', submission=submission, modules=[m['name'] for m in modules])
 
@@ -250,7 +284,7 @@ def admin_review_distractor(submission_id):
     
     db = get_db()
     submission = db.execute('''
-        SELECT sd.*, q.question, q.answer 
+        SELECT sd.*, q.question, q.answer
         FROM submitted_distractors sd
         JOIN questions q ON sd.question_id = q.id
         WHERE sd.id = ?
@@ -264,7 +298,7 @@ def admin_review_distractor(submission_id):
         action = request.form.get('action')
         
         if action == 'approve':
-            # Add to manual_distractors table
+            # Add distractor to manual_distractors table
             db.execute('''
                 INSERT INTO manual_distractors 
                 (question_id, distractor_text, created_by, created_at)
@@ -279,16 +313,14 @@ def admin_review_distractor(submission_id):
                 WHERE user_id = ?
             ''', (submission['user_id'],))
             
-            # Remove from submissions
-            db.execute('DELETE FROM submitted_distractors WHERE id = ?', (submission_id,))
-            db.commit()
-            
             flash('Distractor approved and added!')
             
         elif action == 'reject':
-            db.execute('DELETE FROM submitted_distractors WHERE id = ?', (submission_id,))
-            db.commit()
             flash('Distractor submission rejected.')
+        
+        # Remove from submissions
+        db.execute('DELETE FROM submitted_distractors WHERE id = ?', (submission_id,))
+        db.commit()
         
         return redirect(url_for('admin.admin_review_flashcards'))
     
