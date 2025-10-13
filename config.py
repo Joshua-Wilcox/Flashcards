@@ -37,9 +37,9 @@ class Config:
     SECRET_TOKEN_KEY = os.getenv('TOKEN_SECRET_KEY', 'dev_token_secret')
     TOKEN_EXPIRY_SECONDS = 600  # 10 minutes
     
-    # Stripe configuration
-    STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
-    STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY")
+    # GitHub configuration for sponsors
+    GITHUB_SPONSORS_URL = "https://github.com/sponsors/Joshua-Wilcox?o=esb"
+    GITHUB_REPO_URL = "https://github.com/Joshua-Wilcox/Flashcards"
 
     # n8n ingestion configuration
     N8N_INGEST_TOKEN = os.getenv("N8N_INGEST_TOKEN")

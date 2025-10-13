@@ -18,7 +18,7 @@ This is a web-based flashcard application designed for students to study various
 
 ### APIs and Services
 - **Discord API**: Used for user authentication (OAuth2).
-- **Stripe API**: Integrated for handling payments, though this is planned to be replaced.
+- **GitHub Sponsors**: Integrated for accepting support through GitHub Sponsors and repository starring.
 
 ## Features
 
@@ -124,9 +124,9 @@ To run this project locally, follow these steps:
     # API Access (optional - for programmatic content ingestion)
     N8N_INGEST_TOKEN=your_secure_api_token
 
-    # Stripe (optional - if using payment features)
-    STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
-    STRIPE_SECRET_KEY=your_stripe_secret_key
+    # GitHub configuration for sponsors
+    GITHUB_SPONSORS_URL=https://github.com/sponsors/Joshua-Wilcox?o=esb
+    GITHUB_REPO_URL=https://github.com/Joshua-Wilcox/Flashcards
     ```
 
 5.  **Initialize and start Supabase:**
