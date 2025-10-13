@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Review PDF Access Request</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style-index.css') }}">
+    <style>
+        /* Unique styles for this page only */
+        .review-card { max-width: 600px; margin: 40px auto; box-shadow: 0 4px 16px rgba(0,0,0,0.08); border-radius: 12px; }
+        .alert-warning { font-size: 1.1em; }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+            <div class="container-fluid">
+                <span class="navbar-brand">Admin Dashboard</span>
+                <div class="navbar-nav ms-auto">
+                    <a class="nav-link" href="{{ url_for('admin.admin_review_flashcards') }}">Back to Dashboard</a>
+                    <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
+                </div>
+            </div>
+        </nav>
+        <div class="review-card card p-4">
+            <div class="alert alert-warning">
+                <b>Important:</b> Please talk to Josh before approving PDF access requests. These are his notes and not for general distribution.
+            </div>
+            <h4>PDF Access Request</h4>
+            <div class="mb-3"><b>User:</b> {{ req['username'] or req['discord_id'] }}</div>
+            <div class="mb-3"><b>Message:</b> {{ req['message'] or "(no message provided)" }}</div>
+            <div class="mb-3"><b>Requested At:</b> <span id="pdf-requested-at" data-timestamp="{{ req['created_at'] }}"></span></div>
+            <form method="post">
+                {{ csrf_token() }}
+                <div class="btn-group d-flex justify-content-between mt-4">
+                    <button type="submit" name="action" value="approve" class="btn btn-success w-50 me-2">Approve</button>
+                    <button type="submit" name="action" value="deny" class="btn btn-danger w-50 ms-2">Deny</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script>
+    function formatRelativeTime(ts) {
+        if (!ts) return "Never";
+        const now = Math.floor(Date.now() / 1000);
+        const localTs = ts - (new Date().getTimezoneOffset() * 60);
+        let diff = now - localTs;
+        if (diff < 60) return "Just now";
+        const units = [
+            { name: "year",   secs: 31536000 },
+            { name: "month",  secs: 2592000 },
+            { name: "day",    secs: 86400 },
+            { name: "hour",   secs: 3600 },
+            { name: "minute", secs: 60 }
+        ];
+        for (const unit of units) {
+            if (diff >= unit.secs) {
+                const value = Math.floor(diff / unit.secs);
+                if (window.Intl && Intl.RelativeTimeFormat) {
+                    const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
+                    return rtf.format(-value, unit.name);
+                } else {
+                    return value + ' ' + unit.name + (value !== 1 ? 's' : '') + ' ago';
+                }
+            }
+        }
+        return "Just now";
+    }
+    function parseTimestamp(ts) {
+        if (!ts) return null;
+        
+        // If it's already a number (Unix timestamp), return it
+        if (!isNaN(ts)) {
+            return Number(ts);
+        }
+        
+        // If it's an ISO string, parse it and convert to Unix timestamp
+        try {
+            const date = new Date(ts);
+            if (!isNaN(date.getTime())) {
+                return Math.floor(date.getTime() / 1000); // Convert to seconds
+            }
+        } catch (e) {
+            // Invalid date string
+        }
+        
+        return null;
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        var el = document.getElementById('pdf-requested-at');
+        var ts = el.getAttribute('data-timestamp');
+        const parsedTs = parseTimestamp(ts);
+        if (parsedTs) {
+            el.textContent = formatRelativeTime(parsedTs);
+        } else {
+            el.textContent = "Never";
+        }
+    });
+    </script>
+</body>
+</html>

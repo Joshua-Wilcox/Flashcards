@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Request PDF Access</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style-index.css') }}">
+    <style>
+        /* Unique styles for this page only */
+        .request-card { max-width: 500px; margin: 40px auto; box-shadow: 0 4px 16px rgba(0,0,0,0.08); border-radius: 12px; }
+        .welcome-title { font-size: 2.2rem; font-weight: 700; color: #0d6efd; }
+        .welcome-desc { font-size: 1.1rem; color: #555; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="content-wrapper">
+        <div class="container mt-4">
+            <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+                <div class="container-fluid">
+                    <span class="navbar-brand">Flashcards</span>
+                    <div class="navbar-nav ms-auto">
+                        <a class="nav-link" href="{{ url_for('main.index') }}">Back to Flashcards</a>
+                        <a class="nav-link" href="{{ url_for('user.leaderboard') }}">Leaderboard</a>
+                        {% if session.user_id %}
+                            <a class="nav-link" href="{{ url_for('user.stats') }}">My Stats</a>
+                            <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
+                        {% else %}
+                            <a class="nav-link" href="{{ url_for('auth.login') }}">Login with Discord</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </nav>
+            <div class="request-card card p-4">
+                <div class="text-center mb-3">
+                    <div class="welcome-title">Request Access to PDF Files</div>
+                    <div class="welcome-desc">Access to PDFs is restricted. Please submit a request below.</div>
+                </div>
+                <form method="post">
+                    {{ csrf_token() }}
+                    <div class="mb-3">
+                        <label for="message" class="form-label">Message (optional):</label>
+                        <textarea class="form-control" id="message" name="message" rows="3" placeholder="Let us know why you need access or any extra info..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Request Access</button>
+                </form>
+            </div>
+        </div>
+        <footer class="text-center">
+            <p>made with ❤️ by <a href="https://github.com/joshua-wilcox">Josh Wilcox</a></p>
+        </footer>
+    </div>
+</body>
+</html>

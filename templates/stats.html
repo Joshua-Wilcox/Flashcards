@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Your Flashcard Stats</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style-index.css') }}">
+    <style>
+        /* Unique styles for this page only */
+        .content-wrapper { min-height: 100vh; display: flex; flex-direction: column; }
+        .stats-card { border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); transition: transform 0.2s; }
+        .stats-card:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,0.1); }
+        .stat-value { font-size: 2.5rem; font-weight: bold; color: #0d6efd; }
+        .stat-label { color: #6c757d; font-size: 1.1rem; }
+        footer { margin-top: auto; padding: 10px 0; }
+        @media (max-width: 768px) {
+            .stat-value {
+                font-size: 2rem;
+            }
+            .stat-label {
+                font-size: 1rem;
+            }
+            .stats-card {
+                margin-bottom: 10px;
+            }
+            h1 {
+                font-size: 1.5rem;
+            }
+        }
+        @media (max-width: 576px) {
+            .stat-value {
+                font-size: 1.5rem;
+            }
+            .stat-label {
+                font-size: 0.95rem;
+            }
+            .stats-card {
+                margin-bottom: 8px;
+            }
+            .container {
+                padding-left: 4px;
+                padding-right: 4px;
+            }
+        }
+
+        .navbar-nav .nav-link {
+            border-radius: 999px !important;
+            padding: 8px 22px !important;
+            margin-left: 6px;
+            margin-right: 6px;
+            font-weight: 600;
+            transition: background 0.15s, color 0.15s, box-shadow 0.15s, transform 0.15s;
+            background: #f8f9fa !important;
+            color: #444 !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            position: relative;
+            z-index: 1;
+        }
+        .navbar-nav .nav-link:hover, .navbar-nav .nav-link:focus {
+            background: #e2e6ea !important;
+            color: #222 !important;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            transform: scale(1.04);
+        }
+        .sort-btn {
+            border: none;
+            background: none;
+            color: #0d6efd;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 0 4px;
+        }
+        .sort-btn.active {
+            text-decoration: underline;
+        }
+        .sort-arrow {
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="content-wrapper">
+        <div class="container mt-4">
+            <!-- Navigation bar -->
+            <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+                <div class="container-fluid">
+                    <span class="navbar-brand">Flashcards</span>
+                    <div class="navbar-nav ms-auto">
+                        <a class="nav-link" href="{{ url_for('main.index') }}">Back to Flashcards</a>
+                        <a class="nav-link" href="{{ url_for('user.leaderboard') }}">Leaderboard</a>
+                        {% if not is_other_user %}
+                            <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Module filter using shared component -->
+            <div class="row mb-4">
+                <div class="col-12 col-md-4">
+                    {% set container_id = 'stats-module-selector' %}
+                    {% set selected_module = stats.active_module or '' %}
+                    {% include 'components/module_selector.html' with context %}
+                </div>
+            </div>
+
+            <!-- Stats content -->
+            <div class="row justify-content-center">
+                <div class="col-12 col-md-8">
+                    <h1 class="text-center mb-4">Statistics for {{ stats['username'] }}</h1>
+                    <div class="row g-4">
+                        <div class="col-12 col-md-6">
+                            <div class="card stats-card p-3 mb-3">
+                                <div class="stat-value">
+                                    {% if stats.active_module and stats.module_stats[stats.active_module] %}
+                                        {{ stats.module_stats[stats.active_module].number_correct or 0 }}
+                                    {% else %}
+                                        {{ stats['correct_answers'] or 0 }}
+                                    {% endif %}
+                                </div>
+                                <div class="stat-label">Correct Answers</div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <div class="card stats-card p-3 mb-3">
+                                <div class="stat-value">
+                                    {% if stats.active_module and stats.module_stats[stats.active_module] %}
+                                        {{ stats.module_stats[stats.active_module].number_answered or 0 }}
+                                    {% else %}
+                                        {{ stats['total_answers'] or 0 }}
+                                    {% endif %}
+                                </div>
+                                <div class="stat-label">Total Answers</div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <div class="card stats-card p-3 mb-3">
+                                <div class="stat-value">
+                                    {% if stats.active_module and stats.module_stats[stats.active_module] %}
+                                        {{ '%.1f%%' % ((stats.module_stats[stats.active_module].number_correct or 0) / (stats.module_stats[stats.active_module].number_answered or 1) * 100) }}
+                                    {% else %}
+                                        {{ '%.1f%%' % ((stats['correct_answers'] or 0) / (stats['total_answers'] or 1) * 100) }}
+                                    {% endif %}
+                                </div>
+                                <div class="stat-label">Accuracy</div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <div class="card stats-card p-3 mb-3">
+                                <div class="stat-value">
+                                    {% if stats.active_module and stats.module_stats[stats.active_module] %}
+                                        {{ stats.module_stats[stats.active_module].current_streak or 0 }}
+                                    {% else %}
+                                        {{ stats['current_streak'] or 0 }}
+                                    {% endif %}
+                                </div>
+                                <div class="stat-label">Current Streak</div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <div class="card stats-card p-3 mb-3">
+                                <div class="stat-value" id="last-answer-time" data-timestamp="{% if stats.active_module and stats.module_stats[stats.active_module] %}{{ stats.module_stats[stats.active_module].last_answered_time or '' }}{% else %}{{ stats['last_answer_time'] or '' }}{% endif %}"></div>
+                                <div class="stat-label">Last Answer</div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <div class="card stats-card p-3 mb-3">
+                                <div class="stat-value">
+                                    {% if stats.active_module and stats.module_stats[stats.active_module] %}
+                                        {{ stats.module_stats[stats.active_module].approved_cards or 0 }}
+                                    {% else %}
+                                        {{ stats['approved_cards'] or 0 }}
+                                    {% endif %}
+                                </div>
+                                <div class="stat-label">Approved Cards</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Per-module stats table -->
+            {% if stats.module_stats %}
+            <div class="row justify-content-center mt-4">
+                <div class="col-12 col-md-8">
+                    <h3 class="text-center mb-3">Per-Module Stats</h3>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>
+                                        <button class="sort-btn" data-sort="module">Module</button>
+                                    </th>
+                                    <th>
+                                        <button class="sort-btn" data-sort="answered">Answered</button>
+                                    </th>
+                                    <th>
+                                        <button class="sort-btn" data-sort="correct">Correct</button>
+                                    </th>
+                                    <th>
+                                        <button class="sort-btn" data-sort="accuracy">Accuracy</button>
+                                    </th>
+                                    <th>
+                                        <button class="sort-btn" data-sort="last_answered">Last Answered</button>
+                                    </th>
+                                    <th>
+                                        <button class="sort-btn" data-sort="streak">Streak</button>
+                                    </th>
+                                    <th>
+                                        <button class="sort-btn" data-sort="approved_cards">Approved Cards</button>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for module, modstats in stats.module_stats.items() %}
+                                <tr data-module="{{ module }}" 
+                                    data-answered="{{ modstats.number_answered or 0 }}"
+                                    data-correct="{{ modstats.number_correct or 0 }}"
+                                    data-accuracy="{% if modstats.number_answered %}{{ (modstats.number_correct or 0) / (modstats.number_answered or 1) * 100 }}{% else %}0{% endif %}"
+                                    data-streak="{{ modstats.current_streak or 0 }}"
+                                    data-approved="{{ modstats.approved_cards or 0 }}">
+                                    <td>{{ module }}</td>
+                                    <td>{{ modstats.number_answered or 0 }}</td>
+                                    <td>{{ modstats.number_correct or 0 }}</td>
+                                    <td>
+                                        {% if modstats.number_answered %}
+                                            {{ "%.1f"|format((modstats.number_correct or 0) / (modstats.number_answered or 1) * 100) }}%
+                                        {% else %}
+                                            0%
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="last-answered" data-timestamp="{{ modstats.last_answered_time or '' }}"></span>
+                                    </td>
+                                    <td>
+                                        {{ modstats.current_streak or 0 }}
+                                    </td>
+                                    <td>{{ modstats.approved_cards or 0 }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <footer class="text-center">
+            <p>made with ❤️ by <a href="https://github.com/joshua-wilcox">Josh Wilcox</a></p>
+        </footer>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='javascript/module-selector.js') }}"></script>
+    <script>
+        // Parse timestamp to handle both Unix timestamps and ISO strings
+        function parseTimestamp(ts) {
+            if (!ts) return null;
+            
+            // If it's already a number (Unix timestamp), return it
+            if (!isNaN(ts)) {
+                return Number(ts);
+            }
+            
+            // If it's an ISO string, parse it and convert to Unix timestamp
+            try {
+                const date = new Date(ts);
+                if (!isNaN(date.getTime())) {
+                    return Math.floor(date.getTime() / 1000); // Convert to seconds
+                }
+            } catch (e) {
+                // Invalid date string
+            }
+            
+            return null;
+        }
+
+        // Relative time formatter using Intl.RelativeTimeFormat if available, fallback otherwise
+        function formatRelativeTime(timestamp) {
+            if (!timestamp) return "Never";
+            // Use UTC time for consistency with leaderboard
+            const now = Math.floor(Date.now() / 1000);
+            let diff = Math.floor(now - timestamp);
+
+            if (diff < 60) return "Just now";
+            const units = [
+                { name: "year",   secs: 31536000 },
+                { name: "month",  secs: 2592000 },
+                { name: "day",    secs: 86400 },
+                { name: "hour",   secs: 3600 },
+                { name: "minute", secs: 60 }
+            ];
+            for (const unit of units) {
+                if (diff >= unit.secs) {
+                    const value = Math.floor(diff / unit.secs);
+                    if (window.Intl && Intl.RelativeTimeFormat) {
+                        const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
+                        return rtf.format(-value, unit.name);
+                    } else {
+                        return value + ' ' + unit.name + (value !== 1 ? 's' : '') + ' ago';
+                    }
+                }
+            }
+            return "Just now";
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const el = document.getElementById("last-answer-time");
+            const ts = el.getAttribute("data-timestamp");
+            const parsedTs = parseTimestamp(ts);
+            if (parsedTs) {
+                el.textContent = formatRelativeTime(parsedTs);
+            } else {
+                el.textContent = "Never";
+            }
+            document.querySelectorAll('.last-answered').forEach(function(el) {
+                const ts = el.getAttribute('data-timestamp');
+                const parsedTs = parseTimestamp(ts);
+                // Only show a time if the timestamp is a valid, non-empty, non-null, non-0 value
+                if (parsedTs && parsedTs > 0) {
+                    el.textContent = formatRelativeTime(parsedTs);
+                } else {
+                    el.textContent = "Never";
+                }
+            });
+            // Initialize module selector component
+            const moduleSelector = new ModuleSelector({
+                containerId: 'stats-module-selector',
+                selectedModule: '{{ stats.active_module or "" }}',
+                allowDeselect: true,
+                onModuleChange: function(selectedModule) {
+                    const url = new URL(window.location.href);
+                    
+                    // Clear module parameter and set new one if selected
+                    url.searchParams.delete('module');
+                    if (selectedModule) {
+                        url.searchParams.set('module', selectedModule);
+                    }
+                    
+                    window.location.href = url.toString();
+                }
+            });
+
+            // Table sorting functionality
+            let currentSort = { column: null, direction: 'asc' };
+            
+            function sortTable(column) {
+                const table = document.querySelector('.table tbody');
+                const rows = Array.from(table.querySelectorAll('tr'));
+                
+                // Toggle direction if same column
+                if (currentSort.column === column) {
+                    currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+                } else {
+                    currentSort.column = column;
+                    currentSort.direction = 'asc';
+                }
+                
+                // Sort rows
+                rows.sort((a, b) => {
+                    let aVal, bVal;
+                    
+                    switch (column) {
+                        case 'module':
+                            aVal = a.cells[0].textContent.toLowerCase();
+                            bVal = b.cells[0].textContent.toLowerCase();
+                            break;
+                        case 'answered':
+                            aVal = parseInt(a.cells[1].textContent) || 0;
+                            bVal = parseInt(b.cells[1].textContent) || 0;
+                            break;
+                        case 'correct':
+                            aVal = parseInt(a.cells[2].textContent) || 0;
+                            bVal = parseInt(b.cells[2].textContent) || 0;
+                            break;
+                        case 'accuracy':
+                            aVal = parseFloat(a.cells[3].textContent) || 0;
+                            bVal = parseFloat(b.cells[3].textContent) || 0;
+                            break;
+                        case 'last_answered':
+                            const aTime = a.cells[4].querySelector('.last-answered').getAttribute('data-timestamp');
+                            const bTime = b.cells[4].querySelector('.last-answered').getAttribute('data-timestamp');
+                            aVal = parseTimestamp(aTime) || 0;
+                            bVal = parseTimestamp(bTime) || 0;
+                            break;
+                        case 'streak':
+                            aVal = parseInt(a.cells[5].textContent) || 0;
+                            bVal = parseInt(b.cells[5].textContent) || 0;
+                            break;
+                        case 'approved_cards':
+                            aVal = parseInt(a.cells[6].textContent) || 0;
+                            bVal = parseInt(b.cells[6].textContent) || 0;
+                            break;
+                    }
+                    
+                    if (currentSort.direction === 'asc') {
+                        return aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
+                    } else {
+                        return aVal > bVal ? -1 : aVal < bVal ? 1 : 0;
+                    }
+                });
+                
+                // Re-append sorted rows
+                rows.forEach(row => table.appendChild(row));
+                
+                // Update button states
+                document.querySelectorAll('.sort-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                    btn.innerHTML = btn.innerHTML.replace(/ [▲▼]/g, '');
+                });
+                
+                const activeBtn = document.querySelector(`[data-sort="${column}"]`);
+                activeBtn.classList.add('active');
+                activeBtn.innerHTML += ` ${currentSort.direction === 'asc' ? '▲' : '▼'}`;
+            }
+            
+            // Add click handlers to sort buttons
+            document.querySelectorAll('.sort-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    sortTable(btn.getAttribute('data-sort'));
+                });
+            });
+        });
+    </script>
+</body>
+</html>

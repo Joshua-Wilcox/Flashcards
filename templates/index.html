@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>flashcards.josh.software</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"> <!-- Added for mobile scaling -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+        
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style-index.css') }}">
+
+    <script>
+        // Check localStorage immediately to prevent flashing of the widget
+        document.addEventListener('DOMContentLoaded', function() {
+            const neverShow = localStorage.getItem('never-show-payment-widget') === 'true';
+            if (neverShow) {
+                const widget = document.getElementById('stripe-widget');
+                if (widget) widget.classList.add('preload-hidden');
+            }
+        });
+
+        // Pass Jinja variables to JS
+        window.FLASHCARDS_CONFIG = {
+            stripe_publishable_key: "{{ stripe_publishable_key|e }}",
+            session_user_id: {{ 'true' if session.user_id else 'false' }}
+        };
+    </script>
+</head>
+
+<body>
+    <div class="content-wrapper">
+        <div class="container mt-4">
+            <!-- Add navigation bar -->
+            <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+                <div class="container-fluid">
+                    <span class="navbar-brand">flashcards.josh.software</span>
+                    <!-- Hamburger toggler for mobile -->
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar"
+                        aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <!-- Collapsible nav links -->
+                    <div class="collapse navbar-collapse" id="mainNavbar">
+                        <div class="navbar-nav ms-auto">
+                            <a class="nav-link" href="{{ url_for('user.leaderboard') }}">Leaderboard</a>
+                            {% if not session.user_id %}
+                            <a class="nav-link" href="{{ url_for('auth.login') }}">Login with Discord</a>
+                            {% else %}
+                            <a class="nav-link" href="{{ url_for('user.stats') }}">My Stats</a>
+                            <a class="nav-link submit-flashcard-btn" id="submit-flashcard-navbar-btn"
+                                href="{{ url_for('main.submit_flashcard') }}">Submit Flashcards!</a>
+                            {% if session.user_id and is_user_admin(session.user_id) %}
+                            <a class="nav-link" href="{{ url_for('admin.admin_review_flashcards') }}">Admin Dashboard</a>
+                            {% endif %}
+                            <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </nav>
+            <div class="row">
+                <div class="col-12 col-md-4 select-container">
+                    {% set container_id = 'module-selector' %}
+                    {% set selected_module = '' %}
+                    {% set disabled = not session.user_id %}
+                    {% include 'components/module_selector.html' %}
+                </div>
+                <div class="col-12 col-md-4 select-container">
+                    <label for="topic-dropdown">Topics:</label>
+                    <div class="dropdown w-100">
+                        <button class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-multiselect w-100"
+                            type="button" id="topic-dropdown" data-bs-toggle="dropdown" data-bs-auto-close="false"
+                            aria-expanded="false" disabled>
+                            Select Topic
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-multiselect w-100" aria-labelledby="topic-dropdown"
+                            id="topic-dropdown-menu">
+                            <!-- Populated by JS -->
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-12 col-md-4 select-container">
+                    <label for="subtopic-dropdown">Subtopics:</label>
+                    <div class="dropdown w-100">
+                        <button class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-multiselect w-100"
+                            type="button" id="subtopic-dropdown" data-bs-toggle="dropdown" data-bs-auto-close="false"
+                            aria-expanded="false" disabled>
+                            Select Subtopic
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-multiselect w-100" aria-labelledby="subtopic-dropdown"
+                            id="subtopic-dropdown-menu">
+                            <!-- Populated by JS -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Welcome section, shown only if no module is selected -->
+            <div id="welcome-section" class="welcome-section">
+                <div class="welcome-title">Flashcards.josh.software</div>
+                <p class="welcome-desc">
+                    {% if session.user_id %}
+                    Select a module to begin practicing.<br>
+                    Use the filters above to narrow down your questions.
+                    {% else %}
+                    You must be logged in to use the flashcards.<br>
+                    Click "Login with Discord" to begin.
+                    {% endif %}
+                </p>
+            </div>
+
+            <!-- Question and answers section, hidden until a module is selected -->
+            <div id="qa-section" class="answers-section" style="display: none;">
+                <div id="question-container" class="p-4 bg-light rounded">
+                    <h4 id="question-text"></h4>
+                    <div id="question-info" class="small text-muted mt-2">
+                        <span id="module-info"></span> |
+                        <span id="topic-info"></span> |
+                        <span id="subtopic-info"></span>
+                    </div>
+                    <!-- Remove tags container -->
+                    <!-- <div id="tags-container" class="mt-2"></div> -->
+                    <!-- Button group: Relevant PDFs, Next Question, Report Question, Answer Obvious, Delay Answers -->
+                    <div class="qa-controls-row">
+                        <div class="dropdown" id="pdfs-dropdown-container" style="display:none;">
+                            <button class="btn" type="button" id="pdfsDropdown"
+                                data-bs-toggle="dropdown" aria-expanded="false" data-question-id="">
+                                Relevant Lecture Notes
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="pdfsDropdown" id="pdfs-dropdown-list"></ul>
+                        </div>
+                        <button id="new-question-btn" class="btn btn-primary">Next Question</button>
+                        <button id="report-question-btn" class="btn">Report Question</button>
+                        <button id="answer-obvious-btn" class="btn">Obvious Answer?</button>
+                        <div class="delay-answers-group" title="Delay before showing answers (seconds)">
+                            <span class="delay-answers-label">Pondering Time</span>
+                            <input type="number" min="0" max="60" step="1" id="delay-answers-input"
+                                class="form-control form-control-sm" value="0" aria-label="Delay answers in seconds"
+                                inputmode="numeric" pattern="[0-9]*">
+                        </div>
+                        <!-- Manual continue toggle button -->
+                        <button type="button" id="manual-continue-toggle" class="manual-continue-toggle" title="Toggle manual continue">
+                            Manual continue
+                        </button>
+                    </div>
+                </div>
+
+                <div id="answers-container" class="row g-2" style="height: 100%;">
+                    {% for i in range(NUMBER_OF_DISTRACTORS + 1) %}
+                    <div class="col-12 {% if not loop.last %}mb-2{% endif %}">
+                        <button class="btn btn-primary w-100 answer-btn" disabled></button>
+                    </div>
+                    {% endfor %}
+                    <!-- Manual continue button, hidden by default -->
+                    <div class="col-12" id="manual-continue-btn-row" style="display:none;">
+                        <button class="btn btn-success w-100" id="manual-continue-btn">Continue to next question</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="text-center">
+            <p>made with ❤️ by <a href="https://github.com/joshua-wilcox">Josh Wilcox</a></p>
+            <p>New update to <a href="{{ url_for('main.submit_flashcard') }}">flashcard submission!</a> Take a look!</p>
+        </footer>
+    </div>
+
+    <!-- Stripe support widget - only show if eligible -->
+    {% if show_payment_widget %}
+    <div id="stripe-widget" class="preload-hidden">
+        <div id="stripe-header">
+            <span id="stripe-header-text">Support the site</span>
+            <div id="stripe-header-actions">
+                <button id="stripe-toggle-btn" aria-label="Toggle support widget">▼</button>
+                <button id="stripe-close-btn" aria-label="Close support widget">×</button>
+            </div>
+        </div>
+        <div id="stripe-container">
+            <div class="amount-options">
+                <div class="amount-option selected" data-amount="1">£1</div>
+                <div class="amount-option" data-amount="3">£3</div>
+                <div class="amount-option" data-amount="5">£5</div>
+            </div>
+            <div class="custom-amount">
+                <span>£</span>
+                <input type="number" id="custom-amount" placeholder="Custom amount" min="1" step="1">
+            </div>
+            <button id="checkout-button" class="support-button">Support Now</button>
+            <div class="support-message">
+                Any amount would be greatly appreciated for the upkeep of the site ❤️ <br> If you can't donate, please consider <a href="{{ url_for('main.submit_flashcard') }}">submitting some flashcards</a>
+            </div>
+            <div class="text-center mt-3">
+                <button id="never-show-widget-btn" class="btn btn-link btn-sm text-muted" style="font-size: 0.75rem; text-decoration: none; padding: 0;">Do not show again</button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Donation modal -->
+    <div class="modal fade" id="donateModal" tabindex="-1" aria-labelledby="donateModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="donateModalLabel">Support Flashcards</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p>Thank you for supporting this flashcard website! Your contribution helps keep it running and ad-free.</p>
+            
+            <div class="payment-options mb-4">
+              <h6>Select an amount:</h6>
+              <div class="btn-group w-100" role="group" aria-label="Payment amount options">
+                {% for option in payment_options %}
+                  <input type="radio" class="btn-check" name="paymentOption" id="option{{ option }}" 
+                         value="{{ option }}" {% if option == default_payment %}checked{% endif %}>
+                  <label class="btn btn-outline-primary" for="option{{ option }}">£{{ option }}</label>
+                {% endfor %}
+              </div>
+            </div>
+            
+            <div class="d-grid">
+              <button id="checkout-button" class="btn btn-primary">Support Now</button>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://js.stripe.com/v3/"></script>
+    <script src="{{ url_for('static', filename='javascript/module-selector.js') }}"></script>
+    <script src="{{ url_for('static', filename='javascript/js-index.js') }}"></script>
+</body>
+
+</html>

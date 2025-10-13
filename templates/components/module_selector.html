@@ -1,0 +1,36 @@
+<!-- Module selector component -->
+<!-- This component provides a dropdown module selector that can be reused across pages -->
+<!-- Parameters:
+     - modules: list of module objects/names
+     - selected_module: currently selected module (optional)
+     - container_id: unique ID for this instance (default: 'module-selector')
+     - show_label: whether to show the "Module:" label (default: true)
+     - disabled: whether the selector should be disabled (default: false)
+-->
+
+{% set container_id = container_id or 'module-selector' %}
+{% set show_label = show_label if show_label is defined else true %}
+{% set disabled = disabled if disabled is defined else false %}
+{% set modules = modules if modules is defined else [] %}
+{% set module_groups = module_groups if module_groups is defined else [] %}
+{% set selected_module = selected_module if selected_module is defined else (active_module if active_module is defined else '') %}
+
+<div class="select-container" id="{{ container_id }}-container">
+    {% if show_label %}
+    <label for="{{ container_id }}-dropdown">Module:</label>
+    {% endif %}
+    <div class="dropdown w-100 module-selector-root"
+        data-modules='{{ modules | tojson | safe }}'
+        data-module-groups='{{ module_groups | tojson | safe }}'
+        data-selected-module="{{ selected_module|e }}">
+        <button class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-module w-100"
+            type="button" id="{{ container_id }}-dropdown" data-bs-toggle="dropdown" data-bs-auto-close="false" aria-expanded="false" 
+            {% if disabled %}disabled{% endif %}>
+            {% if selected_module %}{{ selected_module }}{% else %}Select Module{% endif %}
+        </button>
+        <ul class="dropdown-menu dropdown-menu-multiselect w-100" aria-labelledby="{{ container_id }}-dropdown"
+            id="{{ container_id }}-dropdown-menu" data-bs-auto-close="false">
+            <li class="px-3 py-2 text-muted module-selector-placeholder">Loading modules...</li>
+        </ul>
+    </div>
+</div>

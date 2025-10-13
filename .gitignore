@@ -1,0 +1,8 @@
+*/.DS_Store
+/venv
+.env
+whitelist.json
+*.db*
+*/__pycache__/*
+*.pyc
+/optimization_prompts
