@@ -26,6 +26,9 @@ DECLARE
     topic_id integer;
     subtopic_id integer;
     tag_id integer;
+    err_detail text;
+    err_hint text;
+    err_context text;
 BEGIN
     SELECT id INTO existing_pdf_id
     FROM pdfs 
@@ -81,7 +84,7 @@ BEGIN
         LOOP
             INSERT INTO pdf_tags (pdf_id, tag_id, count) 
             VALUES (new_pdf_id, tag_id, 1)
-            ON CONFLICT (pdf_id, tag_id) DO UPDATE SET count = pdf_tags.count + EXCLUDED.count;
+            ON CONFLICT ON CONSTRAINT pdf_tags_pkey DO UPDATE SET count = pdf_tags.count + EXCLUDED.count;
         END LOOP;
     END IF;
     
@@ -94,10 +97,18 @@ BEGIN
         END AS message;
         
 EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS
+        err_detail = PG_EXCEPTION_DETAIL,
+        err_hint = PG_EXCEPTION_HINT,
+        err_context = PG_EXCEPTION_CONTEXT;
+
     RETURN QUERY SELECT 
         false AS success, 
         NULL::integer AS pdf_id, 
-        SQLERRM AS message;
+        SQLERRM
+            || COALESCE(' | detail: ' || err_detail, '')
+            || COALESCE(' | hint: ' || err_hint, '')
+            || COALESCE(' | context: ' || err_context, '') AS message;
 END;
 $$ LANGUAGE plpgsql;
 
