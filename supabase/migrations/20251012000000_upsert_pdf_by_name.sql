@@ -30,14 +30,14 @@ BEGIN
     ON CONFLICT (name) DO NOTHING;
     SELECT id INTO v_module_id FROM modules WHERE name = p_module_name;
 
-    -- 2. Get or create Topic IDs
+    -- 2. Get or create Topic IDs (topics are global, not module-specific)
     IF p_topic_names IS NOT NULL AND array_length(p_topic_names, 1) > 0 THEN
         FOREACH topic_name IN ARRAY p_topic_names
         LOOP
-            INSERT INTO topics (name, module_id) VALUES (topic_name, v_module_id)
-            ON CONFLICT (name, module_id) DO NOTHING;
+            INSERT INTO topics (name) VALUES (topic_name)
+            ON CONFLICT (name) DO NOTHING;
             
-            v_topic_ids := array_append(v_topic_ids, (SELECT id FROM topics WHERE name = topic_name AND module_id = v_module_id));
+            v_topic_ids := array_append(v_topic_ids, (SELECT id FROM topics WHERE name = topic_name));
         END LOOP;
     END IF;
 

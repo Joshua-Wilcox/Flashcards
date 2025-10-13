@@ -120,7 +120,7 @@ class PDFStorageService:
                 return {"success": False, "error": f"Upload failed: {result.error}"}
             
             # Use the new RPC function to create database record with multiple topics/subtopics
-            rpc_result = self.client.rpc('upsert_pdf_with_metadata', {
+            rpc_result = self.client.rpc('upsert_pdf_with_metadata_by_ids', {
                 'storage_path_param': storage_path,
                 'original_filename_param': secure_name,
                 'module_id_param': module_id,
@@ -496,7 +496,7 @@ class PDFStorageService:
                     return {"success": False, "error": f"Failed to update PDF file: {storage_result.error}"}
                 
                 # Use ID-based RPC function to update existing PDF with new metadata
-                rpc_result = self.client.rpc('upsert_pdf_with_metadata', {
+                rpc_result = self.client.rpc('upsert_pdf_with_metadata_by_ids', {
                     'storage_path_param': existing_storage_path,
                     'original_filename_param': secure_name,
                     'module_id_param': resolved["module_id"],
@@ -558,7 +558,7 @@ class PDFStorageService:
                 return {"success": False, "error": f"Upload failed: {result.error}"}
             
             # Use RPC function to create database record with names (not IDs)
-            rpc_result = self.client.rpc('upsert_pdf_with_metadata', {
+            rpc_result = self.client.rpc('upsert_pdf_with_metadata_by_names', {
                 'p_storage_path': storage_path,
                 'p_original_filename': secure_name,
                 'p_file_size': file_size,
@@ -571,15 +571,16 @@ class PDFStorageService:
                 'p_tag_names': tag_names
             }).execute()
             
-            if not rpc_result.data or rpc_result.data[0] is None:
+            if not rpc_result.data or not rpc_result.data[0].get('success'):
                 # If database insert failed, try to clean up uploaded file
                 try:
                     self.client.storage.from_(self.BUCKET_NAME).remove([storage_path])
                 except:
                     pass
-                return {"success": False, "error": "Failed to create database record"}
+                error_msg = rpc_result.data[0].get('message') if rpc_result.data else "Failed to create database record"
+                return {"success": False, "error": error_msg}
             
-            pdf_id = rpc_result.data[0]
+            pdf_id = rpc_result.data[0]['pdf_id']
             
             return {
                 "success": True,
