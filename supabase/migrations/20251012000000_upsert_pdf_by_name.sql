@@ -80,8 +80,8 @@ BEGIN
     END IF;
 
     IF v_tag_ids IS NOT NULL THEN
-        INSERT INTO pdf_tags (pdf_id, tag_id)
-        SELECT v_pdf_id, unnest(v_tag_ids);
+        INSERT INTO pdf_tags (pdf_id, tag_id, count)
+        SELECT v_pdf_id, unnest(v_tag_ids), 1;
     END IF;
 
     RETURN v_pdf_id;

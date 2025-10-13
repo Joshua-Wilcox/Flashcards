@@ -269,7 +269,7 @@ BEGIN
         LOOP
             INSERT INTO pdf_tags (pdf_id, tag_id, count) 
             VALUES (new_pdf_id, tag_id, 1)
-            ON CONFLICT (pdf_id, tag_id) DO UPDATE SET count = pdf_tags.count + 1;
+            ON CONFLICT (pdf_id, tag_id) DO UPDATE SET count = pdf_tags.count + EXCLUDED.count;
         END LOOP;
     END IF;
     

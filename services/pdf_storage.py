@@ -495,7 +495,7 @@ class PDFStorageService:
                 if hasattr(storage_result, 'error') and storage_result.error:
                     return {"success": False, "error": f"Failed to update PDF file: {storage_result.error}"}
                 
-                # Use RPC function to update existing PDF with new metadata
+                # Use ID-based RPC function to update existing PDF with new metadata
                 rpc_result = self.client.rpc('upsert_pdf_with_metadata', {
                     'storage_path_param': existing_storage_path,
                     'original_filename_param': secure_name,
@@ -557,30 +557,29 @@ class PDFStorageService:
             if hasattr(result, 'error') and result.error:
                 return {"success": False, "error": f"Upload failed: {result.error}"}
             
-            # Use RPC function to create database record with multiple topics/subtopics
+            # Use RPC function to create database record with names (not IDs)
             rpc_result = self.client.rpc('upsert_pdf_with_metadata', {
-                'storage_path_param': storage_path,
-                'original_filename_param': secure_name,
-                'module_id_param': resolved["module_id"],
-                'topic_ids_param': resolved["topic_ids"],
-                'subtopic_ids_param': resolved["subtopic_ids"],
-                'tag_ids_param': resolved["tag_ids"],
-                'uploaded_by_param': uploaded_by,
-                'metadata_param': metadata or {},
-                'file_size_param': file_size,
-                'mime_type_param': mime_type
+                'p_storage_path': storage_path,
+                'p_original_filename': secure_name,
+                'p_file_size': file_size,
+                'p_mime_type': mime_type,
+                'p_uploaded_by': uploaded_by,
+                'p_metadata': metadata or {},
+                'p_module_name': module_name,
+                'p_topic_names': topic_names,
+                'p_subtopic_names': subtopic_names,
+                'p_tag_names': tag_names
             }).execute()
             
-            if not rpc_result.data or not rpc_result.data[0]['success']:
+            if not rpc_result.data or rpc_result.data[0] is None:
                 # If database insert failed, try to clean up uploaded file
                 try:
                     self.client.storage.from_(self.BUCKET_NAME).remove([storage_path])
                 except:
                     pass
-                error_msg = rpc_result.data[0]['message'] if rpc_result.data else "Failed to create database record"
-                return {"success": False, "error": error_msg}
+                return {"success": False, "error": "Failed to create database record"}
             
-            pdf_id = rpc_result.data[0]['pdf_id']
+            pdf_id = rpc_result.data[0]
             
             return {
                 "success": True,
