@@ -536,7 +536,8 @@ footer {
             max-width: 90vw;
             background-color: #ffffff;
             border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 12px 40px rgba(13, 110, 253, 0.25), 0 6px 20px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(13, 110, 253, 0.15);
             z-index: 1000;
             transition: all 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
             overflow: hidden;
@@ -547,7 +548,7 @@ footer {
             justify-content: space-between;
             align-items: center;
             padding: 12px 16px;
-            background-color: #333; /* GitHub dark */
+            background-color: #0d6efd;
             color: white;
             cursor: pointer;
             font-weight: 600;
@@ -567,25 +568,26 @@ footer {
         }
 
         #github-toggle-btn, #github-close-btn {
-            background: none;
+            background: rgba(255, 255, 255, 0.2);
             border: none;
             color: white;
             cursor: pointer;
             padding: 0;
             margin-left: 12px;
-            font-size: 20px;
+            font-size: 18px;
             line-height: 1;
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 24px;
-            height: 24px;
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
             transition: all 0.25s cubic-bezier(0.4, 0.0, 0.2, 1);
         }
 
         #github-toggle-btn:hover, #github-close-btn:hover {
-            opacity: 0.8;
-            transform: scale(1.1);
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
         }
 
         /* Rotate toggle arrow when minimized */
@@ -604,6 +606,7 @@ footer {
             transition: all 0.35s cubic-bezier(0.4, 0.0, 0.2, 1);
             overflow: hidden;
             max-height: 400px;
+            background-color: #ffffff;
         }
 
         #github-widget.minimized #github-container {
@@ -657,21 +660,27 @@ footer {
         }
 
         .sponsor-btn {
-            background: #ea4aaa;
+            background-color: #0d6efd;
             color: white;
+            box-shadow: 0 2px 8px rgba(13, 110, 253, 0.3);
         }
 
         .sponsor-btn:hover {
-            background: #d43f97;
+            background-color: #0a58ca;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(13, 110, 253, 0.4);
         }
 
         .star-btn {
-            background: #333;
+            background-color: #0d6efd;
             color: white;
+            box-shadow: 0 2px 8px rgba(13, 110, 253, 0.3);
         }
 
         .star-btn:hover {
-            background: #444;
+            background-color: #0a58ca;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(13, 110, 253, 0.4);
         }
 
         .support-button:disabled {
@@ -686,8 +695,9 @@ footer {
         .support-message {
             margin-top: 15px;
             font-size: 14px;
-            color: #4a5568;
+            color: #64748b;
             text-align: center;
+            line-height: 1.4;
         }
 
         /* Make sure the widget is properly sized on different devices */
