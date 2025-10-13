@@ -4,8 +4,8 @@ from config import Config
 payments_bp = Blueprint('payments', __name__)
 
 # GitHub Sponsors configuration
-GITHUB_SPONSORS_URL = "https://github.com/sponsors/Joshua-Wilcox?o=esb"
-GITHUB_REPO_URL = "https://github.com/Joshua-Wilcox/Flashcards"
+GITHUB_SPONSORS_URL = Config.GITHUB_SPONSORS_URL
+GITHUB_REPO_URL = Config.GITHUB_REPO_URL
 
 @payments_bp.route('/github-sponsor', methods=['POST'])
 def redirect_to_github_sponsor():
