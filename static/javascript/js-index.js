@@ -1,11 +1,11 @@
 // Apply hiding logic before any other code runs
 (function () {
     if (localStorage.getItem('never-show-payment-widget') === 'true') {
-        const widget = document.getElementById('stripe-widget');
+        const widget = document.getElementById('github-widget');
         if (widget) widget.classList.add('preload-hidden');
     } else {
         // Only remove preload-hidden if user hasn't opted out
-        const widget = document.getElementById('stripe-widget');
+        const widget = document.getElementById('github-widget');
         if (widget) widget.classList.remove('preload-hidden');
     }
 })();
@@ -685,163 +685,106 @@ $(document).on('click', function (e) {
 // Remove any existing click handlers that might interfere
 $('.dropdown-menu-multiselect').off('mousedown');
 
-// Stripe widget functionality
+// GitHub widget functionality
 $(document).ready(function () {
-    const $stripeWidget = $('#stripe-widget');
+    const $githubWidget = $('#github-widget');
 
     // Check if user has chosen to never show the widget again
     if (localStorage.getItem('never-show-payment-widget') === 'true') {
-        $stripeWidget.remove();
+        $githubWidget.remove();
         return; // Exit early, don't initialize the widget
     }
 
     // Only now fully remove the preload-hidden class to prevent flashing
-    $stripeWidget.removeClass('preload-hidden');
+    $githubWidget.removeClass('preload-hidden');
 
     // Only initialize if the widget exists on the page
-    if ($stripeWidget.length) {
-        const $stripeToggleBtn = $('#stripe-toggle-btn');
-        const $stripeCloseBtn = $('#stripe-close-btn');
-        const $stripeHeader = $('#stripe-header');
+    if ($githubWidget.length) {
+        const $githubToggleBtn = $('#github-toggle-btn');
+        const $githubCloseBtn = $('#github-close-btn');
+        const $githubHeader = $('#github-header');
         const $supportLink = $('#support-link');
         const $neverShowBtn = $('#never-show-widget-btn');
-        let selectedAmount = 1; // Default amount
+        const $sponsorBtn = $('#sponsor-button');
+        const $starBtn = $('#star-button');
 
         // Handle "Do not show again" button click
         $neverShowBtn.on('click', function () {
             localStorage.setItem('never-show-payment-widget', 'true');
-            $stripeWidget.fadeOut(300, function () {
-                $stripeWidget.remove();
+            $githubWidget.fadeOut(300, function () {
+                $githubWidget.remove();
             });
         });
 
-        // Stripe initialization
-        const stripe = Stripe(window.FLASHCARDS_CONFIG.stripe_publishable_key);
-
         // Check if widget was dismissed in this session
-        if (sessionStorage.getItem('stripe-widget-dismissed') === 'true') {
-            $stripeWidget.hide();
+        if (sessionStorage.getItem('github-widget-dismissed') === 'true') {
+            $githubWidget.hide();
         }
 
         // Toggle widget expanded/minimized state
-        function toggleStripeWidget() {
-            $stripeWidget.toggleClass('minimized');
+        function toggleGithubWidget() {
+            $githubWidget.toggleClass('minimized');
             // Note: Arrow rotation is handled by CSS, no need to change the symbol
         }
 
         // Close widget and remember for this session only
-        $stripeCloseBtn.click(function (e) {
+        $githubCloseBtn.click(function (e) {
             e.stopPropagation();
-            $stripeWidget.hide();
-            sessionStorage.setItem('stripe-widget-dismissed', 'true');
+            $githubWidget.hide();
+            sessionStorage.setItem('github-widget-dismissed', 'true');
         });
 
         // Toggle on header click
-        $stripeHeader.click(function () {
-            toggleStripeWidget();
+        $githubHeader.click(function () {
+            toggleGithubWidget();
         });
 
         // Prevent the toggle from triggering the header click
-        $stripeToggleBtn.click(function (e) {
+        $githubToggleBtn.click(function (e) {
             e.stopPropagation();
-            toggleStripeWidget();
+            toggleGithubWidget();
         });
 
         // Re-show widget when footer link is clicked
         $supportLink.click(function (e) {
             e.preventDefault();
-            $stripeWidget.show();
+            $githubWidget.show();
 
             // If it was minimized, expand it
-            if ($stripeWidget.hasClass('minimized')) {
-                toggleStripeWidget();
+            if ($githubWidget.hasClass('minimized')) {
+                toggleGithubWidget();
             }
 
             // Clear the dismissed state
-            sessionStorage.removeItem('stripe-widget-dismissed');
+            sessionStorage.removeItem('github-widget-dismissed');
         });
 
-        // Amount option selection
-        $('.amount-option').click(function () {
-            $('.amount-option').removeClass('selected');
-            $(this).addClass('selected');
-            selectedAmount = $(this).data('amount');
-            $('#custom-amount').val(''); // Clear custom amount
-        });
-
-        // Custom amount input handling - FIX: Properly track custom amount
-        $('#custom-amount').on('input', function () {
-            const customAmount = parseInt($(this).val());
-            if (customAmount && customAmount > 0) {
-                // When valid custom amount is entered, deselect preset amounts
-                $('.amount-option').removeClass('selected');
-                selectedAmount = customAmount;
-            } else if ($('.amount-option.selected').length) {
-                // If invalid and a preset is selected, use that
-                selectedAmount = $('.amount-option.selected').data('amount');
-            } else {
-                // Default to £1 if nothing is selected and custom is invalid
-                $('.amount-option[data-amount="1"]').addClass('selected');
-                selectedAmount = 1;
-            }
-        });
-
-        // Checkout button - FIX: Always check for custom amount value first
-        $('#checkout-button').click(function () {
+        // Sponsor button click handler
+        $sponsorBtn.click(function () {
             const button = $(this);
-            button.prop('disabled', true).text('Processing...');
+            button.prop('disabled', true).text('Opening GitHub...');
 
-            let finalAmount = selectedAmount; // Start with currently selected amount
+            // Open GitHub Sponsors page in new tab
+            window.open(window.FLASHCARDS_CONFIG.github_sponsors_url, '_blank');
+            
+            // Re-enable button after short delay
+            setTimeout(function() {
+                button.prop('disabled', false).html('<span class="button-icon">❤️</span> Sponsor on GitHub');
+            }, 2000);
+        });
 
-            // Check if there's a valid custom amount entered (this takes priority)
-            const customAmountInput = $('#custom-amount').val().trim();
-            if (customAmountInput) {
-                const customAmount = parseInt(customAmountInput);
-                if (customAmount && customAmount > 0) {
-                    finalAmount = customAmount;
-                    console.log('Using custom amount for checkout:', finalAmount);
-                }
-            }
+        // Star button click handler
+        $starBtn.click(function () {
+            const button = $(this);
+            button.prop('disabled', true).text('Opening GitHub...');
 
-            // Ensure we have a valid amount (minimum £1)
-            finalAmount = Math.max(1, finalAmount);
-
-            // Create a checkout session on your server with the final amount
-            $.ajax({
-                url: '/create-checkout-session',
-                method: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify({ amount: finalAmount }),
-                success: function (response) {
-                    // Redirect to Stripe Checkout
-                    stripe.redirectToCheckout({ sessionId: response.id })
-                        .then(function (result) {
-                            if (result.error) {
-                                console.error('Stripe checkout error:', result.error);
-                                alert(result.error.message);
-                                button.prop('disabled', false).text('Support Now');
-                            }
-                        });
-                },
-                error: function (xhr) {
-                    console.error('Error creating checkout session');
-
-                    // Try to parse detailed error message
-                    let errorMessage = 'Sorry, there was a problem processing your request. Please try again later.';
-
-                    try {
-                        if (xhr.responseJSON && xhr.responseJSON.error) {
-                            errorMessage = xhr.responseJSON.error;
-                            console.error('Detailed error:', errorMessage);
-                        }
-                    } catch (e) {
-                        console.error('Could not parse error response:', e);
-                    }
-
-                    alert(errorMessage);
-                    button.prop('disabled', false).text('Support Now');
-                }
-            });
+            // Open GitHub repository page in new tab
+            window.open(window.FLASHCARDS_CONFIG.github_repo_url, '_blank');
+            
+            // Re-enable button after short delay
+            setTimeout(function() {
+                button.prop('disabled', false).html('<span class="button-icon">⭐</span> Star on GitHub');
+            }, 2000);
         });
 
         // Minimize the widget when answer buttons appear
@@ -851,8 +794,8 @@ $(document).ready(function () {
 
             // Minimize widget when there are answer options
             setTimeout(function () {
-                if ($('.answer-btn:visible').length > 0 && !$stripeWidget.hasClass('minimized')) {
-                    $stripeWidget.addClass('minimized');
+                if ($('.answer-btn:visible').length > 0 && !$githubWidget.hasClass('minimized')) {
+                    $githubWidget.addClass('minimized');
                     // Note: Arrow rotation is handled by CSS
                 }
             }, 300);
@@ -861,8 +804,8 @@ $(document).ready(function () {
         // Also minimize when a module is selected (as that triggers answers to appear)
         $(document).on('click', '#module-dropdown-menu .dropdown-item-module', function () {
             setTimeout(function () {
-                if ($('#qa-section:visible').length > 0 && !$stripeWidget.hasClass('minimized')) {
-                    $stripeWidget.addClass('minimized');
+                if ($('#qa-section:visible').length > 0 && !$githubWidget.hasClass('minimized')) {
+                    $githubWidget.addClass('minimized');
                     // Note: Arrow rotation is handled by CSS
                 }
             }, 300);

@@ -10,7 +10,7 @@ from routes.auth import auth_bp, init_discord, enforce_session_version, inject_i
 from routes.main import main_bp
 from routes.user import user_bp
 from routes.api import api_bp
-from routes.payments import payments_bp, inject_stripe_key
+from routes.payments import payments_bp, inject_github_config
 from routes.admin import admin_bp
 from routes.pdf_api import pdf_api_bp
 
@@ -59,7 +59,7 @@ def create_app():
     def context_processors():
         return {
             **inject_is_user_admin(),
-            **inject_stripe_key()
+            **inject_github_config()
         }
     
     return app

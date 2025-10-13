@@ -79,7 +79,7 @@ footer {
             bottom: 0;
             left: 0;
             right: 0;
-            z-index: 900; /* Lower than stripe widget (1000) */
+            z-index: 900; /* Lower than github widget (1000) */
             margin-top: auto;
             padding: 10px 0;
             background: #f8f9fa;
@@ -527,8 +527,8 @@ footer {
             color: #6c757d;
         }
 
-        /* Ko-fi widget styling */
-        #stripe-widget {
+        /* GitHub widget styling */
+        #github-widget {
             position: fixed;
             bottom: 20px;
             right: 20px;
@@ -536,18 +536,19 @@ footer {
             max-width: 90vw;
             background-color: #ffffff;
             border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 12px 40px rgba(13, 110, 253, 0.25), 0 6px 20px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(13, 110, 253, 0.15);
             z-index: 1000;
             transition: all 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
             overflow: hidden;
         }
 
-        #stripe-header {
+        #github-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 12px 16px;
-            background-color: #6772E5; /* Stripe purple */
+            background-color: #0d6efd;
             color: white;
             cursor: pointer;
             font-weight: 600;
@@ -555,58 +556,60 @@ footer {
             white-space: nowrap; /* Prevent text wrapping */
         }
 
-        #stripe-header-text {
+        #github-header-text {
             font-size: 16px;
             flex-shrink: 0; /* Prevent text from shrinking */
         }
 
-        #stripe-header-actions {
+        #github-header-actions {
             display: flex;
             align-items: center;
             flex-shrink: 0; /* Prevent buttons from shrinking */
         }
 
-        #stripe-toggle-btn, #stripe-close-btn {
-            background: none;
+        #github-toggle-btn, #github-close-btn {
+            background: rgba(255, 255, 255, 0.2);
             border: none;
             color: white;
             cursor: pointer;
             padding: 0;
             margin-left: 12px;
-            font-size: 20px;
+            font-size: 18px;
             line-height: 1;
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 24px;
-            height: 24px;
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
             transition: all 0.25s cubic-bezier(0.4, 0.0, 0.2, 1);
         }
 
-        #stripe-toggle-btn:hover, #stripe-close-btn:hover {
-            opacity: 0.8;
-            transform: scale(1.1);
+        #github-toggle-btn:hover, #github-close-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
         }
 
         /* Rotate toggle arrow when minimized */
-        #stripe-widget.minimized #stripe-toggle-btn {
+        #github-widget.minimized #github-toggle-btn {
             transform: rotate(180deg);
         }
 
-        #stripe-widget.minimized #stripe-toggle-btn:hover {
+        #github-widget.minimized #github-toggle-btn:hover {
             transform: rotate(180deg) scale(1.1);
         }
 
-        #stripe-container {
+        #github-container {
             padding: 20px;
             opacity: 1;
             transform: translateY(0);
             transition: all 0.35s cubic-bezier(0.4, 0.0, 0.2, 1);
             overflow: hidden;
             max-height: 400px;
+            background-color: #ffffff;
         }
 
-        #stripe-widget.minimized #stripe-container {
+        #github-widget.minimized #github-container {
             opacity: 0;
             transform: translateY(-10px);
             max-height: 0;
@@ -614,7 +617,7 @@ footer {
             transition: all 0.35s cubic-bezier(0.4, 0.0, 0.2, 1);
         }
 
-        #stripe-widget.minimized {
+        #github-widget.minimized {
             width: 250px; /* Increased from 220px to accommodate text and buttons */
         }
 
@@ -630,122 +633,104 @@ footer {
             }
         }
 
-        #stripe-widget {
+        #github-widget {
             animation: fadeInUp 0.5s cubic-bezier(0.4, 0.0, 0.2, 1);
         }
 
-        .amount-options {
+        .support-buttons {
             display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
+            flex-direction: column;
+            gap: 12px;
             margin-bottom: 15px;
-        }
-
-        .amount-option {
-            flex: 1;
-            min-width: 60px;
-            padding: 8px;
-            text-align: center;
-            background: #f7fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-weight: 500;
-        }
-
-        .amount-option:hover {
-            background: #e6e6fa;
-            border-color: #6772E5;
-        }
-
-        .amount-option.selected {
-            background: #6772E5;
-            color: white;
-            border-color: #6772E5;
-        }
-
-        .custom-amount {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .custom-amount input {
-            flex: 1;
-            padding: 8px 12px;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 16px;
-        }
-
-        .custom-amount input:focus {
-            outline: none;
-            border-color: #6772E5;
-            box-shadow: 0 0 0 1px rgba(103, 114, 229, 0.3);
         }
 
         .support-button {
             width: 100%;
             padding: 12px;
-            background: #6772E5;
-            color: white;
             border: none;
             border-radius: 8px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
-        .support-button:hover {
-            background: #5469d4;
+        .sponsor-btn {
+            background-color: #0d6efd;
+            color: white;
+            box-shadow: 0 2px 8px rgba(13, 110, 253, 0.3);
+        }
+
+        .sponsor-btn:hover {
+            background-color: #0a58ca;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(13, 110, 253, 0.4);
+        }
+
+        .star-btn {
+            background-color: #0d6efd;
+            color: white;
+            box-shadow: 0 2px 8px rgba(13, 110, 253, 0.3);
+        }
+
+        .star-btn:hover {
+            background-color: #0a58ca;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(13, 110, 253, 0.4);
         }
 
         .support-button:disabled {
-            background: #a1a8e5;
+            opacity: 0.6;
             cursor: not-allowed;
+        }
+
+        .button-icon {
+            font-size: 18px;
         }
 
         .support-message {
             margin-top: 15px;
             font-size: 14px;
-            color: #4a5568;
+            color: #64748b;
             text-align: center;
+            line-height: 1.4;
         }
 
         /* Make sure the widget is properly sized on different devices */
         @media (max-width: 768px) {
-            #stripe-widget {
+            #github-widget {
                 width: 300px;
                 bottom: 15px;
                 right: 15px;
             }
 
-            #stripe-widget.minimized {
+            #github-widget.minimized {
                 width: 230px; /* Increased from 200px */
             }
         }
 
         @media (max-width: 576px) {
-            #stripe-widget {
+            #github-widget {
                 width: 280px;
                 bottom: 10px;
                 right: 10px;
             }
 
-            #stripe-widget.minimized {
+            #github-widget.minimized {
                 width: 210px; /* Increased from 180px */
             }
             
-            #stripe-header-text {
+            #github-header-text {
                 font-size: 15px; /* Slightly smaller text on mobile */
             }
         }
 
         /* Hide the widget initially if 'never-show-payment-widget' is set to true in localStorage */
-        #stripe-widget.preload-hidden {
+        #github-widget.preload-hidden {
             display: none !important;
         }
 
