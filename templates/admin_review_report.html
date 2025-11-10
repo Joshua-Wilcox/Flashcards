@@ -40,7 +40,7 @@
                 <div class="complaint-box">{{ report['message'] or "No message provided." }}</div>
             </div>
             <form method="post" autocomplete="off">
-                {{ csrf_token() }}
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <!-- Main Question Section -->
                 <div class="question-section">
                     <h2>Correct Answer</h2>

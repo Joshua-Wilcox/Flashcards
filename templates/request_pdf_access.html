@@ -37,7 +37,7 @@
                     <div class="welcome-desc">Access to PDFs is restricted. Please submit a request below.</div>
                 </div>
                 <form method="post">
-                    {{ csrf_token() }}
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="mb-3">
                         <label for="message" class="form-label">Message (optional):</label>
                         <textarea class="form-control" id="message" name="message" rows="3" placeholder="Let us know why you need access or any extra info..."></textarea>

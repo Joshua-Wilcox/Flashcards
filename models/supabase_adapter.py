@@ -14,6 +14,8 @@ class SupabaseAdapter:
     def __init__(self):
         url = os.getenv("SUPABASE_URL")
         key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+        
+        
         self.client: Client = create_client(url, key)
         self.rpc_enabled = os.getenv("RPC_FUNCTIONS_ENABLED", "true").lower() == "true"
     

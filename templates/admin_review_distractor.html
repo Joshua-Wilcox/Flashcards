@@ -55,7 +55,7 @@
                 <p><strong>{{ submission['distractor_text'] }}</strong></p>
             </div>
             <form method="post">
-                {{ csrf_token() }}
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="btn-group d-flex justify-content-between mt-4">
                     <button type="submit" name="action" value="approve" class="btn btn-success w-50 me-2">Approve Distractor</button>
                     <button type="submit" name="action" value="reject" class="btn btn-danger w-50 ms-2">Reject Distractor</button>

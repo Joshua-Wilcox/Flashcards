@@ -6,3 +6,4 @@ whitelist.json
 */__pycache__/*
 *.pyc
 /optimization_prompts
+node_modules/*

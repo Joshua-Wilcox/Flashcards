@@ -233,7 +233,7 @@
                 </div>
                 
                 <form method="post">
-                    {{ csrf_token() }}
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <input type="hidden" name="question_id" value="{{ question.id }}">
                     
                     <div class="mb-3">

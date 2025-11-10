@@ -187,7 +187,7 @@
                   {% endif %}
                 {% endwith %}
                 <form id="flashcard-form" method="post" autocomplete="off">
-                    {{ csrf_token() }}
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="mb-3">
                         <label for="question" class="form-label">Question <span class="text-danger">*</span></label>
                         <textarea class="form-control" id="question" name="question" rows="3" required>{{ '' if clear_fields else prev_question if prev_question is defined else '' }}</textarea>
@@ -590,6 +590,11 @@
                 
                 // Set the tags hidden input before submitting
                 $('#tags').val(selectedTags.join(', '));
+                
+                // CRITICAL: Enable all form fields before submission
+                // Disabled fields don't send their values in form submissions
+                $('#topic, #subtopic, #tag-input').prop('disabled', false);
+                
                 return true;
             });
 

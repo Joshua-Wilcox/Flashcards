@@ -32,7 +32,7 @@
             <div class="mb-3"><b>Message:</b> {{ req['message'] or "(no message provided)" }}</div>
             <div class="mb-3"><b>Requested At:</b> <span id="pdf-requested-at" data-timestamp="{{ req['created_at'] }}"></span></div>
             <form method="post">
-                {{ csrf_token() }}
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="btn-group d-flex justify-content-between mt-4">
                     <button type="submit" name="action" value="approve" class="btn btn-success w-50 me-2">Approve</button>
                     <button type="submit" name="action" value="deny" class="btn btn-danger w-50 ms-2">Deny</button>

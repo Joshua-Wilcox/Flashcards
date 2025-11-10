@@ -576,6 +576,8 @@ def submit_flashcard():
         subtopic = request.form.get('subtopic', '').strip()
         tags = request.form.get('tags', '').strip()
         
+        logger.info(f"Flashcard submission attempt by user {user.id}: module={module}, topic={topic}, subtopic={subtopic}, tags={tags}")
+        
         if question and answer and module and topic and subtopic and tags:
             try:
                 # Insert the flashcard submission
@@ -618,10 +620,12 @@ def submit_flashcard():
                                            prev_topic=topic, prev_subtopic=subtopic, prev_tags=tags)
                 
             except Exception as e:
+                logger.error(f'Error submitting flashcard: {str(e)}', exc_info=True)
                 flash(f'Error submitting flashcard: {str(e)}')
                 return render_template('submit_flashcard.html', modules=[m['name'] for m in modules], selected_module=module, clear_fields=False,
                                        prev_question=question, prev_answer=answer, prev_topic=topic, prev_subtopic=subtopic, prev_tags=tags)
         else:
+            logger.warning(f"Flashcard submission missing required fields: question={bool(question)}, answer={bool(answer)}, module={bool(module)}, topic={bool(topic)}, subtopic={bool(subtopic)}, tags={bool(tags)}")
             flash('Please fill in all required fields (question, answer, module, topic, subtopic, tags).')
             return render_template('submit_flashcard.html', modules=[m['name'] for m in modules], selected_module=module, clear_fields=False,
                                    prev_question=question, prev_answer=answer, prev_topic=topic, prev_subtopic=subtopic, prev_tags=tags)

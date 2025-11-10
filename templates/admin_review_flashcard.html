@@ -47,7 +47,7 @@
                 </div>
             </div>
             <form id="flashcard-form" method="post" autocomplete="off">
-                {{ csrf_token() }}
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="mb-3">
                     <label for="question" class="form-label">Question <span class="text-danger">*</span></label>
                     <textarea class="form-control" id="question" name="question" rows="3" required>{{ submission['submitted_question'] }}</textarea>

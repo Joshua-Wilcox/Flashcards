@@ -10,7 +10,7 @@ END $$;
 
 -- User stats table with real-time support
 CREATE TABLE user_stats (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     user_id TEXT UNIQUE NOT NULL,
     username TEXT NOT NULL,
     correct_answers INTEGER DEFAULT 0,
@@ -80,7 +80,7 @@ CREATE TABLE question_subtopics (
 
 -- Module stats with real-time support
 CREATE TABLE module_stats (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     user_id TEXT NOT NULL,
     module_id INTEGER REFERENCES modules(id) ON DELETE CASCADE,
     number_answered INTEGER DEFAULT 0,
