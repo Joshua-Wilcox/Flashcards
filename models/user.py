@@ -114,8 +114,12 @@ def user_has_enough_answers(user_id, minimum=10):
     """Check if a user has at least the minimum number of correct answers."""
     client = supabase_client.get_db()
     result = client.table('user_stats').select('correct_answers').eq('user_id', user_id).execute()
-    return result.data and result.data[0]['correct_answers'] >= minimum
-
+    
+    if not result.data:
+        return False
+    
+    correct_answers = result.data[0].get('correct_answers', 0) or 0
+    return correct_answers >= minimum
 def get_user_stats(user_id):
     """Get comprehensive user statistics."""
     client = supabase_client.get_db()
