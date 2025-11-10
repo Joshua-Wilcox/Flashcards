@@ -165,6 +165,221 @@ npx supabase start && python3 app.py
 
 This will start the local Supabase instance and then launch the Flask application.
 
+## Running as a Linux Service (VPS/Production)
+
+To automatically run the flashcards application on system startup and keep it running in the background on a Linux VPS, you can set up a systemd service.
+
+### Step 1: Create the Systemd Service File
+
+Create a new service file:
+
+```bash
+sudo nano /etc/systemd/system/flashcards.service
+```
+
+Add the following configuration (replace placeholders with your actual values):
+
+```ini
+[Unit]
+Description=Flashcards Web Application
+After=network.target docker.service
+Requires=docker.service
+
+[Service]
+Type=simple
+User=your_username
+Group=your_username
+WorkingDirectory=/path/to/Flashcards
+
+# Environment variables (or use EnvironmentFile)
+Environment="PATH=/usr/local/bin:/usr/bin:/bin:/home/your_username/.local/bin"
+
+# Start Supabase first, then the Flask app
+ExecStartPre=/bin/sleep 5
+ExecStartPre=/usr/bin/npx supabase start
+ExecStart=/path/to/Flashcards/venv/bin/python /path/to/Flashcards/app.py
+
+# Graceful shutdown
+ExecStop=/usr/bin/npx supabase stop
+KillMode=mixed
+KillSignal=SIGTERM
+TimeoutStopSec=30
+
+# Restart configuration
+Restart=always
+RestartSec=10
+
+# Security settings
+NoNewPrivileges=true
+
+# Logging
+StandardOutput=append:/var/log/flashcards/app.log
+StandardError=append:/var/log/flashcards/error.log
+SyslogIdentifier=flashcards
+
+[Install]
+WantedBy=multi-user.target
+```
+
+**Important replacements:**
+- `your_username` → Your Linux username (e.g., `ubuntu`, `flashcards`, etc.)
+- `/path/to/Flashcards` → Full path to your project (e.g., `/home/ubuntu/Flashcards`)
+
+### Step 2: Create Log Directory
+
+```bash
+sudo mkdir -p /var/log/flashcards
+sudo chown your_username:your_username /var/log/flashcards
+```
+
+### Step 3: Ensure Proper Permissions
+
+Make sure your user can run Docker without sudo:
+
+```bash
+sudo usermod -aG docker $USER
+# Log out and back in for this to take effect
+```
+
+Verify Docker permissions:
+```bash
+docker ps
+```
+
+### Step 4: Enable and Start the Service
+
+```bash
+# Reload systemd to recognize the new service
+sudo systemctl daemon-reload
+
+# Enable the service to start on boot
+sudo systemctl enable flashcards.service
+
+# Start the service now
+sudo systemctl start flashcards.service
+
+# Check the status
+sudo systemctl status flashcards.service
+```
+
+### Step 5: Managing the Service
+
+```bash
+# View real-time logs
+sudo journalctl -u flashcards.service -f
+
+# View application logs
+tail -f /var/log/flashcards/app.log
+tail -f /var/log/flashcards/error.log
+
+# Restart the service
+sudo systemctl restart flashcards.service
+
+# Stop the service
+sudo systemctl stop flashcards.service
+
+# Disable auto-start on boot
+sudo systemctl disable flashcards.service
+
+# View recent logs (last 100 lines)
+sudo journalctl -u flashcards.service -n 100 --no-pager
+```
+
+### Troubleshooting
+
+If the service fails to start:
+
+1. **Check the service status:**
+   ```bash
+   sudo systemctl status flashcards.service -l
+   ```
+
+2. **View detailed logs:**
+   ```bash
+   sudo journalctl -u flashcards.service -n 50 --no-pager
+   ```
+
+3. **Common issues:**
+   - **Docker not running:** Ensure Docker is installed and running: `sudo systemctl start docker`
+   - **Permission issues:** Make sure your user is in the docker group
+   - **Path issues:** Verify all paths in the service file are absolute and correct
+   - **Python dependencies:** Ensure the virtual environment has all dependencies installed
+   - **Port conflicts:** Check if port 2456 or Supabase ports are already in use
+
+4. **Test manually first:**
+   ```bash
+   cd /path/to/Flashcards
+   source venv/bin/activate
+   npx supabase start
+   python3 app.py
+   ```
+
+### Alternative: Using a Custom Start Script
+
+If you need more complex startup logic, create a wrapper script:
+
+```bash
+nano /home/your_username/start_flashcards.sh
+```
+
+Add:
+
+```bash
+#!/bin/bash
+set -e
+
+# Change to project directory
+cd /path/to/Flashcards
+
+# Load environment variables if needed
+export PATH="/usr/local/bin:/usr/bin:/bin:$PATH"
+
+# Start Supabase
+echo "Starting Supabase..."
+npx supabase start
+
+# Give Supabase time to fully initialize
+sleep 5
+
+# Activate virtual environment and start Flask
+echo "Starting Flask application..."
+source venv/bin/activate
+exec python3 app.py
+```
+
+Make it executable:
+```bash
+chmod +x /home/your_username/start_flashcards.sh
+```
+
+Then modify the service file to use:
+```ini
+ExecStart=/home/your_username/start_flashcards.sh
+```
+
+### Updating the Application
+
+When you need to update your code:
+
+```bash
+# Stop the service
+sudo systemctl stop flashcards.service
+
+# Pull latest changes
+cd /path/to/Flashcards
+git pull
+
+# Update dependencies if needed
+source venv/bin/activate
+pip install -r requirements.txt
+
+# Apply any database migrations
+npx supabase db reset
+
+# Restart the service
+sudo systemctl start flashcards.service
+```
+
 ## A Note on Development
 
 This project has been developed with the assistance of AI. I am always open to feedback and contributions. If you have any suggestions for improvements or find any issues, please feel free to open an issue or submit a pull request. Your code reviews are greatly appreciated!

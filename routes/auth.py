@@ -22,12 +22,13 @@ def callback():
 
         discord.callback()
         user = discord.fetch_user()
-        session['user_id'] = user.id
+        # Convert user ID to string to match database schema (TEXT type)
+        session['user_id'] = str(user.id)
         session['username'] = f"{user.name}"
         session['session_version'] = Config.SESSION_VERSION
         
         # Use Supabase function to get or create user stats
-        get_or_create_user_stats(user.id, session['username'])
+        get_or_create_user_stats(str(user.id), session['username'])
         
         return redirect(url_for('main.index'))
     except Exception as e:

@@ -264,6 +264,39 @@ class SupabaseAdapter:
             logger.error(f"Error in process_answer_check_rpc: {e}")
             return fallback()
     
+    def check_answer_optimized_rpc(self, user_id: str, question_id: str, submitted_answer: str,
+                                  token: str, username: str = 'Unknown') -> Dict:
+        """
+        Ultra-optimized answer check using single RPC call.
+        Reduces answer checking from 3-4 database calls to 1 call.
+        Includes token validation, answer verification, and stats updates.
+        """
+        def fallback():
+            return self._check_answer_optimized_fallback(user_id, question_id, submitted_answer, token, username)
+        
+        try:
+            result = self.execute_rpc_with_fallback(
+                'check_answer_optimized',
+                {
+                    'user_id_param': user_id,
+                    'question_id_param': question_id,
+                    'submitted_answer_param': submitted_answer,
+                    'token_param': token,
+                    'username_param': username
+                },
+                fallback
+            )
+            
+            if hasattr(result, 'data') and result.data:
+                # The RPC function returns JSON, parse it
+                return result.data[0] if isinstance(result.data, list) else result.data
+            else:
+                return fallback()
+                
+        except Exception as e:
+            logger.error(f"Error in check_answer_optimized_rpc: {e}")
+            return fallback()
+    
     def get_suggestions_rpc(self, suggestion_type: str, module_name: str, 
                           topic_name: str = None, query: str = None, limit: int = 10) -> List[Dict]:
         """Get optimized suggestions using RPC functions"""
@@ -512,6 +545,104 @@ class SupabaseAdapter:
             
         except Exception as e:
             logger.error(f"Error in answer check fallback: {e}")
+            return {'error': str(e)}
+    
+    def _check_answer_optimized_fallback(self, user_id: str, question_id: str, submitted_answer: str,
+                                        token: str, username: str = 'Unknown') -> Dict:
+        """Fallback method for optimized answer checking - includes token validation"""
+        try:
+            # Check if token was already used
+            used_token_result = self.client.table('used_tokens').select('*').eq('user_id', user_id).eq('token', token).execute()
+            if used_token_result.data:
+                return {'error': 'Token already used for a correct answer'}
+            
+            # Get question details
+            question_result = self.client.table('questions').select('answer, module_id').eq('id', question_id).execute()
+            if not question_result.data:
+                return {'error': 'Question not found'}
+            
+            question = question_result.data[0]
+            correct_answer = question['answer']
+            is_correct = (submitted_answer == correct_answer)
+            
+            # Get user stats
+            stats_result = self.client.table('user_stats').select('correct_answers, total_answers, current_streak').eq('user_id', user_id).execute()
+            if stats_result.data:
+                stats = stats_result.data[0]
+                correct = stats.get('correct_answers', 0) or 0
+                total = stats.get('total_answers', 0) or 0
+                streak = stats.get('current_streak', 0) or 0
+            else:
+                correct = 0
+                total = 0
+                streak = 0
+            
+            # Calculate new values
+            total += 1
+            if is_correct:
+                correct += 1
+                streak += 1
+            else:
+                streak = 0
+            
+            # Get current time
+            from datetime import datetime
+            import pytz
+            london_tz = pytz.timezone('Europe/London')
+            now_london = datetime.now(london_tz)
+            last_answer_time = now_london.isoformat()
+            
+            # Update module stats
+            module_stats_result = self.client.table('module_stats').select('number_answered, number_correct, current_streak').eq('user_id', user_id).eq('module_id', question['module_id']).execute()
+            
+            if module_stats_result.data:
+                module_stats = module_stats_result.data[0]
+                new_answered = (module_stats.get('number_answered', 0) or 0) + 1
+                new_correct = (module_stats.get('number_correct', 0) or 0) + (1 if is_correct else 0)
+                new_streak = (module_stats.get('current_streak', 0) or 0) + 1 if is_correct else 0
+                
+                self.client.table('module_stats').update({
+                    'number_answered': new_answered,
+                    'number_correct': new_correct,
+                    'last_answered_time': last_answer_time,
+                    'current_streak': new_streak
+                }).eq('user_id', user_id).eq('module_id', question['module_id']).execute()
+            else:
+                self.client.table('module_stats').insert({
+                    'user_id': user_id,
+                    'module_id': question['module_id'],
+                    'number_answered': 1,
+                    'number_correct': 1 if is_correct else 0,
+                    'last_answered_time': last_answer_time,
+                    'current_streak': 1 if is_correct else 0
+                }).execute()
+            
+            # Insert used token if correct
+            if is_correct:
+                self.client.table('used_tokens').insert({
+                    'user_id': user_id,
+                    'token': token
+                }).execute()
+            
+            # Update user stats
+            self.client.table('user_stats').upsert({
+                'user_id': user_id,
+                'username': username,
+                'correct_answers': correct,
+                'total_answers': total,
+                'last_answer_time': last_answer_time,
+                'current_streak': streak
+            }, on_conflict='user_id').execute()
+            
+            return {
+                'success': True,
+                'correct': is_correct,
+                'correct_answer': correct_answer,
+                'module_id': question['module_id']
+            }
+            
+        except Exception as e:
+            logger.error(f"Error in optimized answer check fallback: {e}")
             return {'error': str(e)}
     
     def real_time_channel(self, channel_name):
