@@ -413,30 +413,17 @@ def check_answer():
     user_id = session['user_id']
     client = supabase_client.get_db()
     
-    # --- Token validation (still needed) ---
-    used_token_result = client.table('used_tokens').select('*').eq('user_id', user_id).eq('token', token).execute()
-    if used_token_result.data:
-        return jsonify({'error': 'Token already used for a correct answer'}), 400
-    
+    # Validate token signature (local operation, no DB call)
     question_id, valid = verify_signed_token(token, user_id)
     if not valid:
         return jsonify({'error': 'Invalid or expired token'}), 400
     
-    # Use optimized RPC function for answer processing
+    # Use ultra-optimized RPC function for entire answer check (reduces 3-4 calls to 1)
     try:
-        # First, get the correct answer to check if submission is correct
-        question_result = client.table('questions').select('answer').eq('id', question_id).execute()
-        if not question_result.data:
-            return jsonify({'error': 'Question not found'}), 400
-        
-        correct_answer = question_result.data[0]['answer']
-        is_correct = submitted_answer == correct_answer
-        
-        # Use RPC function to process the answer check (reduces 6-7 calls to 1-2)
-        result = adapter.process_answer_check_rpc(
+        result = adapter.check_answer_optimized_rpc(
             user_id, 
             question_id, 
-            is_correct, 
+            submitted_answer,
             token, 
             session.get('username', 'Unknown')
         )
@@ -444,7 +431,7 @@ def check_answer():
         if 'error' in result:
             return jsonify({'error': result['error']}), 400
         
-        return jsonify({'correct': is_correct})
+        return jsonify({'correct': result.get('correct', False)})
         
     except Exception as e:
         logger.error(f"RPC answer check failed, using fallback: {e}")
