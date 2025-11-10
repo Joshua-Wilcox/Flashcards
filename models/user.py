@@ -28,6 +28,9 @@ def get_or_create_user_stats(user_id, username):
     """Get or create user stats entry."""
     client = supabase_client.get_db()
     
+    # Ensure user_id is string to match database schema
+    user_id = str(user_id)
+    
     # Check if user exists
     result = client.table('user_stats').select('*').eq('user_id', user_id).execute()
     
@@ -61,6 +64,9 @@ def get_or_create_user_stats(user_id, username):
 def update_user_stats(user_id, module_id, is_correct, last_answer_time):
     """Update user statistics with real-time broadcasting."""
     client = supabase_client.get_db()
+    
+    # Ensure user_id is string to match database schema
+    user_id = str(user_id)
     
     # Update module stats
     try:
@@ -113,6 +119,10 @@ def update_user_stats(user_id, module_id, is_correct, last_answer_time):
 def user_has_enough_answers(user_id, minimum=10):
     """Check if a user has at least the minimum number of correct answers."""
     client = supabase_client.get_db()
+    
+    # Ensure user_id is string to match database schema
+    user_id = str(user_id)
+    
     result = client.table('user_stats').select('correct_answers').eq('user_id', user_id).execute()
     
     if not result.data:
@@ -123,6 +133,9 @@ def user_has_enough_answers(user_id, minimum=10):
 def get_user_stats(user_id):
     """Get comprehensive user statistics."""
     client = supabase_client.get_db()
+    
+    # Ensure user_id is string to match database schema
+    user_id = str(user_id)
     
     # Get base user stats
     result = client.table('user_stats').select('*').eq('user_id', user_id).execute()

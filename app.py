@@ -26,6 +26,7 @@ def create_app():
     
     # Exempt API endpoints that use token-based authentication from CSRF
     csrf.exempt(pdf_api_bp)  # PDF API uses bearer tokens
+    csrf.exempt(api_bp)  # API endpoints use bearer token authentication
     
     # Initialize Discord OAuth
     global discord
@@ -39,9 +40,6 @@ def create_app():
     app.register_blueprint(payments_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(pdf_api_bp)
-    
-    # Exempt specific token-protected API endpoints from CSRF
-    csrf.exempt('api.ingest_flashcards')
     
     # Register template filters and context processors
     @app.template_filter('datetimeformat')
