@@ -9,6 +9,8 @@
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
 
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style-index.css') }}">
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
         // Check localStorage immediately to prevent flashing of the widget
@@ -24,7 +26,9 @@
         window.FLASHCARDS_CONFIG = {
             github_sponsors_url: "{{ github_sponsors_url|e }}",
             github_repo_url: "{{ github_repo_url|e }}",
-            session_user_id: {{ 'true' if session.user_id else 'false' }}
+            session_user_id: {{ 'true' if session.user_id else 'false' }},
+        supabase_url: "{{ supabase_url }}",
+            supabase_anon_key: "{{ supabase_anon_key }}"
         };
     </script>
 </head>
@@ -162,12 +166,12 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Inline Form Containers -->
             <div id="report-form-container" style="display: none;" class="mt-4">
                 <!-- Report form will be loaded here via AJAX -->
             </div>
-            
+
             <div id="distractor-form-container" style="display: none;" class="mt-4">
                 <!-- Distractor form will be loaded here via AJAX -->
             </div>
@@ -211,6 +215,24 @@
     </div>
     {% endif %}
 
+    <!-- Live Activity Widget (Left Side) -->
+    <div id="live-activity-widget" class="live-activity-widget" style="display: none;">
+        <div id="live-activity-header">
+            <div style="display: flex; align-items: center;">
+                <span class="live-pulse">●</span> <span id="live-activity-title">Live Activity</span>
+            </div>
+            <div id="live-activity-actions">
+                <button id="live-activity-toggle-btn" aria-label="Toggle widget">▼</button>
+                <button id="live-activity-close-btn" aria-label="Close widget">×</button>
+            </div>
+        </div>
+        <div id="live-activity-container">
+            <div id="live-activity-list">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+    </div>
+
 
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -218,6 +240,7 @@
 
     <script src="{{ url_for('static', filename='javascript/module-selector.js') }}"></script>
     <script src="{{ url_for('static', filename='javascript/js-index.js') }}"></script>
+    <script src="{{ url_for('static', filename='javascript/live_activity.js') }}"></script>
 </body>
 
 </html>

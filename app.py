@@ -57,7 +57,9 @@ def create_app():
     def context_processors():
         return {
             **inject_is_user_admin(),
-            **inject_github_config()
+            **inject_github_config(),
+            'supabase_url': app.config['SUPABASE_URL'],
+            'supabase_anon_key': app.config['SUPABASE_ANON_KEY']
         }
     
     return app
