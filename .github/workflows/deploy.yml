@@ -1,0 +1,29 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Execute Remote SSH Commands
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            # Update this path to where your code lives on the VPS
+            cd /root/flashcards/Flashcards
+            
+            # Pull latest changes
+            git pull origin main
+            
+            # Optional: Install requirements if you changed them
+            # source venv/bin/activate && pip install -r requirements.txt
+            
+            # Restart the service
+            sudo systemctl restart flashcards
