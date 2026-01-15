@@ -493,3 +493,108 @@ def reject_flashcard():
 
     except Exception as e:
         return jsonify({'error': f'Error rejecting flashcard: {str(e)}'}), 500
+
+
+@api_bp.route('/api/approve_distractor', methods=['POST'])
+def approve_distractor():
+    """
+    API endpoint to approve a distractor submission.
+    Supports API token authentication for n8n workflows.
+    """
+    # Check for API token authentication first
+    token = None
+    auth_header = request.headers.get('Authorization', '')
+    if auth_header.lower().startswith('bearer '):
+        token = auth_header.split(' ', 1)[1]
+    else:
+        token = request.headers.get('X-API-Key')
+
+    # If token is provided, verify it; otherwise fall back to Discord auth
+    if token:
+        if not verify_ingest_token(token):
+            return jsonify({'error': 'Unauthorized'}), 401
+    else:
+        from app import discord
+        if not discord.authorized:
+            return jsonify({'error': 'Unauthorized'}), 401
+
+    data = request.get_json()
+    if not data:
+        return jsonify({'error': 'No JSON data provided'}), 400
+
+    submission_id = data.get('submission_id')
+    if not submission_id:
+        return jsonify({'error': 'submission_id is required'}), 400
+
+    try:
+        client = supabase_client.get_db()
+        
+        # Use RPC for atomic approval operation
+        result = client.rpc('admin_approve_distractor', {
+            'submission_id_param': submission_id
+        }).execute()
+
+        if result.data and result.data.get('success'):
+            return jsonify({
+                'success': True,
+                'message': 'Distractor approved and added to the database.',
+                'distractor_id': result.data.get('distractor_id')
+            }), 200
+        else:
+            error_msg = result.data.get('error', 'Unknown error occurred') if result.data else 'RPC call failed'
+            return jsonify({'error': f'Error approving distractor: {error_msg}'}), 500
+
+    except Exception as e:
+        return jsonify({'error': f'Error approving distractor: {str(e)}'}), 500
+
+
+@api_bp.route('/api/reject_distractor', methods=['POST'])
+def reject_distractor():
+    """
+    API endpoint to reject a distractor submission.
+    Supports API token authentication for n8n workflows.
+    """
+    # Check for API token authentication first
+    token = None
+    auth_header = request.headers.get('Authorization', '')
+    if auth_header.lower().startswith('bearer '):
+        token = auth_header.split(' ', 1)[1]
+    else:
+        token = request.headers.get('X-API-Key')
+
+    # If token is provided, verify it; otherwise fall back to Discord auth
+    if token:
+        if not verify_ingest_token(token):
+            return jsonify({'error': 'Unauthorized'}), 401
+    else:
+        from app import discord
+        if not discord.authorized:
+            return jsonify({'error': 'Unauthorized'}), 401
+
+    data = request.get_json()
+    if not data:
+        return jsonify({'error': 'No JSON data provided'}), 400
+
+    submission_id = data.get('submission_id')
+    if not submission_id:
+        return jsonify({'error': 'submission_id is required'}), 400
+
+    try:
+        client = supabase_client.get_db()
+        
+        # Use RPC for atomic rejection operation
+        result = client.rpc('admin_reject_distractor', {
+            'submission_id_param': submission_id
+        }).execute()
+
+        if result.data and result.data.get('success'):
+            return jsonify({
+                'success': True,
+                'message': 'Distractor submission rejected and removed.'
+            }), 200
+        else:
+            error_msg = result.data.get('error', 'Unknown error occurred') if result.data else 'RPC call failed'
+            return jsonify({'error': f'Error rejecting distractor: {error_msg}'}), 500
+
+    except Exception as e:
+        return jsonify({'error': f'Error rejecting distractor: {str(e)}'}), 500
