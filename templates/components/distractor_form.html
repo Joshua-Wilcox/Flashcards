@@ -1,0 +1,315 @@
+<style>
+    /* Distractor form styles */
+    .submit-card { max-width: 800px; margin: 40px auto; box-shadow: 0 4px 16px rgba(0,0,0,0.08); border-radius: 12px; }
+    .welcome-title { font-size: 2.2rem; font-weight: 700; color: #6f42c1; }
+    .welcome-desc { font-size: 1.1rem; color: #555; margin-top: 10px; }
+    .question-display { background: #f8f9fa; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+    .answer-display { background: #e7f3ff; border-radius: 8px; padding: 15px; margin-bottom: 20px; }
+    .ai-prompt-section { 
+        background: #f8f9fa; 
+        border: 1px solid #e9ecef; 
+        border-radius: 8px; 
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+    }
+    .ai-prompt-header { 
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); 
+        border-bottom: 1px solid #dee2e6; 
+        padding: 15px 20px; 
+        border-radius: 8px 8px 0 0; 
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .ai-prompt-header:hover {
+        background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+    }
+    .ai-prompt-content { 
+        padding: 20px; 
+        font-size: 0.9rem; 
+        line-height: 1.6; 
+    }
+    .human-preferred { 
+        color: #6f42c1; 
+        font-weight: 600; 
+    }
+    .ai-prompt-box {
+        background: #ffffff;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        padding: 15px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .prompt-header-text {
+        color: #495057;
+        font-size: 0.85rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+    }
+    .ai-prompt-section .list-unstyled li {
+        margin-bottom: 8px;
+        padding-left: 0;
+    }
+    .ai-prompt-section .list-unstyled li strong {
+        color: #495057;
+    }
+    .chatgpt-btn {
+        border: 1.5px solid #10a37f !important;
+        background: #f0fdf4 !important;
+        color: #10a37f !important;
+        font-weight: 600;
+        font-size: 1.07em;
+        padding: 8px 22px;
+        border-radius: 999px !important;
+        box-shadow: 0 2px 8px rgba(16, 163, 127, 0.08);
+        transition: background 0.13s, color 0.13s, border 0.13s;
+    }
+    .chatgpt-btn:hover, .chatgpt-btn:focus {
+        background: #dcfce7 !important;
+        color: #059669 !important;
+        border-color: #10a37f !important;
+    }
+    .perplexity-btn {
+        border: 1.5px solid #00b4d8 !important;
+        background: #f0f9ff !important;
+        color: #00b4d8 !important;
+        font-weight: 600;
+        font-size: 1.07em;
+        padding: 8px 22px;
+        border-radius: 999px !important;
+        box-shadow: 0 2px 8px rgba(0, 180, 216, 0.08);
+        transition: background 0.13s, color 0.13s, border 0.13s;
+    }
+    .perplexity-btn:hover, .perplexity-btn:focus {
+        background: #e0f2fe !important;
+        color: #0288d1 !important;
+        border-color: #00b4d8 !important;
+    }
+    .claude-btn {
+        border: 1.5px solid #d97706 !important;
+        background: #fffbeb !important;
+        color: #d97706 !important;
+        font-weight: 600;
+        font-size: 1.07em;
+        padding: 8px 22px;
+        border-radius: 999px !important;
+        box-shadow: 0 2px 8px rgba(217, 119, 6, 0.08);
+        transition: background 0.13s, color 0.13s, border 0.13s;
+    }
+    .claude-btn:hover, .claude-btn:focus {
+        background: #fef3c7 !important;
+        color: #b45309 !important;
+        border-color: #d97706 !important;
+    }
+    .copy-btn {
+        border: 1.5px solid #6b7280 !important;
+        background: #f9fafb !important;
+        color: #6b7280 !important;
+        font-weight: 600;
+        font-size: 1.07em;
+        padding: 8px 22px;
+        border-radius: 999px !important;
+        box-shadow: 0 2px 8px rgba(107, 114, 128, 0.08);
+        transition: background 0.13s, color 0.13s, border 0.13s;
+    }
+    .copy-btn:hover, .copy-btn:focus {
+        background: #f3f4f6 !important;
+        color: #374151 !important;
+        border-color: #6b7280 !important;
+    }
+    .ai-button-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-top: 15px;
+    }
+    @media (max-width: 576px) {
+        .ai-button-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    @media (max-width: 900px) {
+        .submit-card { max-width: 98vw; }
+    }
+    .btn-cancel {
+        background-color: #6c757d;
+        color: white;
+        font-weight: bold;
+        border-radius: 8px;
+        padding: 10px 20px;
+        transition: all 0.2s;
+        margin-top: 10px;
+    }
+    .btn-cancel:hover {
+        background-color: #5a6268;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+</style>
+
+<div class="submit-card card p-4">
+    <div class="text-center mb-3">
+        <div class="welcome-title">Submit Better Distractors</div>
+        <div class="welcome-desc">Help improve this question by suggesting better wrong answers that are more challenging.</div>
+    </div>
+    
+    <!-- Display the question and correct answer -->
+    <div class="question-display">
+        <h5>Question:</h5>
+        <p>{{ question.question }}</p>
+    </div>
+    
+    <div class="answer-display">
+        <h6>Correct Answer:</h6>
+        <p>{{ question.answer }}</p>
+    </div>
+    
+    <!-- AI Prompt Suggestion Section -->
+    <div class="ai-prompt-section">
+        <div class="ai-prompt-header" data-bs-toggle="collapse" data-bs-target="#aiPromptCollapse" aria-expanded="false" aria-controls="aiPromptCollapse">
+            <h6 class="mb-0 d-flex align-items-center">
+                <i class="bi bi-lightbulb me-2" style="color: #ffc107;"></i>
+                <span class="human-preferred">Human responses preferred!</span> 
+                <span class="ms-2 text-muted">But if you need AI assistance...</span>
+                <small class="text-muted ms-auto">(click to expand)</small>
+            </h6>
+        </div>
+        <div class="collapse" id="aiPromptCollapse">
+            <div class="ai-prompt-content">
+                <p class="human-preferred mb-3">We strongly encourage human-generated distractors as they tend to be more effective and creative. However, if you need AI assistance, here's a suggested prompt:</p>
+                <div class="ai-prompt-box">
+                    <div class="prompt-header-text">Suggested AI Prompt</div>
+                    <hr class="my-2" style="opacity: 0.3;">
+                    <p class="mb-3"><strong>You will be provided with a single flashcard object containing a 'Question' and its correct 'Answer'. Your task is to generate four (4) incorrect distractor answers for this flashcard.</strong></p>
+                    <p class="mb-3"><strong>These distractors must strictly adhere to the following rules:</strong></p>
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-3">• <strong>Context-Dependent & Ambiguous in Isolation:</strong> Each distractor, when read on its own (without the associated 'Question'), should be ambiguous, incomplete, or not make full sense. It should only appear as a plausible (though incorrect) response when considered as an answer to the original 'Question' from the provided flashcard.</li>
+                        <li class="mb-3">• <strong>No Hints or Question Referencing:</strong> Distractors must NOT contain any words, phrases, or concepts directly from the 'Question' that would give away the context or make the distractor obviously related to that specific question if seen in a list of other potential answers. The distractor should stand alone as a short phrase or term.</li>
+                        <li class="mb-3">• <strong>Plausible but Definitely Incorrect:</strong> Distractors should be designed to seem like reasonable potential answers to the original 'Question'. However, each distractor must be clearly and definitively incorrect as an answer to the original 'Question'.</li>
+                        <li class="mb-3">• <strong>Format & Style Consistency:</strong> Distractors must be in simple plaintext. Their style, length, and complexity should be similar to the provided correct 'Answer'. Avoid any special formatting, LaTeX, or complex mathematical notation.</li>
+                        <li class="mb-0">• <strong>Uniqueness:</strong> Each generated distractor should be unique from the correct 'Answer' and from the other distractors you generate for the same question-answer pair.</li>
+                    </ul>
+                    <hr class="my-3" style="opacity: 0.3;">
+                    <div class="prompt-header-text">Your Flashcard Data:</div>
+                    <div class="bg-light p-2 rounded mt-2" style="font-family: monospace; font-size: 0.85rem;">
+                        <strong>Question:</strong> <span id="ai-question-text">{{ question.question }}</span><br>
+                        <strong>Answer:</strong> <span id="ai-answer-text">{{ question.answer }}</span>
+                    </div>
+                    <div class="mt-3 text-center">
+                        <div class="ai-button-grid">
+                            <button type="button" class="btn chatgpt-btn" onclick="openInChatGPTDistractor()">
+                                <i class="bi bi-robot me-1"></i>Open in ChatGPT
+                            </button>
+                            <button type="button" class="btn perplexity-btn" onclick="openInPerplexityDistractor()">
+                                <i class="bi bi-search me-1"></i>Open in Perplexity
+                            </button>
+                            <button type="button" class="btn claude-btn" onclick="openInClaudeDistractor()">
+                                <i class="bi bi-chat-dots me-1"></i>Open in Claude
+                            </button>
+                            <button type="button" class="btn copy-btn" onclick="copyToClipboardDistractor()">
+                                <i class="bi bi-clipboard me-1"></i>Copy to Clipboard
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <form method="post" id="distractor-form" data-inline="true">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="question_id" value="{{ question.id }}">
+        
+        <div class="mb-3">
+            <label class="form-label">Suggested Distractors <small class="text-muted">(wrong answers that are plausible but incorrect)</small></label>
+            <p class="text-muted small">You can submit 1-{{ NUMBER_OF_DISTRACTORS }} distractors. Good distractors are wrong but believable answers that test understanding.</p>
+            
+            {% for i in range(NUMBER_OF_DISTRACTORS) %}
+            <div class="mb-2">
+                <label for="distractor_{{ i }}" class="form-label">Distractor {{ i + 1 }}:</label>
+                <textarea class="form-control" id="distractor_{{ i }}" name="distractor_{{ i }}" rows="2" placeholder="Enter a plausible wrong answer..."></textarea>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <button type="submit" class="btn btn-success w-100">Submit Distractors for Review</button>
+        <button type="button" class="btn btn-cancel w-100" id="cancel-distractor-btn">Cancel</button>
+    </form>
+</div>
+
+<script>
+    // Only handle AI prompt functions - event handlers are set up in main JS
+    (function() {
+        const questionText = '{{ question.question|safe }}';
+        const answerText = '{{ question.answer|safe }}';
+        
+        function getPromptTextDistractor() {
+            return `You will be provided with a single flashcard object containing a 'Question' and its correct 'Answer'. Your task is to generate four (4) incorrect distractor answers for this flashcard.
+
+These distractors must strictly adhere to the following rules:
+
+• Context-Dependent & Ambiguous in Isolation: Each distractor, when read on its own (without the associated 'Question'), should be ambiguous, incomplete, or not make full sense. It should only appear as a plausible (though incorrect) response when considered as an answer to the original 'Question' from the provided flashcard.
+
+• No Hints or Question Referencing: Distractors must NOT contain any words, phrases, or concepts directly from the 'Question' that would give away the context or make the distractor obviously related to that specific question if seen in a list of other potential answers. The distractor should stand alone as a short phrase or term.
+
+• Plausible but Definitely Incorrect: Distractors should be designed to seem like reasonable potential answers to the original 'Question'. However, each distractor must be clearly and definitively incorrect as an answer to the original 'Question'.
+
+• Format & Style Consistency: Distractors must be in simple plaintext. Their style, length, and complexity should be similar to the provided correct 'Answer'. Avoid any special formatting, LaTeX, or complex mathematical notation.
+
+• Uniqueness: Each generated distractor should be unique from the correct 'Answer' and from the other distractors you generate for the same question-answer pair.
+
+Question: ${questionText}
+Answer: ${answerText}`;
+        }
+        
+        window.openInChatGPTDistractor = function() {
+            const prompt = getPromptTextDistractor();
+            const encodedPrompt = encodeURIComponent(prompt);
+            const chatgptUrl = `https://chatgpt.com/?q=${encodedPrompt}`;
+            window.open(chatgptUrl, '_blank');
+        };
+        
+        window.openInPerplexityDistractor = function() {
+            const prompt = getPromptTextDistractor();
+            const encodedPrompt = encodeURIComponent(prompt);
+            const perplexityUrl = `https://www.perplexity.ai/search?q=${encodedPrompt}`;
+            window.open(perplexityUrl, '_blank');
+        };
+        
+        window.openInClaudeDistractor = function() {
+            const prompt = getPromptTextDistractor();
+            const encodedPrompt = encodeURIComponent(prompt);
+            const claudeUrl = `https://claude.ai/new?q=${encodedPrompt}`;
+            window.open(claudeUrl, '_blank');
+        };
+        
+        window.copyToClipboardDistractor = function() {
+            const prompt = getPromptTextDistractor();
+            navigator.clipboard.writeText(prompt).then(function() {
+                const btn = event.target.closest('.copy-btn');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="bi bi-check me-1"></i>Copied!';
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                }, 2000);
+            }).catch(function(err) {
+                console.error('Could not copy text: ', err);
+                const textArea = document.createElement('textarea');
+                textArea.value = prompt;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                const btn = event.target.closest('.copy-btn');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="bi bi-check me-1"></i>Copied!';
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                }, 2000);
+            });
+        };
+    })();
+</script>

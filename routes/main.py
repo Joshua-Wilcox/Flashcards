@@ -146,9 +146,75 @@ def get_question():
     module_id = module_result.data[0]['id']
     
     # Get filtered question IDs based on topics, subtopics, and tags
-    filtered_question_ids = None
     filters_applied = bool(topics or subtopics or tags)
     filters_relaxed = False
+
+    # Try optimized RPC first
+    rpc_result = adapter.get_random_question_with_distractors_rpc(
+        module_id, 
+        topic_names=topics if topics else None, 
+        subtopic_names=subtopics if subtopics else None, 
+        tag_names=tags if tags else None,
+        specific_question_id=specific_question_id, 
+        distractor_limit=Config.NUMBER_OF_DISTRACTORS
+    )
+
+    if rpc_result and rpc_result.get('question_data'):
+        q_data = rpc_result['question_data']
+        d_data = rpc_result['distractors']
+        
+        # Start with correct answer
+        answers = [q_data['answer']]
+        answer_ids = [q_data['id']]
+        answer_types = ['question']
+        answer_metadata = [None]
+        
+        # Add manual distractors
+        manual_distractors = d_data.get('manual_distractors', [])
+        for md in manual_distractors:
+            answers.append(md['answer'])
+            answer_ids.append(None)
+            answer_types.append('manual_distractor')
+            answer_metadata.append(md['id'])
+            
+        # Add smart distractors
+        smart_distractors = d_data.get('smart_distractors', [])
+        for sd in smart_distractors:
+            answers.append(sd['answer'])
+            answer_ids.append(sd['id'])
+            answer_types.append('question')
+            answer_metadata.append(None)
+            
+        # Shuffle answers
+        combined = list(zip(answers, answer_ids, answer_types, answer_metadata))
+        random.shuffle(combined)
+        shuffled_answers, shuffled_answer_ids, shuffled_answer_types, shuffled_answer_metadata = zip(*combined)
+        
+        # Generate token and get PDFs
+        token = generate_signed_token(q_data['id'], session['user_id'])
+        pdfs = get_pdfs_for_question(q_data['id'])
+        
+        return jsonify({
+            'question': q_data['question'],
+            'answers': list(shuffled_answers),
+            'answer_ids': list(shuffled_answer_ids),
+            'answer_types': list(shuffled_answer_types),
+            'answer_metadata': list(shuffled_answer_metadata),
+            'module': module,  # Use the module name from request
+            'topic': ', '.join(q_data.get('topics', [])),
+            'subtopic': ', '.join(q_data.get('subtopics', [])),
+            'tags': q_data.get('tags', []),
+            'pdfs': pdfs,
+            'question_id': q_data['id'],
+            'token': token,
+            'is_admin': is_user_admin(session['user_id']),
+            'filters_applied': filters_applied,
+            'filters_relaxed': False,  # RPC handles exact matches
+            'total_filtered_questions': 1 # approximate since we don't count in optimization
+        })
+
+    # Fallback to old logic if RPC fails or returns no data
+    filtered_question_ids = None
     
     if specific_question_id:
         # If specific question requested, just use that
@@ -665,31 +731,39 @@ def report_question():
         distractor_type_list = distractor_types.split(',')
         distractor_metadata_list = distractor_metadata.split(',') if distractor_metadata else [''] * len(distractor_id_list)
         
+        # Collect IDs for batch fetching
+        question_distractor_ids = []
+        manual_distractor_ids = []
+        
         for i, (d_id, d_type) in enumerate(zip(distractor_id_list, distractor_type_list)):
             d_metadata = distractor_metadata_list[i] if i < len(distractor_metadata_list) else ''
             
             if d_type == 'question' and d_id and d_id != str(question_id):
-                # Regular question distractor
-                d_result = client.table('questions').select('id, question, answer').eq('id', d_id).execute()
-                if d_result.data:
-                    d_row = d_result.data[0]
-                    distractors.append({
-                        'id': d_row['id'],
-                        'question': d_row['question'],
-                        'answer': d_row['answer'],
-                        'type': 'question'
-                    })
+                question_distractor_ids.append(d_id)
             elif d_type == 'manual_distractor' and d_metadata:
-                # Manual distractor
-                d_result = client.table('manual_distractors').select('id, distractor_text').eq('id', d_metadata).execute()
-                if d_result.data:
-                    d_row = d_result.data[0]
-                    distractors.append({
-                        'id': d_row['id'],
-                        'question': question,  # Same question as main
-                        'answer': d_row['distractor_text'],
-                        'type': 'manual_distractor'
-                    })
+                manual_distractor_ids.append(d_metadata)
+        
+        # Batch fetch question distractors
+        if question_distractor_ids:
+            q_results = client.table('questions').select('id, question, answer').in_('id', question_distractor_ids).execute()
+            for d_row in q_results.data:
+                distractors.append({
+                    'id': d_row['id'],
+                    'question': d_row['question'],
+                    'answer': d_row['answer'],
+                    'type': 'question'
+                })
+        
+        # Batch fetch manual distractors
+        if manual_distractor_ids:
+            m_results = client.table('manual_distractors').select('id, distractor_text').in_('id', manual_distractor_ids).execute()
+            for d_row in m_results.data:
+                distractors.append({
+                    'id': d_row['id'],
+                    'question': question,  # Same question as main
+                    'answer': d_row['distractor_text'],
+                    'type': 'manual_distractor'
+                })
     
     if request.method == 'POST':
         message = request.form.get('message', '')
@@ -715,12 +789,18 @@ def report_question():
         }).execute()
         
         flash('Your report has been submitted!')
+        
+        # Check if this is an AJAX request
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.headers.get('Accept') == 'application/json':
+            return jsonify({'success': True, 'message': 'Your report has been submitted!'})
+        
         return redirect(url_for('main.index'))
     
     # Convert distractors to JSON for the form
     distractors_json = json.dumps(distractors)
     
-    return render_template('report_question.html', question=question, answer=answer, distractors_json=distractors_json)
+    # Always use the inline component template
+    return render_template('components/report_form.html', question=question, answer=answer, distractors_json=distractors_json)
 
 @main_bp.route('/submit_distractor', methods=['GET', 'POST'])
 def submit_distractor():
@@ -730,19 +810,19 @@ def submit_distractor():
     
     if request.method == 'GET':
         question_id = request.args.get('question_id')
+        
         if not question_id:
-            flash('No question specified.')
-            return redirect(url_for('main.index'))
+            return jsonify({'success': False, 'message': 'No question specified.'})
         
         client = supabase_client.get_db()
         question_result = client.table('questions').select('*').eq('id', question_id).execute()
         if not question_result.data:
-            flash('Question not found.')
-            return redirect(url_for('main.index'))
+            return jsonify({'success': False, 'message': 'Question not found.'})
         
         question = question_result.data[0]
         
-        return render_template('submit_distractor.html', 
+        # Always use the inline component template
+        return render_template('components/distractor_form.html', 
                              question=question, 
                              NUMBER_OF_DISTRACTORS=Config.NUMBER_OF_DISTRACTORS)
     
@@ -757,6 +837,9 @@ def submit_distractor():
                 distractors.append(distractor)
         
         if not distractors:
+            # Check if this is an AJAX request
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.headers.get('Accept') == 'application/json':
+                return jsonify({'success': False, 'message': 'Please provide at least one distractor.'})
             flash('Please provide at least one distractor.')
             return redirect(request.url)
         
@@ -772,6 +855,11 @@ def submit_distractor():
             }).execute()
         
         flash(f'Thank you! Your {len(distractors)} distractor(s) have been submitted for review.')
+        
+        # Check if this is an AJAX request
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.headers.get('Accept') == 'application/json':
+            return jsonify({'success': True, 'message': f'Thank you! Your {len(distractors)} distractor(s) have been submitted for review.'})
+        
         return redirect(url_for('main.index'))
 
 

@@ -17,12 +17,18 @@ function getCSRFToken() {
 
 // Configure jQuery to include CSRF token in all AJAX requests
 $.ajaxSetup({
-    beforeSend: function(xhr, settings) {
+    beforeSend: function (xhr, settings) {
         if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
             xhr.setRequestHeader("X-CSRFToken", getCSRFToken());
         }
     }
 });
+
+// Toast notification function (disabled)
+function showToast(message, type = 'success') {
+    // Toasts disabled - do nothing
+    console.log(`[Toast ${type}]:`, message);
+}
 
 let currentSelections = {
     module: '',
@@ -234,6 +240,10 @@ function getNewQuestion(specificQuestionId = null) {
     resetDelayCountdown();
     // Hide manual continue button on new question
     $('#manual-continue-btn-row').hide();
+    // Hide inline forms when loading new question
+    $('#report-form-container').hide();
+    $('#distractor-form-container').hide();
+
     const data = {
         module: currentSelections.module,
         topics: currentSelections.topics,
@@ -435,10 +445,8 @@ $(document).off('click', '.answer-btn').on('click', '.answer-btn', function () {
                     // Show manual continue button
                     $('#manual-continue-btn-row').show();
                 } else {
-                    // Auto-advance after 1 second
-                    setTimeout(function () {
-                        getNewQuestion();
-                    }, 1000);
+                    // Auto-advance immediately
+                    getNewQuestion();
                 }
             } else {
                 // Only disable and mark the clicked button as incorrect
@@ -522,18 +530,18 @@ $(document).off('submit', '.edit-answer-form').on('submit', '.edit-answer-form',
     const answerType = $answerBtn.data('answer-type');
     const answerMetadata = $answerBtn.data('answer-metadata');
     const newText = $form.find('input').val();
-    
+
     const requestData = {
         new_text: newText,
         edit_type: answerType
     };
-    
+
     if (answerType === 'manual_distractor') {
         requestData.manual_distractor_id = answerMetadata;
     } else {
         requestData.question_id = questionId;
     }
-    
+
     $.ajax({
         url: '/edit_answer',
         method: 'POST',
@@ -585,12 +593,12 @@ $('#report-question-btn').off('click').on('click', function () {
     let distractorIds = [];
     let distractorTypes = [];
     let distractorMetadata = [];
-    
+
     $('.answer-btn:visible').each(function () {
         const questionId = $(this).data('question-id');
         const answerType = $(this).data('answer-type') || 'question';
         const answerMetadata = $(this).data('answer-metadata');
-        
+
         distractorIds.push(questionId || '');
         distractorTypes.push(answerType);
         distractorMetadata.push(answerMetadata || '');
@@ -602,11 +610,88 @@ $('#report-question-btn').off('click').on('click', function () {
             answer: answerText,
             distractor_ids: distractorIds.join(','),
             distractor_types: distractorTypes.join(','),
-            distractor_metadata: distractorMetadata.join(',')
+            distractor_metadata: distractorMetadata.join(','),
+            ajax: '1'
         });
-        
-        window.location.href = '/report_question?' + params.toString();
-        console.log("Redirecting to report page with distractor data:", {
+
+        // Hide distractor form if open
+        $('#distractor-form-container').hide();
+
+        // Load form via AJAX
+        $.get('/report_question?' + params.toString())
+            .done(function (html) {
+                const $container = $('#report-form-container');
+                $container.html(html).show();
+
+                // Wait for next tick to ensure DOM is fully updated
+                requestAnimationFrame(function () {
+                    // Scroll to form after DOM update
+                    $container[0].scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+                    // Set up textarea enable/disable logic for submit buttons
+                    const $messageTextarea = $('#message');
+                    const $submitButtonTop = $('#submit-button-top');
+                    const $submitButtonBottom = $('#submit-button-bottom');
+
+                    if ($messageTextarea.length && $submitButtonTop.length && $submitButtonBottom.length) {
+                        function toggleSubmitButtons() {
+                            const messageText = $messageTextarea.val().trim();
+                            const isEnabled = messageText.length > 0;
+                            $submitButtonTop.prop('disabled', !isEnabled);
+                            $submitButtonBottom.prop('disabled', !isEnabled);
+                        }
+
+                        // Attach multiple event listeners for reliability
+                        $messageTextarea.on('input keyup change paste', toggleSubmitButtons);
+
+                        // Initial check
+                        toggleSubmitButtons();
+                    }
+
+                    // Set up cancel button handlers
+                    $('#cancel-button-top, #cancel-button-bottom').off('click').on('click', function () {
+                        $container.hide();
+                        $('#qa-section')[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    });
+
+                    // Handle form submission via AJAX
+                    const $form = $('#report-form');
+                    if ($form.length) {
+                        $form.off('submit').on('submit', function (e) {
+                            e.preventDefault();
+                            const formData = new FormData(this);
+
+                            $.ajax({
+                                url: '/report_question',
+                                method: 'POST',
+                                data: formData,
+                                processData: false,
+                                contentType: false,
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'Accept': 'application/json'
+                                },
+                                success: function (response) {
+                                    // Show success message
+                                    showToast(response.message || 'Your report has been submitted!', 'success');
+                                    // Hide form
+                                    $container.hide();
+                                    // Scroll back to question
+                                    $('#qa-section')[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                },
+                                error: function () {
+                                    showToast('An error occurred. Please try again.', 'error');
+                                }
+                            });
+                        });
+                    }
+                });
+            })
+            .fail(function () {
+                showToast('Unable to load report form. Please try again.', 'error');
+            });
+
+        console.log("Loading inline report form with distractor data:", {
             ids: distractorIds.join(','),
             types: distractorTypes.join(','),
             metadata: distractorMetadata.join(',')
@@ -622,11 +707,11 @@ $(document).ready(function () {
             containerId: 'module-selector',
             selectedModule: '',
             allowDeselect: true,
-            onModuleChange: function(selectedModule) {
+            onModuleChange: function (selectedModule) {
                 currentSelections.module = selectedModule;
                 currentSelections.topics = [];
                 currentSelections.subtopics = [];
-                
+
                 updateFilters();
 
                 // Show/hide welcome and QA sections
@@ -766,9 +851,9 @@ $(document).ready(function () {
 
             // Open GitHub Sponsors page in new tab
             window.open(window.FLASHCARDS_CONFIG.github_sponsors_url, '_blank');
-            
+
             // Re-enable button after short delay
-            setTimeout(function() {
+            setTimeout(function () {
                 button.prop('disabled', false).html('<span class="button-icon">❤️</span> Sponsor on GitHub');
             }, 2000);
         });
@@ -780,9 +865,9 @@ $(document).ready(function () {
 
             // Open GitHub repository page in new tab
             window.open(window.FLASHCARDS_CONFIG.github_repo_url, '_blank');
-            
+
             // Re-enable button after short delay
-            setTimeout(function() {
+            setTimeout(function () {
                 button.prop('disabled', false).html('<span class="button-icon">⭐</span> Star on GitHub');
             }, 2000);
         });
@@ -840,6 +925,61 @@ $(document).ready(function () {
 // Answer Obvious button handler
 $('#answer-obvious-btn').off('click').on('click', function () {
     if (currentQuestionId) {
-        window.location.href = '/submit_distractor?question_id=' + currentQuestionId;
+        // Hide report form if open
+        $('#report-form-container').hide();
+
+        // Load distractor form via AJAX
+        $.get('/submit_distractor?question_id=' + currentQuestionId + '&ajax=1')
+            .done(function (html) {
+                const $container = $('#distractor-form-container');
+                $container.html(html).show();
+
+                // Wait for next tick to ensure DOM is fully updated
+                requestAnimationFrame(function () {
+                    // Scroll to form after DOM update
+                    $container[0].scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+                    // Set up cancel button handler
+                    $('#cancel-distractor-btn').off('click').on('click', function () {
+                        $container.hide();
+                        $('#qa-section')[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    });
+
+                    // Handle form submission via AJAX
+                    const $form = $('#distractor-form');
+                    if ($form.length) {
+                        $form.off('submit').on('submit', function (e) {
+                            e.preventDefault();
+                            const formData = new FormData(this);
+
+                            $.ajax({
+                                url: '/submit_distractor',
+                                method: 'POST',
+                                data: formData,
+                                processData: false,
+                                contentType: false,
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'Accept': 'application/json'
+                                },
+                                success: function (response) {
+                                    // Show success message
+                                    showToast(response.message || 'Your distractors have been submitted!', 'success');
+                                    // Hide form
+                                    $container.hide();
+                                    // Scroll back to question
+                                    $('#qa-section')[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                },
+                                error: function () {
+                                    showToast('An error occurred. Please try again.', 'error');
+                                }
+                            });
+                        });
+                    }
+                });
+            })
+            .fail(function () {
+                showToast('Unable to load distractor form. Please try again.', 'error');
+            });
     }
 });

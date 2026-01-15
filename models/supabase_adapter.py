@@ -647,6 +647,40 @@ class SupabaseAdapter:
             logger.error(f"Error in optimized answer check fallback: {e}")
             return {'error': str(e)}
     
+    
+    def get_random_question_with_distractors_rpc(self, module_id: int, topic_names: List[str] = None, 
+                                               subtopic_names: List[str] = None, tag_names: List[str] = None,
+                                               specific_question_id: str = None, distractor_limit: int = 4) -> Dict:
+        """
+        Get a random question with all metadata and distractors using a single RPC call.
+        """
+        def fallback():
+            return None  # Fallback handled in route for now due to complexity
+        
+        try:
+            result = self.execute_rpc_with_fallback(
+                'get_random_question_with_distractors',
+                {
+                    'module_id_param': module_id,
+                    'topic_names_param': topic_names,
+                    'subtopic_names_param': subtopic_names,
+                    'tag_names_param': tag_names,
+                    'specific_question_id_param': specific_question_id,
+                    'distractor_limit_param': distractor_limit
+                },
+                fallback
+            )
+            
+            if hasattr(result, 'data') and result.data:
+                # The RPC returns a list of rows (should be length 1)
+                return result.data[0] if isinstance(result.data, list) and result.data else None
+            else:
+                return fallback()
+                
+        except Exception as e:
+            logger.error(f"Error in get_random_question_with_distractors_rpc: {e}")
+            return fallback()
+
     def real_time_channel(self, channel_name):
         """Create a real-time channel"""
         return self.client.channel(channel_name)

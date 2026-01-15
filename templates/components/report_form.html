@@ -1,0 +1,263 @@
+<style>
+    /* Report form styles */
+    .report-card { max-width: 800px; margin: 20px auto; box-shadow: 0 4px 16px rgba(0,0,0,0.08); border-radius: 12px; }
+    .welcome-title { font-size: 2rem; font-weight: 700; color: #0d6efd; margin-bottom: 5px; }
+    .welcome-desc { font-size: 1.1rem; color: #555; margin-top: 5px; margin-bottom: 10px; }
+    
+    /* New unified styling for question boxes */
+    .qa-section {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 20px;
+        border: none;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+    
+    .correct-answer-section {
+        background-color: #f0f9ff;
+        border-left: none;
+    }
+    
+    .distractor-section {
+        background-color: #f9f9f9;
+        border-left: none;
+    }
+    
+    .item-box {
+        background-color: #ffffff;
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 12px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        font-size: 1.05rem;
+        border: none;
+    }
+    
+    .question-box {
+        background-color: #f8f9fa;
+    }
+    
+    .answer-box {
+        background-color: #f0f9ff;
+    }
+    
+    .section-title {
+        font-size: 1.4rem;
+        margin-bottom: 12px;
+        color: #0d6efd;
+        font-weight: 600;
+    }
+    
+    .subsection-title {
+        font-size: 1.1rem;
+        margin-bottom: 8px;
+        color: #212529;
+        font-weight: 500;
+    }
+    
+    .guidance-box {
+        background-color: #e7f3ff;
+        border-radius: 8px;
+        padding: 10px;
+        margin-bottom: 12px;
+    }
+    .guidance-box ul {
+        margin-bottom: 0;
+        padding-left: 1.5rem;
+    }
+    .form-message {
+        min-height: 250px !important;
+        height: 250px !important;
+        margin-bottom: 12px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        border: 2px solid #b8daff;
+        background-color: #f8faff;
+        padding: 12px;
+        font-size: 1.05rem;
+        color: #333;
+    }
+    .form-message:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        background-color: #fff;
+    }
+    .form-message::placeholder {
+        color: #6c757d;
+        opacity: 0.8;
+    }
+    .form-label-highlighted {
+        font-weight: 600;
+        color: #0d6efd;
+        font-size: 1.1rem;
+        margin-bottom: 8px;
+    }
+    .btn-submit {
+        background-color: #0d6efd;
+        color: white;
+        font-weight: bold;
+        border-radius: 8px;
+        padding: 10px 20px;
+        transition: all 0.2s;
+    }
+    .btn-submit:hover {
+        background-color: #0b5ed7;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .btn-submit:disabled {
+        background-color: #8db5f8;
+        transform: none;
+        box-shadow: none;
+        cursor: not-allowed;
+    }
+    .textarea-container {
+        position: relative;
+        margin-bottom: 15px;
+    }
+    @media (max-width: 900px) {
+        .report-card { max-width: 98vw; }
+    }
+    /* More compact layout */
+    .compact-section {
+        margin-bottom: 12px;
+    }
+    .compact-header {
+        margin-bottom: 8px;
+        font-size: 1.2rem;
+        color: #0d6efd;
+    }
+    .compact-mb {
+        margin-bottom: 8px;
+    }
+    .btn-group-compact {
+        display: flex;
+        gap: 8px;
+    }
+    .btn-cancel {
+        background-color: #6c757d;
+        color: white;
+        font-weight: bold;
+        border-radius: 8px;
+        padding: 10px 20px;
+        transition: all 0.2s;
+    }
+    .btn-cancel:hover {
+        background-color: #5a6268;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+</style>
+
+<div class="report-card card p-4">
+    <div class="text-center mb-3">
+        <div class="welcome-title">Report a Question</div>
+        <div class="welcome-desc">Please provide details about the issue with this question or answer.</div>
+    </div>
+    
+    <form method="post" autocomplete="off" id="report-form" data-inline="true">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="question_text" value="{{ question }}">
+        <input type="hidden" name="answer_text" value="{{ answer }}">
+        <input type="hidden" name="distractors_json" value="{{ distractors_json }}">
+        
+        <!-- Top submit button -->
+        <div class="d-grid mb-3 btn-group-compact">
+            <button type="submit" class="btn btn-submit" id="submit-button-top" disabled>Submit Report</button>
+            <button type="button" class="btn btn-cancel" id="cancel-button-top">Cancel</button>
+        </div>
+        
+        <div class="guidance-box mb-3">
+            <h5 class="compact-header">Reporting Guidelines</h5>
+            <p class="compact-mb">When reporting, please be specific and include:</p>
+            <ul>
+                <li>What is incorrect about the question or answer</li>
+                <li>If distractors are problematic, mention them by number</li>
+                <li>Provide any corrections or suggestions</li>
+            </ul>
+        </div>
+        
+        <!-- Message textbox right below guidelines -->
+        <div class="mb-3">
+            <label for="message" class="form-label-highlighted">Describe the issue:</label>
+            <textarea class="form-control form-message" id="message" name="message" required 
+                  placeholder="Please describe what's wrong with this question, answer, or distractors."></textarea>
+        </div>
+        
+        <div class="row">
+            <!-- Main Question Section -->
+            <div class="col-12">
+                <div class="qa-section correct-answer-section">
+                    <h2 class="section-title">Correct Answer</h2>
+                    
+                    <div class="mb-3">
+                        <h3 class="subsection-title">Question</h3>
+                        <div class="item-box question-box">{{ question }}</div>
+                    </div>
+                    
+                    <div class="mb-2">
+                        <h3 class="subsection-title">Answer</h3>
+                        <div class="item-box answer-box" style="background-color: #e6ffee;">{{ answer }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Distractor Questions Sections -->
+        {% set distractors = distractors_json|tojson|safe %}
+        <script>
+            var distractorsJson = {{ distractors }};
+        </script>
+        
+        <div id="distractors-container" class="compact-section">
+            <!-- Distractors will be inserted here by JavaScript -->
+        </div>
+        
+        <!-- Bottom submit button -->
+        <div class="d-grid mt-3 btn-group-compact">
+            <button type="submit" class="btn btn-submit" id="submit-button-bottom" disabled>Submit Report</button>
+            <button type="button" class="btn btn-cancel" id="cancel-button-bottom">Cancel</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    // Only render distractors - event handlers are set up in main JS
+    (function() {
+        const distractorsContainer = document.getElementById('distractors-container');
+        const distractors = typeof distractorsJson !== 'undefined' ? distractorsJson : [];
+        
+        if (distractorsContainer) {
+            if (distractors && distractors.length > 0) {
+                let html = '<h2 class="section-title">Distractors</h2>';
+                
+                distractors.forEach((distractor, index) => {
+                    const questionEscaped = String(distractor.question).replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                    const answerEscaped = String(distractor.answer).replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                    html += `
+                        <div class="qa-section distractor-section">
+                            <h3 class="subsection-title">Distractor ${index + 1}</h3>
+                            
+                            <div class="mb-3">
+                                <h4 class="subsection-title">Question</h4>
+                                <div class="item-box question-box">${questionEscaped}</div>
+                            </div>
+                            
+                            <div class="mb-2">
+                                <h4 class="subsection-title">Answer</h4>
+                                <div class="item-box answer-box" style="background-color: #fff0f0;">${answerEscaped}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                distractorsContainer.innerHTML = html;
+            } else {
+                distractorsContainer.innerHTML = '<p class="text-muted">No distractors associated with this question.</p>';
+            }
+        }
+    })();
+</script>
