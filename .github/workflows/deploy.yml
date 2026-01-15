@@ -15,6 +15,7 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          debug: true
           script: |
             # Update this path to where your code lives on the VPS
             cd /root/flashcards/Flashcards
