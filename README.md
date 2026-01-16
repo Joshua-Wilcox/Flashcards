@@ -2,24 +2,6 @@
 
 This is a web-based flashcard application designed for students to study various modules. It features a dynamic question and answer system, user authentication via Discord, and a backend powered by Flask and Supabase.
 
-## Technology Stack
-
-### Backend
-- **Flask**: A lightweight WSGI web application framework in Python. It's used to handle routing, request processing, and to serve the frontend application.
-- **Supabase**: An open-source Firebase alternative. Supabase is used for the entire backend infrastructure, including:
-    - **PostgreSQL Database**: The core data storage for users, questions, modules, and all other application data. The schema is managed through SQL migration files.
-    - **Storage**: Used for storing PDF files associated with questions.
-    - **Serverless Functions**: Supabase's edge functions (RPC calls in the database) are used for performance-critical operations like fetching filtered data, checking for duplicate questions, and processing answers.
-
-### Frontend
-- **HTML/CSS/JavaScript**: The frontend is built with standard web technologies.
-- **Jinja2**: A modern and designer-friendly templating language for Python, used by Flask to render dynamic HTML pages.
-- **jQuery**: Used for simplifying DOM manipulation and handling AJAX requests.
-
-### APIs and Services
-- **Discord API**: Used for user authentication (OAuth2).
-- **GitHub Sponsors**: Integrated for accepting support through GitHub Sponsors and repository starring.
-
 ## Features
 
 - **User Authentication**: Users can log in using their Discord account.
