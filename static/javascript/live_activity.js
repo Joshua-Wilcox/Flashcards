@@ -26,8 +26,8 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // --- Persistence & State Logic ---
 
-    // Check if user has permanently closed the widget
-    if (localStorage.getItem('live_activity_hidden') === 'true') {
+    // Check if user has closed the widget for this session
+    if (sessionStorage.getItem('live_activity_hidden') === 'true') {
         widgetContainer.remove(); // Remove entirely
         return;
     }
@@ -63,17 +63,16 @@ document.addEventListener('DOMContentLoaded', async function () {
         });
     }
 
-    // Close widget permanently
+    // Close widget for session
     if (closeBtn) {
         closeBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            if (confirm('Hide Live Activity? You can enable it again in settings (feature coming soon).')) {
-                widgetContainer.style.opacity = '0';
-                setTimeout(() => {
-                    widgetContainer.remove();
-                    localStorage.setItem('live_activity_hidden', 'true');
-                }, 300);
-            }
+            // No confirmation, just hide for session
+            widgetContainer.style.opacity = '0';
+            setTimeout(() => {
+                widgetContainer.remove();
+                sessionStorage.setItem('live_activity_hidden', 'true');
+            }, 300);
         });
     }
 
@@ -100,18 +99,52 @@ document.addEventListener('DOMContentLoaded', async function () {
             console.log('Live Activity Status:', status);
         });
 
+    // Fetch initial state (last 3 items)
+    fetchInitialState();
+
+    async function fetchInitialState() {
+        // Only fetch if not hidden
+        if (sessionStorage.getItem('live_activity_hidden') === 'true') return;
+
+        const { data, error } = await supabase
+            .from('live_activity_logs')
+            .select('*')
+            .order('answered_at', { ascending: false })
+            .limit(MAX_ITEMS);
+
+        if (error) {
+            console.error('Error fetching live activity:', error);
+            return;
+        }
+
+        if (data && data.length > 0) {
+            // Reverse so we prepend strictly in order (oldest first, so newest ends up on top)
+            // Actually handleNewActivity prepends, so if we iterate 0..N (newest..oldest), 
+            // the newest (0) gets prepended first (bottom), then (1) above it... wait.
+            // listContainer.prepend puts the element at the TOP.
+            // If data is [Newest, Mid, Oldest]
+            // We want the final list to be [Newest, Mid, Oldest]
+            // 1. Process Oldest -> Prepend -> List: [Oldest]
+            // 2. Process Mid -> Prepend -> List: [Mid, Oldest]
+            // 3. Process Newest -> Prepend -> List: [Newest, Mid, Oldest]
+            // So we need to process in reverse order: Oldest to Newest.
+
+            const reversedData = [...data].reverse();
+            reversedData.forEach(activity => {
+                handleNewActivity(activity, false); // false = no animation for initial load?
+            });
+        }
+    }
+
     /**
      * Handle a new activity event
      * @param {Object} activity - The activity log record
+     * @param {Boolean} animate - Whether to animate the entry (default true)
      */
-    /**
-     * Handle a new activity event
-     * @param {Object} activity - The activity log record
-     */
-    function handleNewActivity(activity) {
+    function handleNewActivity(activity, animate = true) {
         // Show widget if it was concealed securely (hidden by default display:none in CSS/HTML)
-        // Only show if not permanently hidden by user
-        if (localStorage.getItem('live_activity_hidden') !== 'true') {
+        // Only show if not hidden for session
+        if (sessionStorage.getItem('live_activity_hidden') !== 'true') {
             if (widgetContainer.style.display === 'none') {
                 widgetContainer.style.display = 'block';
             }
@@ -130,10 +163,16 @@ document.addEventListener('DOMContentLoaded', async function () {
         // Add to list (prepend to show latest at top)
         listContainer.prepend(itemElement);
 
-        // Animate entrance
-        // Force reflow
-        void itemElement.offsetWidth;
-        itemElement.classList.add('visible');
+        if (animate) {
+            // Animate entrance
+            // Force reflow
+            void itemElement.offsetWidth;
+            itemElement.classList.add('visible');
+        } else {
+            // Show immediately without animation class logic if wanted, 
+            // OR just add visible immediately
+            itemElement.classList.add('visible');
+        }
 
         // Prune old items (keep max 3)
         const items = listContainer.children;
@@ -200,8 +239,35 @@ document.addEventListener('DOMContentLoaded', async function () {
         return div.innerHTML;
     }
 
-    // --- Timer & Expiry Logic ---
+    // --- Timer Logic ---
     let timerInterval = null;
+
+    function formatTimeAgo(date) {
+        const now = new Date();
+        const diffSeconds = Math.floor((now - date) / 1000);
+
+        if (diffSeconds < 60) {
+            return diffSeconds <= 0 ? 'Just now' : `${diffSeconds}s ago`;
+        }
+
+        const diffMinutes = Math.floor(diffSeconds / 60);
+        if (diffMinutes < 60) {
+            return `${diffMinutes}m ago`;
+        }
+
+        const diffHours = Math.floor(diffMinutes / 60);
+        if (diffHours < 24) {
+            return `${diffHours}h ago`;
+        }
+
+        const diffDays = Math.floor(diffHours / 24);
+        if (diffDays < 30) {
+            return `${diffDays}d ago`;
+        }
+
+        const diffMonths = Math.floor(diffDays / 30);
+        return `${diffMonths}mo ago`;
+    }
 
     function startTimerLoop() {
         if (timerInterval) return; // Already running
@@ -217,35 +283,20 @@ document.addEventListener('DOMContentLoaded', async function () {
                 return;
             }
 
-            const now = new Date();
-            let hasItems = false;
+            // Expiry logic REMOVED. Items stay until pushed out by new ones.
 
             items.forEach(item => {
                 const timestampStr = item.getAttribute('data-timestamp');
                 if (!timestampStr) return;
 
                 const time = new Date(timestampStr);
-                const diffSeconds = Math.floor((now - time) / 1000);
 
-                if (diffSeconds > 30) {
-                    // Expire item
-                    item.remove();
-                } else {
-                    hasItems = true;
-                    // Update text
-                    const timeSpan = item.querySelector('.activity-time');
-                    if (timeSpan) {
-                        timeSpan.textContent = diffSeconds <= 0 ? 'Just now' : `${diffSeconds}s ago`;
-                    }
+                // Update text
+                const timeSpan = item.querySelector('.activity-time');
+                if (timeSpan) {
+                    timeSpan.textContent = formatTimeAgo(time);
                 }
             });
-
-            // Double check if we emptied the list during this iteration
-            if (!hasItems && listContainer.children.length === 0) {
-                widgetContainer.style.display = 'none';
-                clearInterval(timerInterval);
-                timerInterval = null;
-            }
 
         }, 1000);
     }
