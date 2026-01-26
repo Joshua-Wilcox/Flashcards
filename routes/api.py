@@ -417,9 +417,11 @@ def approve_flashcard():
 
         if result.data and result.data.get('success'):
             pending_count = result.data.get('pending_distractors_count', 0)
+            question_id = result.data.get('question_id')
             return jsonify({
                 'success': True,
                 'message': 'Flashcard approved and added to the database.',
+                'question_id': question_id,
                 'pending_distractors_count': pending_count
             }), 200
         else:
@@ -598,3 +600,154 @@ def reject_distractor():
 
     except Exception as e:
         return jsonify({'error': f'Error rejecting distractor: {str(e)}'}), 500
+
+
+@api_bp.route('/api/submit_distractors', methods=['POST'])
+def submit_distractors():
+    """
+    Submit distractors for an existing question via REST API.
+
+    Similar to /api/ingest_flashcards, but specifically for adding distractors
+    to questions that already exist in the database.
+
+    Request format:
+    {
+        "question_id": "abc123...",  # Required: existing question ID
+        "distractors": [             # Required: array of distractor texts
+            "distractor 1",
+            "distractor 2"
+        ],
+        "user_id": "optional-user-id",      # Optional: defaults to n8n user
+        "username": "optional-username"     # Optional: defaults to n8n username
+    }
+
+    Or batch format:
+    {
+        "submissions": [
+            {
+                "question_id": "abc123...",
+                "distractors": ["distractor 1", "distractor 2"],
+                "user_id": "optional",
+                "username": "optional"
+            }
+        ]
+    }
+
+    Response format:
+    {
+        "accepted": [
+            {
+                "index": 0,
+                "question_id": "abc123...",
+                "count": 2
+            }
+        ],
+        "errors": [
+            {
+                "index": 1,
+                "error": "error message"
+            }
+        ]
+    }
+    """
+    # Check for API token authentication first
+    token = None
+    auth_header = request.headers.get('Authorization', '')
+    if auth_header.lower().startswith('bearer '):
+        token = auth_header.split(' ', 1)[1]
+    else:
+        token = request.headers.get('X-API-Key')
+
+    # If token is provided, verify it; otherwise fall back to Discord auth
+    if token:
+        if not verify_ingest_token(token):
+            return jsonify({'error': 'Unauthorized'}), 401
+    else:
+        from app import discord
+        if not discord.authorized:
+            return jsonify({'error': 'Unauthorized'}), 401
+
+    payload = request.get_json(silent=True)
+    if payload is None:
+        return jsonify({'error': 'Invalid JSON payload'}), 400
+
+    client = supabase_client.get_db()
+
+    # Determine if this is a single submission or batch
+    submissions = []
+    if 'submissions' in payload and isinstance(payload['submissions'], list):
+        # Batch format
+        submissions = payload['submissions']
+    elif 'question_id' in payload:
+        # Single submission format
+        submissions = [payload]
+    else:
+        return jsonify({'error': 'Request must include either "question_id" and "distractors" fields, or a "submissions" array'}), 400
+
+    if not submissions:
+        return jsonify({'error': 'No submissions provided'}), 400
+
+    results = {
+        'accepted': [],
+        'errors': []
+    }
+
+    for index, submission in enumerate(submissions):
+        try:
+            if not isinstance(submission, dict):
+                raise ValueError('Each submission must be an object')
+
+            question_id = (submission.get('question_id') or '').strip()
+            distractors = submission.get('distractors') or []
+            user_id = (submission.get('user_id') or Config.N8N_DEFAULT_USER_ID).strip()
+            username = (submission.get('username') or Config.N8N_DEFAULT_USERNAME).strip()
+
+            # Validate required fields
+            if not question_id:
+                raise ValueError('question_id is required')
+
+            if not isinstance(distractors, list) or len(distractors) == 0:
+                raise ValueError('distractors must be a non-empty array')
+
+            # Validate question exists in database
+            question_check = client.table('questions').select('id').eq('id', question_id).execute()
+            if not question_check.data:
+                raise ValueError(f'Question with id "{question_id}" does not exist')
+
+            # Process distractors (limit to configured maximum)
+            valid_distractors = []
+            for distractor in distractors[:Config.NUMBER_OF_DISTRACTORS]:
+                distractor_text = (str(distractor) or '').strip()
+                if distractor_text:
+                    valid_distractors.append(distractor_text)
+
+            if not valid_distractors:
+                raise ValueError('At least one non-empty distractor is required')
+
+            # Insert each distractor into submitted_distractors table
+            inserted_count = 0
+            for distractor_text in valid_distractors:
+                insert_payload = {
+                    'user_id': user_id,
+                    'username': username,
+                    'question_id': question_id,
+                    'distractor_text': distractor_text
+                }
+
+                client.table('submitted_distractors').insert(insert_payload).execute()
+                inserted_count += 1
+
+            results['accepted'].append({
+                'index': index,
+                'question_id': question_id,
+                'count': inserted_count
+            })
+
+        except Exception as exc:
+            results['errors'].append({
+                'index': index,
+                'error': str(exc)
+            })
+
+    status_code = 207 if results['errors'] else 201
+    return jsonify(results), status_code
