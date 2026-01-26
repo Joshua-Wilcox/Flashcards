@@ -7,3 +7,4 @@ whitelist.json
 *.pyc
 /optimization_prompts
 node_modules/*
+CLAUDE.md

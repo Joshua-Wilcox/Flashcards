@@ -113,30 +113,39 @@ def get_question():
     if rpc_result and rpc_result.get('question_data'):
         q_data = rpc_result['question_data']
         d_data = rpc_result['distractors']
-        
-        # Start with correct answer
+
+        # Collect distractors (but don't add correct answer yet)
+        distractor_list = []
+
+        # Add manual distractors
+        manual_distractors = d_data.get('manual_distractors', [])
+        for md in manual_distractors:
+            distractor_list.append((md['answer'], None, 'manual_distractor', md['id']))
+
+        # Add smart distractors
+        smart_distractors = d_data.get('smart_distractors', [])
+        for sd in smart_distractors:
+            distractor_list.append((sd['answer'], sd['id'], 'question', None))
+
+        # Limit distractors to NUMBER_OF_DISTRACTORS to leave room for correct answer
+        # This ensures total options = NUMBER_OF_DISTRACTORS + 1 (correct answer + distractors)
+        if len(distractor_list) > Config.NUMBER_OF_DISTRACTORS:
+            distractor_list = distractor_list[:Config.NUMBER_OF_DISTRACTORS]
+
+        # Now add the correct answer at the beginning
         answers = [q_data['answer']]
         answer_ids = [q_data['id']]
         answer_types = ['question']
         answer_metadata = [None]
-        
-        # Add manual distractors
-        manual_distractors = d_data.get('manual_distractors', [])
-        for md in manual_distractors:
-            answers.append(md['answer'])
-            answer_ids.append(None)
-            answer_types.append('manual_distractor')
-            answer_metadata.append(md['id'])
-            
-        # Add smart distractors
-        smart_distractors = d_data.get('smart_distractors', [])
-        for sd in smart_distractors:
-            answers.append(sd['answer'])
-            answer_ids.append(sd['id'])
-            answer_types.append('question')
-            answer_metadata.append(None)
-            
-        # Shuffle answers
+
+        # Add the limited distractors
+        for dist_answer, dist_id, dist_type, dist_meta in distractor_list:
+            answers.append(dist_answer)
+            answer_ids.append(dist_id)
+            answer_types.append(dist_type)
+            answer_metadata.append(dist_meta)
+
+        # Shuffle answers (correct answer is now guaranteed to be in the shuffled list)
         combined = list(zip(answers, answer_ids, answer_types, answer_metadata))
         random.shuffle(combined)
         shuffled_answers, shuffled_answer_ids, shuffled_answer_types, shuffled_answer_metadata = zip(*combined)
