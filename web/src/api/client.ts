@@ -226,15 +226,6 @@ export const api = {
       body: JSON.stringify({ request_id: requestId }),
     }),
 
-  checkDuplicates: (question: string, module: string) =>
-    fetchJSON<{ matches: { reason: string; id: string; question: string; answer: string; similarity: number }[] }>(
-      `${API_BASE}/check-duplicates`,
-      {
-        method: 'POST',
-        body: JSON.stringify({ question, module }),
-      }
-    ),
-
   editAnswer: (data: {
     question_id?: string;
     manual_distractor_id?: number;

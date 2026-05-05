@@ -21,7 +21,7 @@ export default function MultiSelectField({
   onFetch,
   placeholder = 'Select or type to add...',
   disabled = false,
-  label,
+  label: _label,
 }: MultiSelectFieldProps) {
   const [inputValue, setInputValue] = useState('');
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);

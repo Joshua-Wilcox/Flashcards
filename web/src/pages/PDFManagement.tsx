@@ -56,14 +56,14 @@ export default function PDFManagement() {
       const tagNames = uploadTags.filter(Boolean);
 
       if (pendingFiles.length === 1) {
-        return api.uploadPDF(pendingFiles[0], {
+        return api.adminUploadPDF(pendingFiles[0], {
           module_id: selectedModuleId,
           topic_names: topicNames,
           subtopic_names: subtopicNames,
           tag_names: tagNames,
         });
       } else {
-        return api.batchUploadPDFs(pendingFiles, {
+        return api.batchSubmitPDFs(pendingFiles, {
           module_id: selectedModuleId,
           topic_names: topicNames,
           subtopic_names: subtopicNames,
