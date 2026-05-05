@@ -1,0 +1,36 @@
+# Environment
+.env
+.env.*
+
+# Binaries
+bin/
+server
+
+# Frontend build artifacts & deps
+web/node_modules/
+web/dist/
+
+# Go
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Database
+*.db
+*.sqlite
+
+# Supabase local
+supabase/.temp/

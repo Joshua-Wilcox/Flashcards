@@ -1,0 +1,124 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-bg: #0f172a;
+  --color-surface: #1e293b;
+  --color-surface-hover: #334155;
+  --color-text: #f8fafc;
+  --color-text-muted: #94a3b8;
+  --color-primary: #3b82f6;
+  --color-primary-hover: #2563eb;
+  --color-success: #22c55e;
+  --color-danger: #ef4444;
+  --color-warning: #f59e0b;
+}
+
+body {
+  @apply bg-slate-900 text-slate-100 antialiased;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 
+           disabled:opacity-50 disabled:cursor-not-allowed
+           focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900;
+  }
+
+  .btn-primary {
+    @apply btn bg-blue-600 hover:bg-blue-700 text-white focus:ring-blue-500;
+  }
+
+  .btn-secondary {
+    @apply btn bg-slate-700 hover:bg-slate-600 text-white focus:ring-slate-500;
+  }
+
+  .btn-success {
+    @apply btn bg-green-600 hover:bg-green-700 text-white focus:ring-green-500;
+  }
+
+  .btn-danger {
+    @apply btn bg-red-600 hover:bg-red-700 text-white focus:ring-red-500;
+  }
+
+  .btn-ghost {
+    @apply btn bg-transparent hover:bg-slate-800 text-slate-300 focus:ring-slate-500;
+  }
+
+  .card {
+    @apply bg-slate-800 rounded-xl border border-slate-700 shadow-lg;
+  }
+
+  .input {
+    @apply w-full px-4 py-2 bg-slate-800 border border-slate-600 rounded-lg
+           text-slate-100 placeholder-slate-400
+           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+           transition-all duration-200;
+  }
+
+  .answer-btn {
+    @apply w-full p-4 text-left rounded-xl border-2 transition-all duration-200
+           font-medium text-lg;
+  }
+
+  .answer-btn-default {
+    @apply answer-btn bg-slate-800 border-slate-600 hover:border-blue-500 hover:bg-slate-700
+           text-slate-100;
+  }
+
+  .answer-btn-correct {
+    @apply answer-btn bg-green-900/50 border-green-500 text-green-100;
+  }
+
+  .answer-btn-incorrect {
+    @apply answer-btn bg-red-900/50 border-red-500 text-red-100 opacity-60;
+  }
+
+  .answer-btn-disabled {
+    @apply answer-btn bg-slate-800/50 border-slate-700 text-slate-400 cursor-not-allowed;
+  }
+
+  .tag {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+           bg-slate-700 text-slate-300;
+  }
+
+  .dropdown {
+    @apply relative inline-block;
+  }
+
+  .dropdown-menu {
+    @apply absolute z-50 mt-2 w-56 rounded-lg bg-slate-800 border border-slate-700
+           shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none;
+  }
+
+  .dropdown-item {
+    @apply block px-4 py-2 text-sm text-slate-300 hover:bg-slate-700 
+           hover:text-white cursor-pointer transition-colors;
+  }
+
+  .dropdown-item-selected {
+    @apply dropdown-item bg-blue-600/20 text-blue-400;
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+.animate-shake {
+  animation: shake 0.3s ease-in-out;
+}
+
+@keyframes pulse-green {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
+  50% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
+}
+
+.animate-pulse-green {
+  animation: pulse-green 0.5s ease-out;
+}

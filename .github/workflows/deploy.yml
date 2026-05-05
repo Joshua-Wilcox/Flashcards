@@ -1,0 +1,52 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        run: docker build -t flashcards .
+
+      - name: Save Docker image
+        run: docker save flashcards | gzip > flashcards.tar.gz
+
+      - name: Copy image to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: "flashcards.tar.gz"
+          target: "/tmp"
+
+      - name: Deploy on VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd /tmp
+            gunzip -f flashcards.tar.gz
+            docker load < flashcards.tar
+            rm flashcards.tar
+
+            docker stop flashcards 2>/dev/null || true
+            docker rm flashcards 2>/dev/null || true
+
+            docker run -d \
+              --name flashcards \
+              --restart unless-stopped \
+              --network host \
+              --env-file /opt/flashcards/.env \
+              -v /opt/flashcards/whitelist.json:/app/whitelist.json \
+              flashcards
