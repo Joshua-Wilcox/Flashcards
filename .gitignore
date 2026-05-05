@@ -4,7 +4,7 @@
 
 # Binaries
 bin/
-server
+/server
 
 # Frontend build artifacts & deps
 web/node_modules/
