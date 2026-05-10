@@ -1,13 +1,28 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Trophy, Zap, Target, Award, ChevronDown, Percent } from 'lucide-react';
+import { Trophy, Zap, Target, Award, ChevronDown, Percent, Crown, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '../api/client';
 import { useWebSocket, isLeaderboardUpdate } from '../api/websocket';
 import ModuleSelector from '../components/ModuleSelector';
 import type { LeaderboardEntry, WebSocketMessage, LeaderboardUpdate } from '../types';
 
-type SortField = 'correct_answers' | 'total_answers' | 'current_streak' | 'approved_cards' | 'accuracy';
+type SortField = 'correct_answers' | 'total_answers' | 'current_streak' | 'max_streak' | 'approved_cards' | 'accuracy' | 'last_answer_time';
+
+function formatRelativeTime(iso: string | undefined): string {
+  if (!iso) return '-';
+  const seconds = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+  if (seconds < 0) return 'now';
+  if (seconds < 60) return `${seconds}s`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d`;
+  const weeks = Math.floor(days / 7);
+  return `${weeks}w`;
+}
 
 export default function Leaderboard() {
   const [sortBy, setSortBy] = useState<SortField>('correct_answers');
@@ -28,18 +43,18 @@ export default function Leaderboard() {
   const handleWebSocketMessage = useCallback((message: WebSocketMessage) => {
     if (message.type === 'leaderboard_update' && isLeaderboardUpdate(message.data)) {
       const update = message.data as LeaderboardUpdate;
-      
+
       queryClient.setQueryData<{ leaderboard: LeaderboardEntry[] }>(
         ['leaderboard', sortBy, sortOrder, selectedModule],
         (oldData) => {
           if (!oldData) return oldData;
-          
+
           const existingIndex = oldData.leaderboard.findIndex(
             (e) => e.user_id === update.user_id
           );
-          
+
           let newLeaderboard: LeaderboardEntry[];
-          
+
           if (existingIndex >= 0) {
             newLeaderboard = oldData.leaderboard.map((entry) =>
               entry.user_id === update.user_id
@@ -49,7 +64,9 @@ export default function Leaderboard() {
                     correct_answers: update.correct_answers,
                     total_answers: update.total_answers,
                     current_streak: update.current_streak,
+                    max_streak: update.max_streak,
                     approved_cards: update.approved_cards,
+                    last_answer_time: update.last_answer_time,
                   }
                 : entry
             );
@@ -62,25 +79,30 @@ export default function Leaderboard() {
                 correct_answers: update.correct_answers,
                 total_answers: update.total_answers,
                 current_streak: update.current_streak,
+                max_streak: update.max_streak,
                 approved_cards: update.approved_cards,
+                last_answer_time: update.last_answer_time,
               },
             ];
           }
-          
+
           newLeaderboard.sort((a, b) => {
             let aVal: number, bVal: number;
-            
+
             if (sortBy === 'accuracy') {
               aVal = a.total_answers > 0 ? a.correct_answers / a.total_answers : 0;
               bVal = b.total_answers > 0 ? b.correct_answers / b.total_answers : 0;
+            } else if (sortBy === 'last_answer_time') {
+              aVal = a.last_answer_time ? new Date(a.last_answer_time).getTime() : 0;
+              bVal = b.last_answer_time ? new Date(b.last_answer_time).getTime() : 0;
             } else {
               aVal = a[sortBy];
               bVal = b[sortBy];
             }
-            
+
             return sortOrder === 'desc' ? bVal - aVal : aVal - bVal;
           });
-          
+
           return { leaderboard: newLeaderboard };
         }
       );
@@ -133,7 +155,7 @@ export default function Leaderboard() {
   );
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8">
+    <div className="max-w-6xl mx-auto px-4 py-8">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">
           <h1 className="text-2xl font-bold text-white flex items-center gap-2">
@@ -163,14 +185,16 @@ export default function Leaderboard() {
       </div>
 
       <div className="card overflow-hidden">
-        <div className="grid grid-cols-[3rem_1fr_4.5rem_4.5rem_4.5rem_4.5rem_4.5rem] gap-2 p-4 bg-slate-900/50 border-b border-slate-700">
+        <div className="grid grid-cols-[3rem_1fr_4.5rem_4.5rem_4.5rem_4.5rem_4.5rem_4.5rem_4.5rem] gap-2 p-4 bg-slate-900/50 border-b border-slate-700">
           <div className="text-sm font-medium text-slate-400 text-center">#</div>
           <div className="text-sm font-medium text-slate-400">Player</div>
           <SortHeader field="correct_answers" label="Correct" icon={Target} />
           <SortHeader field="total_answers" label="Total" icon={Award} />
           <SortHeader field="accuracy" label="Acc" icon={Percent} />
           <SortHeader field="current_streak" label="Streak" icon={Zap} />
+          <SortHeader field="max_streak" label="Best" icon={Crown} />
           <SortHeader field="approved_cards" label="Cards" icon={Award} />
+          <SortHeader field="last_answer_time" label="Active" icon={Clock} />
         </div>
 
         {isLoading ? (
@@ -209,7 +233,14 @@ function LeaderboardRow({
   rank: number;
   getRankDisplay: (rank: number) => React.ReactNode;
 }) {
-  const accuracy = useMemo(() => 
+  const [, setTick] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => setTick(t => t + 1), 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const accuracy = useMemo(() =>
     entry.total_answers > 0
       ? Math.round((entry.correct_answers / entry.total_answers) * 100)
       : 0,
@@ -222,7 +253,7 @@ function LeaderboardRow({
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 10 }}
-      className={`grid grid-cols-[3rem_1fr_4.5rem_4.5rem_4.5rem_4.5rem_4.5rem] gap-2 p-4 items-center ${
+      className={`grid grid-cols-[3rem_1fr_4.5rem_4.5rem_4.5rem_4.5rem_4.5rem_4.5rem_4.5rem] gap-2 p-4 items-center ${
         rank <= 3 ? 'bg-slate-800/50' : ''
       }`}
     >
@@ -244,8 +275,8 @@ function LeaderboardRow({
 
       <div className="text-right">
         <p className={`font-medium ${
-          accuracy >= 80 ? 'text-green-400' : 
-          accuracy >= 60 ? 'text-yellow-400' : 
+          accuracy >= 80 ? 'text-green-400' :
+          accuracy >= 60 ? 'text-yellow-400' :
           'text-slate-400'
         }`}>
           {accuracy}%
@@ -264,7 +295,24 @@ function LeaderboardRow({
       </div>
 
       <div className="text-right">
+        {entry.max_streak > 0 ? (
+          <span className="flex items-center justify-end gap-1 text-purple-400">
+            <Crown className="h-4 w-4" />
+            {entry.max_streak}
+          </span>
+        ) : (
+          <span className="text-slate-500">-</span>
+        )}
+      </div>
+
+      <div className="text-right">
         <p className="text-slate-300">{entry.approved_cards}</p>
+      </div>
+
+      <div className="text-right">
+        <p className="text-slate-400 text-sm">
+          {formatRelativeTime(entry.last_answer_time)}
+        </p>
       </div>
     </motion.div>
   );

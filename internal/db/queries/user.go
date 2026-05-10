@@ -15,6 +15,7 @@ type UserStats struct {
 	CorrectAnswers int        `json:"correct_answers"`
 	TotalAnswers   int        `json:"total_answers"`
 	CurrentStreak  int        `json:"current_streak"`
+	MaxStreak      int        `json:"max_streak"`
 	ApprovedCards  int        `json:"approved_cards"`
 	LastAnswerTime *time.Time `json:"last_answer_time,omitempty"`
 }
@@ -32,13 +33,13 @@ type ModuleStats struct {
 func GetUserStats(ctx context.Context, userID string) (*UserStats, error) {
 	var stats UserStats
 	err := db.Pool.QueryRow(ctx, `
-		SELECT user_id, username, correct_answers, total_answers, 
-		       current_streak, approved_cards, last_answer_time
+		SELECT user_id, username, correct_answers, total_answers,
+		       current_streak, COALESCE(max_streak, 0), approved_cards, last_answer_time
 		FROM user_stats
 		WHERE user_id = $1
 	`, userID).Scan(
 		&stats.UserID, &stats.Username, &stats.CorrectAnswers,
-		&stats.TotalAnswers, &stats.CurrentStreak, &stats.ApprovedCards,
+		&stats.TotalAnswers, &stats.CurrentStreak, &stats.MaxStreak, &stats.ApprovedCards,
 		&stats.LastAnswerTime,
 	)
 	if err == pgx.ErrNoRows {
@@ -60,8 +61,8 @@ func GetOrCreateUserStats(ctx context.Context, userID, username string) (*UserSt
 	}
 
 	_, err = db.Pool.Exec(ctx, `
-		INSERT INTO user_stats (user_id, username, correct_answers, total_answers, current_streak, approved_cards)
-		VALUES ($1, $2, 0, 0, 0, 0)
+		INSERT INTO user_stats (user_id, username, correct_answers, total_answers, current_streak, max_streak, approved_cards)
+		VALUES ($1, $2, 0, 0, 0, 0, 0)
 		ON CONFLICT (user_id) DO NOTHING
 	`, userID, username)
 	if err != nil {
@@ -98,12 +99,14 @@ func GetUserModuleStats(ctx context.Context, userID string) ([]ModuleStats, erro
 }
 
 type LeaderboardEntry struct {
-	UserID         string `json:"user_id"`
-	Username       string `json:"username"`
-	CorrectAnswers int    `json:"correct_answers"`
-	TotalAnswers   int    `json:"total_answers"`
-	CurrentStreak  int    `json:"current_streak"`
-	ApprovedCards  int    `json:"approved_cards"`
+	UserID         string     `json:"user_id"`
+	Username       string     `json:"username"`
+	CorrectAnswers int        `json:"correct_answers"`
+	TotalAnswers   int        `json:"total_answers"`
+	CurrentStreak  int        `json:"current_streak"`
+	MaxStreak      int        `json:"max_streak"`
+	ApprovedCards  int        `json:"approved_cards"`
+	LastAnswerTime *time.Time `json:"last_answer_time,omitempty"`
 }
 
 func GetLeaderboard(ctx context.Context, sortBy, order string, moduleID *int, limit int) ([]LeaderboardEntry, error) {
@@ -112,8 +115,10 @@ func GetLeaderboard(ctx context.Context, sortBy, order string, moduleID *int, li
 		"correct_answers": "correct_answers",
 		"total_answers":   "total_answers",
 		"current_streak":  "current_streak",
+		"max_streak":      "max_streak",
 		"approved_cards":  "approved_cards",
 		"accuracy":        "(CASE WHEN total_answers > 0 THEN correct_answers::float / total_answers ELSE 0 END)",
+		"last_answer_time": "last_answer_time",
 	}
 	sortExpr, valid := sortExpressions[sortBy]
 	if !valid {
@@ -126,27 +131,38 @@ func GetLeaderboard(ctx context.Context, sortBy, order string, moduleID *int, li
 	var query string
 	var args []interface{}
 
+	nullsClause := ""
+	if sortBy == "last_answer_time" {
+		if order == "desc" {
+			nullsClause = " NULLS LAST"
+		} else {
+			nullsClause = " NULLS LAST"
+		}
+	}
+
 	if moduleID != nil {
 		query = `
-			SELECT us.user_id, us.username, 
+			SELECT us.user_id, us.username,
 			       COALESCE(ms.number_correct, 0) as correct_answers,
 			       COALESCE(ms.number_answered, 0) as total_answers,
 			       COALESCE(ms.current_streak, 0) as current_streak,
-			       COALESCE(ms.approved_cards, 0) as approved_cards
+			       COALESCE(us.max_streak, 0) as max_streak,
+			       COALESCE(ms.approved_cards, 0) as approved_cards,
+			       us.last_answer_time
 			FROM user_stats us
 			LEFT JOIN module_stats ms ON us.user_id = ms.user_id AND ms.module_id = $1
 			WHERE ms.number_answered > 0
-			ORDER BY ` + sortExpr + ` ` + order + `
+			ORDER BY ` + sortExpr + ` ` + order + nullsClause + `
 			LIMIT $2
 		`
 		args = []interface{}{*moduleID, limit}
 	} else {
 		query = `
-			SELECT user_id, username, correct_answers, total_answers, 
-			       current_streak, approved_cards
+			SELECT user_id, username, correct_answers, total_answers,
+			       current_streak, COALESCE(max_streak, 0), approved_cards, last_answer_time
 			FROM user_stats
 			WHERE total_answers > 0
-			ORDER BY ` + sortExpr + ` ` + order + `
+			ORDER BY ` + sortExpr + ` ` + order + nullsClause + `
 			LIMIT $1
 		`
 		args = []interface{}{limit}
@@ -162,7 +178,7 @@ func GetLeaderboard(ctx context.Context, sortBy, order string, moduleID *int, li
 	for rows.Next() {
 		var e LeaderboardEntry
 		if err := rows.Scan(&e.UserID, &e.Username, &e.CorrectAnswers,
-			&e.TotalAnswers, &e.CurrentStreak, &e.ApprovedCards); err != nil {
+			&e.TotalAnswers, &e.CurrentStreak, &e.MaxStreak, &e.ApprovedCards, &e.LastAnswerTime); err != nil {
 			return nil, err
 		}
 		entries = append(entries, e)
@@ -204,6 +220,7 @@ func ResetUserStreak(ctx context.Context, userID string, moduleID int) error {
 type AnswerResult struct {
 	Correct       bool `json:"correct"`
 	NewStreak     int  `json:"new_streak"`
+	MaxStreak     int  `json:"max_streak"`
 	TotalCorrect  int  `json:"total_correct"`
 	TotalAnswers  int  `json:"total_answers"`
 	ModuleStreak  int  `json:"module_streak"`
@@ -244,13 +261,13 @@ func ProcessAnswerCheck(ctx context.Context, userID, questionID, submittedAnswer
 	isCorrect := submittedAnswer == correctAnswer
 	now := time.Now()
 
-	var currentCorrect, currentTotal, currentStreak int
+	var currentCorrect, currentTotal, currentStreak, currentMaxStreak int
 	err = tx.QueryRow(ctx, `
-		SELECT COALESCE(correct_answers, 0), COALESCE(total_answers, 0), COALESCE(current_streak, 0)
+		SELECT COALESCE(correct_answers, 0), COALESCE(total_answers, 0), COALESCE(current_streak, 0), COALESCE(max_streak, 0)
 		FROM user_stats WHERE user_id = $1
-	`, userID).Scan(&currentCorrect, &currentTotal, &currentStreak)
+	`, userID).Scan(&currentCorrect, &currentTotal, &currentStreak, &currentMaxStreak)
 	if err == pgx.ErrNoRows {
-		currentCorrect, currentTotal, currentStreak = 0, 0, 0
+		currentCorrect, currentTotal, currentStreak, currentMaxStreak = 0, 0, 0, 0
 	} else if err != nil {
 		return nil, "", err
 	}
@@ -262,17 +279,22 @@ func ProcessAnswerCheck(ctx context.Context, userID, questionID, submittedAnswer
 		newCorrect++
 		newStreak = currentStreak + 1
 	}
+	newMaxStreak := currentMaxStreak
+	if newStreak > newMaxStreak {
+		newMaxStreak = newStreak
+	}
 
 	_, err = tx.Exec(ctx, `
-		INSERT INTO user_stats (user_id, username, correct_answers, total_answers, current_streak, last_answer_time)
-		VALUES ($1, $2, $3, $4, $5, $6)
+		INSERT INTO user_stats (user_id, username, correct_answers, total_answers, current_streak, max_streak, last_answer_time)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
 		ON CONFLICT (user_id) DO UPDATE SET
 			correct_answers = EXCLUDED.correct_answers,
 			total_answers = EXCLUDED.total_answers,
 			current_streak = EXCLUDED.current_streak,
+			max_streak = EXCLUDED.max_streak,
 			last_answer_time = EXCLUDED.last_answer_time,
 			username = EXCLUDED.username
-	`, userID, username, newCorrect, newTotal, newStreak, now)
+	`, userID, username, newCorrect, newTotal, newStreak, newMaxStreak, now)
 	if err != nil {
 		return nil, "", err
 	}
@@ -344,6 +366,7 @@ func ProcessAnswerCheck(ctx context.Context, userID, questionID, submittedAnswer
 	return &AnswerResult{
 		Correct:       isCorrect,
 		NewStreak:     newStreak,
+		MaxStreak:     newMaxStreak,
 		TotalCorrect:  newCorrect,
 		TotalAnswers:  newTotal,
 		ModuleStreak:  newModuleStreak,

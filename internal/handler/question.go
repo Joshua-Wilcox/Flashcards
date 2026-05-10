@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"math/rand"
 	"net/http"
+	"time"
 
 	"flashcards-go/internal/auth"
 	"flashcards-go/internal/config"
@@ -352,7 +353,9 @@ func (h *QuestionHandler) CheckAnswer(w http.ResponseWriter, r *http.Request) {
 						CorrectAnswers: result.TotalCorrect,
 						TotalAnswers:   result.TotalAnswers,
 						CurrentStreak:  result.NewStreak,
+						MaxStreak:      result.MaxStreak,
 						ApprovedCards:  approvedCards,
+						LastAnswerTime: time.Now().Format(time.RFC3339),
 					})
 				}
 			}()

@@ -94,7 +94,9 @@ export interface LeaderboardEntry {
   correct_answers: number;
   total_answers: number;
   current_streak: number;
+  max_streak: number;
   approved_cards: number;
+  last_answer_time?: string;
 }
 
 export interface ActivityEvent {
@@ -112,7 +114,9 @@ export interface LeaderboardUpdate {
   correct_answers: number;
   total_answers: number;
   current_streak: number;
+  max_streak: number;
   approved_cards: number;
+  last_answer_time?: string;
 }
 
 export interface WebSocketMessage {

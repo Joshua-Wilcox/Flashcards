@@ -74,11 +74,10 @@ export default function LiveLeaderboard({ module, maxItems = 10 }: LiveLeaderboa
       </h3>
 
       <div className="space-y-2">
-        <AnimatePresence mode="popLayout">
+        <AnimatePresence mode="sync">
           {entries.map((entry, index) => (
             <motion.div
               key={entry.user_id}
-              layout
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}

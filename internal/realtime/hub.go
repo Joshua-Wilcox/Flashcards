@@ -23,7 +23,9 @@ type LeaderboardUpdate struct {
 	CorrectAnswers int    `json:"correct_answers"`
 	TotalAnswers   int    `json:"total_answers"`
 	CurrentStreak  int    `json:"current_streak"`
+	MaxStreak      int    `json:"max_streak"`
 	ApprovedCards  int    `json:"approved_cards"`
+	LastAnswerTime string `json:"last_answer_time"`
 }
 
 type Message struct {

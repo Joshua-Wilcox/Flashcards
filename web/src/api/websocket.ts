@@ -5,7 +5,7 @@ type MessageHandler = (message: WebSocketMessage) => void;
 
 export function useWebSocket(onMessage: MessageHandler) {
   const wsRef = useRef<WebSocket | null>(null);
-  const reconnectTimeoutRef = useRef<number>();
+  const reconnectTimeoutRef = useRef<number>(undefined);
   const [isConnected, setIsConnected] = useState(false);
 
   const connect = useCallback(() => {
