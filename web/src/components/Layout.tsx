@@ -27,12 +27,17 @@ export default function Layout({ children, user }: LayoutProps) {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="bg-slate-800 border-b border-slate-700 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-14">
-            <Link to="/" className="text-lg font-semibold text-white hover:text-slate-200 transition-colors">
-              flashcards.josh.software
+    <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
+      <header className="bg-white sticky top-0 z-40 shadow-sm">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <Link
+              to="/"
+              onClick={() => window.dispatchEvent(new CustomEvent('reset-quiz'))}
+              className="flex items-center gap-2.5 font-bold text-gray-900 hover:text-blue-600 transition-colors"
+            >
+              <img src="/favicon.png" alt="" className="h-7 w-7" />
+              <span className="text-base">flashcards.josh.software</span>
             </Link>
 
             <nav className="hidden md:flex items-center gap-1">
@@ -40,10 +45,10 @@ export default function Layout({ children, user }: LayoutProps) {
                 <Link
                   key={path}
                   to={path}
-                  className={`px-3 py-1.5 rounded-md text-sm transition-colors ${
+                  className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${
                     location.pathname === path
                       ? 'bg-blue-600 text-white'
-                      : 'text-slate-300 hover:bg-slate-700 hover:text-white'
+                      : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                   }`}
                 >
                   {label}
@@ -54,10 +59,10 @@ export default function Layout({ children, user }: LayoutProps) {
             <div className="flex items-center gap-3">
               {user?.authenticated ? (
                 <>
-                  <span className="text-sm text-slate-300 hidden sm:inline">{user.username}</span>
+                  <span className="text-sm font-medium text-gray-600 hidden sm:inline">{user.username}</span>
                   <a
                     href="/logout"
-                    className="px-3 py-1.5 rounded-md text-sm bg-slate-700 hover:bg-slate-600 text-slate-300 hover:text-white transition-colors"
+                    className="px-3.5 py-2 rounded-lg text-sm font-medium bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors"
                   >
                     Logout
                   </a>
@@ -65,7 +70,7 @@ export default function Layout({ children, user }: LayoutProps) {
               ) : (
                 <a
                   href="/login"
-                  className="px-4 py-1.5 rounded-md text-sm bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+                  className="px-4 py-2 rounded-lg text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white transition-colors shadow-sm"
                 >
                   Login with Discord
                 </a>
@@ -74,16 +79,16 @@ export default function Layout({ children, user }: LayoutProps) {
           </div>
         </div>
 
-        <nav className="md:hidden border-t border-slate-700">
+        <nav className="md:hidden border-t border-gray-100">
           <div className="flex overflow-x-auto">
             {navItems.map(({ path, label }) => (
               <Link
                 key={path}
                 to={path}
-                className={`flex-1 text-center px-3 py-2.5 text-xs whitespace-nowrap ${
+                className={`flex-1 text-center px-3 py-3 text-xs font-medium whitespace-nowrap ${
                   location.pathname === path
-                    ? 'bg-blue-600/20 text-blue-400 border-b-2 border-blue-500'
-                    : 'text-slate-400 hover:text-white'
+                    ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
+                    : 'text-gray-500 hover:text-gray-900'
                 }`}
               >
                 {label}
@@ -93,17 +98,17 @@ export default function Layout({ children, user }: LayoutProps) {
         </nav>
       </header>
 
-      <main className="flex-1">{children}</main>
+      <main className="flex-1 min-h-0 overflow-y-auto">{children}</main>
 
-      <footer className="bg-slate-800 border-t border-slate-700 py-4">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-slate-400 text-sm">
+      <footer className="bg-white border-t border-gray-100 py-4 flex-shrink-0">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <p className="text-gray-500 text-sm">
             made with love by Josh Wilcox &mdash;{' '}
             <a
               href="https://josh.software"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blue-400 hover:text-blue-300 transition-colors"
+              className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
             >
               See my Website
             </a>

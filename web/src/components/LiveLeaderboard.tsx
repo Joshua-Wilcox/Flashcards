@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trophy, Zap, TrendingUp } from 'lucide-react';
@@ -11,10 +11,28 @@ interface LiveLeaderboardProps {
   maxItems?: number;
 }
 
-export default function LiveLeaderboard({ module, maxItems = 10 }: LiveLeaderboardProps) {
-  const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
+const ITEM_HEIGHT = 48;
 
-  const { data, isLoading } = useQuery({
+export default function LiveLeaderboard({ module, maxItems }: LiveLeaderboardProps) {
+  const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
+  const [visibleCount, setVisibleCount] = useState(maxItems ?? 10);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (maxItems) return;
+    const el = containerRef.current;
+    if (!el) return;
+    const calculate = () => {
+      const available = el.clientHeight;
+      setVisibleCount(Math.max(3, Math.floor(available / ITEM_HEIGHT)));
+    };
+    calculate();
+    const observer = new ResizeObserver(calculate);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [maxItems]);
+
+  const { data } = useQuery({
     queryKey: ['leaderboard', 'correct_answers', 'desc', module],
     queryFn: () => api.getLeaderboard('correct_answers', 'desc', module),
     refetchInterval: 60000,
@@ -22,9 +40,9 @@ export default function LiveLeaderboard({ module, maxItems = 10 }: LiveLeaderboa
 
   useEffect(() => {
     if (data?.leaderboard) {
-      setEntries(data.leaderboard.slice(0, maxItems));
+      setEntries(data.leaderboard.slice(0, visibleCount));
     }
-  }, [data, maxItems]);
+  }, [data, visibleCount]);
 
   const handleMessage = useCallback((message: WebSocketMessage) => {
     if (message.type === 'leaderboard_update' && isLeaderboardUpdate(message.data)) {
@@ -40,75 +58,65 @@ export default function LiveLeaderboard({ module, maxItems = 10 }: LiveLeaderboa
             : entry
         );
 
-        return updated.sort((a, b) => b.correct_answers - a.correct_answers);
+        return updated.sort((a, b) => b.correct_answers - a.correct_answers).slice(0, visibleCount);
       });
     }
-  }, []);
+  }, [visibleCount]);
 
   useWebSocket(handleMessage);
 
   const getRankIcon = (rank: number) => {
-    if (rank === 1) return <Trophy className="h-5 w-5 text-yellow-400" />;
-    if (rank === 2) return <Trophy className="h-5 w-5 text-slate-300" />;
-    if (rank === 3) return <Trophy className="h-5 w-5 text-amber-600" />;
-    return <span className="w-5 text-center text-slate-500">{rank}</span>;
+    if (rank === 1) return <Trophy className="h-5 w-5 text-amber-500" />;
+    if (rank === 2) return <Trophy className="h-5 w-5 text-gray-400" />;
+    if (rank === 3) return <Trophy className="h-5 w-5 text-amber-700" />;
+    return <span className="w-5 text-center text-gray-400 text-sm font-medium">{rank}</span>;
   };
 
-  if (isLoading) {
-    return (
-      <div className="card p-4">
-        <div className="animate-pulse space-y-3">
-          {[...Array(5)].map((_, i) => (
-            <div key={i} className="h-12 bg-slate-700 rounded-lg" />
-          ))}
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="card p-4">
-      <h3 className="text-sm font-semibold text-slate-300 flex items-center gap-2 mb-4">
-        <TrendingUp className="h-4 w-4" />
+    <div className="card p-5 w-full flex flex-col overflow-hidden">
+      <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2 mb-4 flex-shrink-0">
+        <TrendingUp className="h-4 w-4 text-blue-600" />
         Top Players
       </h3>
 
-      <div className="space-y-2">
+      <div ref={containerRef} className="flex flex-col gap-2 flex-1 overflow-hidden">
         <AnimatePresence mode="sync">
-          {entries.map((entry, index) => (
+          {entries.slice(0, visibleCount).map((entry, index) => (
             <motion.div
               key={entry.user_id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className={`flex items-center gap-3 p-3 rounded-lg ${
+              className={`flex items-center gap-3 p-2.5 rounded-xl flex-shrink-0 ${
                 index === 0
-                  ? 'bg-yellow-900/20 border border-yellow-700/50'
-                  : 'bg-slate-900/50'
+                  ? 'bg-amber-50'
+                  : 'bg-gray-50'
               }`}
             >
               <div className="flex-shrink-0">{getRankIcon(index + 1)}</div>
 
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-slate-200 truncate">
+                <p className="text-sm font-medium text-gray-900 truncate">
                   {entry.username}
                 </p>
               </div>
 
-              <div className="flex items-center gap-4 flex-shrink-0">
+              <div className="flex items-center gap-2 flex-shrink-0">
                 {entry.current_streak > 0 && (
-                  <span className="flex items-center gap-1 text-xs text-yellow-400">
+                  <span className="flex items-center gap-1 text-xs font-semibold text-amber-600">
                     <Zap className="h-3 w-3" />
                     {entry.current_streak}
                   </span>
                 )}
-                <span className="text-sm font-semibold text-blue-400">
+                <span className="text-sm font-bold text-blue-600">
                   {entry.correct_answers.toLocaleString()}
                 </span>
               </div>
             </motion.div>
           ))}
         </AnimatePresence>
+
+        <div className="flex-1 bg-gradient-to-b from-gray-50 to-transparent rounded-xl min-h-[1rem]" />
       </div>
     </div>
   );

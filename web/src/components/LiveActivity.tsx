@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Zap, Users } from 'lucide-react';
 import { useWebSocket, isActivityEvent } from '../api/websocket';
@@ -9,27 +9,45 @@ interface LiveActivityProps {
   maxItems?: number;
 }
 
-export default function LiveActivity({ maxItems = 5 }: LiveActivityProps) {
+const ITEM_HEIGHT = 68;
+
+export default function LiveActivity({ maxItems }: LiveActivityProps) {
   const [activities, setActivities] = useState<ActivityEvent[]>([]);
+  const [visibleCount, setVisibleCount] = useState(maxItems ?? 8);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    api.getRecentActivity().then((data) => {
+    if (maxItems) return;
+    const el = containerRef.current;
+    if (!el) return;
+    const calculate = () => {
+      const available = el.clientHeight;
+      setVisibleCount(Math.max(3, Math.floor(available / ITEM_HEIGHT)));
+    };
+    calculate();
+    const observer = new ResizeObserver(calculate);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [maxItems]);
+
+  useEffect(() => {
+    api.getRecentActivity(visibleCount).then((data) => {
       if (data.activities?.length) {
-        setActivities(data.activities.slice(0, maxItems));
+        setActivities(data.activities.slice(0, visibleCount));
       }
     }).catch(() => {});
-  }, [maxItems]);
+  }, [visibleCount]);
 
   const handleMessage = useCallback((message: WebSocketMessage) => {
     if (message.type === 'activity' && isActivityEvent(message.data)) {
       setActivities((prev) => {
         const filtered = prev.filter((a) => a.user_id !== message.data.user_id);
-        return [message.data as ActivityEvent, ...filtered].slice(0, maxItems);
+        return [message.data as ActivityEvent, ...filtered].slice(0, visibleCount);
       });
     }
-  }, [maxItems]);
+  }, [visibleCount]);
 
-  const { isConnected } = useWebSocket(handleMessage);
+  useWebSocket(handleMessage);
 
   const formatTime = (timestamp: string) => {
     const date = new Date(timestamp);
@@ -43,62 +61,46 @@ export default function LiveActivity({ maxItems = 5 }: LiveActivityProps) {
   };
 
   return (
-    <div className="card p-4">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-semibold text-slate-300 flex items-center gap-2">
-          <Users className="h-4 w-4" />
-          Live Activity
-        </h3>
-        <div className="flex items-center gap-2">
-          <span
-            className={`w-2 h-2 rounded-full ${
-              isConnected ? 'bg-green-500 animate-pulse' : 'bg-red-500'
-            }`}
-          />
-          <span className="text-xs text-slate-400">
-            {isConnected ? 'Live' : 'Connecting...'}
-          </span>
-        </div>
-      </div>
+    <div className="card p-5 w-full flex flex-col overflow-hidden">
+      <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2 mb-4 flex-shrink-0">
+        <Users className="h-4 w-4 text-blue-600" />
+        Recent Activity
+      </h3>
 
-      <div className="space-y-2">
+      <div ref={containerRef} className="flex flex-col gap-2 flex-1 overflow-hidden">
         <AnimatePresence mode="popLayout">
-          {activities.length === 0 ? (
-            <p className="text-sm text-slate-500 text-center py-4">
-              No recent activity
-            </p>
-          ) : (
-            activities.map((activity) => (
-              <motion.div
-                key={`${activity.user_id}-${activity.answered_at}`}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 20 }}
-                className="p-2.5 bg-slate-900/50 rounded-lg space-y-1"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-slate-200">
-                    {activity.username}
-                  </span>
-                  <div className="flex items-center gap-2">
-                    {activity.streak > 1 && (
-                      <span className="flex items-center gap-1 text-xs text-yellow-400">
-                        <Zap className="h-3 w-3" />
-                        {activity.streak}
-                      </span>
-                    )}
-                    <span className="text-xs text-slate-500">
-                      {formatTime(activity.answered_at)}
+          {activities.slice(0, visibleCount).map((activity) => (
+            <motion.div
+              key={`${activity.user_id}-${activity.answered_at}`}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              className="p-3 bg-gray-50 rounded-xl space-y-1 flex-shrink-0"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-gray-900 truncate">
+                  {activity.username}
+                </span>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  {activity.streak > 1 && (
+                    <span className="flex items-center gap-1 text-xs font-semibold text-amber-600">
+                      <Zap className="h-3 w-3" />
+                      {activity.streak}
                     </span>
-                  </div>
+                  )}
+                  <span className="text-xs text-gray-400">
+                    {formatTime(activity.answered_at)}
+                  </span>
                 </div>
-                <div className="text-xs text-slate-400">
-                  {activity.module_name}
-                </div>
-              </motion.div>
-            ))
-          )}
+              </div>
+              <div className="text-xs text-gray-500 truncate">
+                {activity.module_name}
+              </div>
+            </motion.div>
+          ))}
         </AnimatePresence>
+
+        <div className="flex-1 bg-gradient-to-b from-gray-50 to-transparent rounded-xl min-h-[1rem]" />
       </div>
     </div>
   );

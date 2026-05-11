@@ -17,7 +17,6 @@ export default function ReportForm({ question, onSubmit, onCancel }: ReportFormP
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  // Build rich distractor objects matching the original schema
   const distractorObjects = question.answers
     .map((answer, i) => ({
       answer,
@@ -62,7 +61,7 @@ export default function ReportForm({ question, onSubmit, onCancel }: ReportFormP
         type="button"
         onClick={handleSubmit}
         disabled={!canSubmit}
-        className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-40 text-white text-sm font-medium flex items-center gap-1.5 transition-colors"
+        className="btn-primary text-sm flex items-center gap-1.5"
       >
         <Send className="h-3.5 w-3.5" />
         Submit Report
@@ -70,7 +69,7 @@ export default function ReportForm({ question, onSubmit, onCancel }: ReportFormP
       <button
         type="button"
         onClick={onCancel}
-        className="px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 text-sm transition-colors"
+        className="btn-secondary text-sm"
       >
         Cancel
       </button>
@@ -78,29 +77,26 @@ export default function ReportForm({ question, onSubmit, onCancel }: ReportFormP
   );
 
   return (
-    <div className="rounded-xl border border-yellow-700/40 bg-yellow-950/10 p-5 space-y-4">
+    <div className="rounded-xl bg-amber-50 p-5 space-y-4">
       <div className="flex items-center gap-2">
-        <Flag className="h-5 w-5 text-yellow-400" />
-        <h3 className="text-base font-semibold text-yellow-400">Report a Question</h3>
-        <span className="text-sm text-slate-400">Please provide details about the issue.</span>
+        <Flag className="h-5 w-5 text-amber-600" />
+        <h3 className="text-base font-bold text-amber-700">Report a Question</h3>
+        <span className="text-sm text-gray-500">Please provide details about the issue.</span>
       </div>
 
-      {/* Top submit buttons */}
       <SubmitButtons />
 
-      {/* Reporting guidelines */}
-      <div className="rounded-lg bg-blue-950/30 border border-blue-800/40 p-3 text-sm text-slate-300 space-y-1">
-        <p className="font-semibold text-blue-300 mb-2">Reporting Guidelines</p>
-        <ul className="space-y-1 list-disc list-inside text-slate-400">
+      <div className="rounded-lg bg-blue-50 p-3 text-sm text-gray-600 space-y-1">
+        <p className="font-semibold text-blue-700 mb-2">Reporting Guidelines</p>
+        <ul className="space-y-1 list-disc list-inside text-gray-500">
           <li>What is incorrect about the question or answer</li>
           <li>If distractors are problematic, mention them by number</li>
           <li>Provide any corrections or suggestions</li>
         </ul>
       </div>
 
-      {/* Message textarea */}
       <div>
-        <label className="block text-sm font-semibold text-blue-300 mb-1">
+        <label className="block text-sm font-semibold text-gray-700 mb-1">
           Describe the issue:
         </label>
         <textarea
@@ -108,46 +104,44 @@ export default function ReportForm({ question, onSubmit, onCancel }: ReportFormP
           onChange={(e) => setMessage(e.target.value)}
           rows={6}
           placeholder="Please describe what's wrong with this question, answer, or distractors."
-          className="w-full bg-slate-900 text-white rounded-lg px-3 py-2 border border-blue-700/50 focus:border-blue-500 focus:outline-none resize-y text-sm leading-relaxed"
+          className="input text-sm leading-relaxed"
         />
       </div>
 
-      {/* Question + Correct Answer */}
-      <div className="rounded-lg bg-blue-950/20 border border-blue-800/30 p-4 space-y-3">
-        <p className="text-sm font-semibold text-blue-300">Correct Answer</p>
+      <div className="rounded-xl bg-white p-4 space-y-3">
+        <p className="text-sm font-semibold text-gray-700">Correct Answer</p>
         <div>
-          <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">Question</p>
-          <div className="bg-slate-800/60 rounded-lg p-3 text-sm text-slate-200">
+          <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Question</p>
+          <div className="bg-gray-50 rounded-lg p-3 text-sm text-gray-700">
             {question.question}
           </div>
         </div>
         <div>
-          <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">Answer</p>
-          <div className="bg-green-950/40 border border-green-800/30 rounded-lg p-3 text-sm text-green-300">
+          <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Answer</p>
+          <div className="bg-emerald-50 rounded-lg p-3 text-sm text-emerald-700">
             {correctAnswer}
           </div>
         </div>
       </div>
 
-      {/* Distractors */}
       {distractorObjects.length > 0 && (
         <div className="space-y-3">
-          <p className="text-sm font-semibold text-slate-300">Distractors</p>
+          <p className="text-sm font-semibold text-gray-700">Distractors</p>
           {distractorObjects.map((d, i) => (
             <div
               key={`${d.id}-${i}`}
-              className="rounded-lg bg-slate-800/40 border border-slate-700/50 p-3 space-y-2"
+              className="rounded-lg bg-white p-3 space-y-2"
             >
-              <p className="text-xs text-slate-500 uppercase tracking-wide">Distractor {i + 1}</p>
+              <p className="text-xs text-gray-400 uppercase tracking-wide">Distractor {i + 1}</p>
               <div>
-                <p className="text-xs text-slate-600 mb-0.5">Question</p>
-                <div className="bg-slate-800/60 rounded p-2 text-xs text-slate-300">
+                <p className="text-xs text-gray-400 mb-0.5">Question</p>
+                <div className="bg-gray-50 rounded p-2 text-xs text-gray-600">
                   {question.question}
                 </div>
               </div>
               <div>
-                <p className="text-xs text-slate-600 mb-0.5">Answer</p>
-                <div className="bg-red-950/30 border border-red-900/30 rounded p-2 text-xs text-red-300">
+                <p className="text-xs text-gray-400 mb-0.5">Answer</p>
+                <div className="bg-red-50 rounded p-2 text-xs text-red-700">
                   {d.answer}
                 </div>
               </div>
@@ -156,7 +150,6 @@ export default function ReportForm({ question, onSubmit, onCancel }: ReportFormP
         </div>
       )}
 
-      {/* Bottom submit buttons */}
       <SubmitButtons />
     </div>
   );

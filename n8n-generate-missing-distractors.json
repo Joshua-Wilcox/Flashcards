@@ -1,0 +1,332 @@
+{
+  "name": "Auto-Generate Missing Distractors",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 12
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -400,
+        300
+      ],
+      "id": "trigger-1",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://dllpooxjdafwmdwsaeob.supabase.co/rest/v1/rpc/get_questions_without_distractors",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "result_limit",
+              "value": "50"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -160,
+        300
+      ],
+      "id": "get-questions-without-distractors",
+      "name": "Get Questions Without Distractors",
+      "credentials": {
+        "supabaseApi": {
+          "id": "NhHQBrahxXIQ218o",
+          "name": "Flashcards Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "={{ Object.keys($json)[0] ? '' : '' }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        80,
+        300
+      ],
+      "id": "split-results",
+      "name": "Split Into Items"
+    },
+    {
+      "parameters": {
+        "options": {
+          "batchSize": 1
+        }
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        320,
+        300
+      ],
+      "id": "loop-questions",
+      "name": "Loop Over Questions"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "You will be provided with a single flashcard object containing a 'Question' and its correct 'Answer'. Your task is to generate EXACTLY four (4) incorrect distractor answers for this flashcard.\n\nThese distractors must strictly adhere to the following rules:\n\n- Context-Dependent & Ambiguous in Isolation: Each distractor, when read on its own (without the associated 'Question'), should be ambiguous, incomplete, or not make full sense. It should only appear as a plausible (though incorrect) response when considered as an answer to the original 'Question' from the provided flashcard.\n- No Hints or Question Referencing: Distractors must NOT contain any words, phrases, or concepts directly from the 'Question' that would give away the context or make the distractor obviously related to that specific question if seen in a list of other potential answers. The distractor should stand alone as a short phrase or term.\n- Plausible but Definitely Incorrect: Distractors should be designed to seem like reasonable potential answers to the original 'Question'. However, each distractor must be clearly and definitively incorrect as an answer to the original 'Question'.\n- Format & Style Consistency: Distractors must be in simple plaintext. Their style, length, and complexity should be similar to the provided correct 'Answer'. Avoid any special formatting, LaTeX, or complex mathematical notation.\n- Uniqueness: Each generated distractor should be unique from the correct 'Answer' and from the other distractors you generate for the same question-answer pair.\n- JSON Output: your output MUST strictly be a JSON list of strings with the distractors in them. Do not use markdown formatting or any backticks. You MUST ONLY return the JSON with no other surrounding text.\n\nThe Question:\n\n{{ $('Loop Over Questions').item.json.question }}\n\nThe CORRECT Answer:\n\n{{ $('Loop Over Questions').item.json.answer }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        560,
+        300
+      ],
+      "id": "generate-distractors",
+      "name": "Generate Distractors",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "model": "x-ai/grok-4.1-fast",
+        "options": {
+          "responseFormat": "json_object"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        560,
+        520
+      ],
+      "id": "llm-model",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "Ii7iGuZ3g18Jh9qa",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "try {\n  const output = $json.output;\n  let distractors;\n\n  if (typeof output === 'string') {\n    const jsonMatch = output.match(/\\[[\\s\\S]*\\]/);\n    if (jsonMatch) {\n      distractors = JSON.parse(jsonMatch[0]);\n    } else {\n      distractors = JSON.parse(output);\n    }\n  } else if (Array.isArray(output)) {\n    distractors = output;\n  } else {\n    return { json: { error: 'Unexpected output format' } };\n  }\n\n  if (!Array.isArray(distractors) || distractors.length === 0) {\n    return { json: { error: 'No valid distractors generated' } };\n  }\n\n  // Ensure all entries are strings\n  distractors = distractors.filter(d => typeof d === 'string' && d.trim().length > 0).slice(0, 4);\n\n  if (distractors.length < 2) {\n    return { json: { error: 'Too few valid distractors after filtering' } };\n  }\n\n  return {\n    json: {\n      question_id: $('Loop Over Questions').item.json.id,\n      distractors: distractors\n    }\n  };\n} catch (e) {\n  return { json: { error: 'Parse error: ' + e.message } };\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        300
+      ],
+      "id": "parse-distractors",
+      "name": "Parse Distractor JSON"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "check-no-error",
+              "leftValue": "={{ $json.error }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notExists"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1040,
+        300
+      ],
+      "id": "check-valid",
+      "name": "Has Valid Distractors?"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://flashcards.josh.software/api/submit_distractors",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ question_id: $json.question_id, distractors: $json.distractors }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1280,
+        240
+      ],
+      "id": "submit-distractors",
+      "name": "Submit Distractors",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "jhXYYmYml3iu5xAW",
+          "name": "Bearer Auth account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1280,
+        440
+      ],
+      "id": "skip-invalid",
+      "name": "Skip (Parse Failed)"
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Questions Without Distractors",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Questions Without Distractors": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Questions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Questions": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Generate Distractors",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generate Distractors",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Distractors": {
+      "main": [
+        [
+          {
+            "node": "Parse Distractor JSON",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Questions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Distractor JSON": {
+      "main": [
+        [
+          {
+            "node": "Has Valid Distractors?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Valid Distractors?": {
+      "main": [
+        [
+          {
+            "node": "Submit Distractors",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Skip (Parse Failed)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Submit Distractors": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Questions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Skip (Parse Failed)": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Questions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}

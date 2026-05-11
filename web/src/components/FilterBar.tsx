@@ -45,16 +45,16 @@ function FilterDropdown({
       <button
         onClick={onToggle}
         disabled={items.length === 0}
-        className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-colors ${
+        className={`flex items-center gap-2 px-3.5 py-2 rounded-lg transition-colors ${
           selected.length > 0
-            ? 'bg-blue-600/20 border-blue-500 text-blue-400'
-            : 'bg-slate-800 border-slate-600 text-slate-300 hover:border-slate-500'
+            ? 'bg-blue-50 text-blue-700 font-medium'
+            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
         } ${items.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
       >
         <span className="text-sm">
           {label}
           {selected.length > 0 && (
-            <span className="ml-1 px-1.5 py-0.5 bg-blue-600 text-white text-xs rounded-full">
+            <span className="ml-1.5 px-1.5 py-0.5 bg-blue-600 text-white text-xs rounded-full font-semibold">
               {selected.length}
             </span>
           )}
@@ -65,22 +65,22 @@ function FilterDropdown({
       </button>
 
       {isOpen && items.length > 0 && (
-        <div className="absolute z-50 mt-2 w-64 max-h-64 overflow-y-auto rounded-lg bg-slate-800 border border-slate-700 shadow-xl">
+        <div className="absolute z-50 mt-2 w-64 max-h-64 overflow-y-auto rounded-xl bg-white shadow-lg">
           {items.map((item) => (
             <button
               key={item}
               onClick={() => toggleItem(item)}
-              className={`w-full flex items-center gap-2 px-4 py-2 text-left text-sm hover:bg-slate-700 transition-colors ${
+              className={`w-full flex items-center gap-3 px-4 py-2.5 text-left text-sm hover:bg-gray-50 transition-colors ${
                 selected.includes(item)
-                  ? 'bg-blue-600/20 text-blue-400'
-                  : 'text-slate-300'
+                  ? 'bg-blue-50 text-blue-700'
+                  : 'text-gray-700'
               }`}
             >
               <div
-                className={`w-4 h-4 rounded border flex items-center justify-center ${
+                className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
                   selected.includes(item)
                     ? 'bg-blue-600 border-blue-600'
-                    : 'border-slate-500'
+                    : 'border-gray-300'
                 }`}
               >
                 {selected.includes(item) && (
@@ -139,15 +139,15 @@ export default function FilterBar({
   if (isLoading) {
     return (
       <div className="flex items-center gap-2 animate-pulse">
-        <div className="h-10 w-24 bg-slate-700 rounded-lg" />
-        <div className="h-10 w-24 bg-slate-700 rounded-lg" />
+        <div className="h-10 w-24 bg-gray-100 rounded-lg" />
+        <div className="h-10 w-24 bg-gray-100 rounded-lg" />
       </div>
     );
   }
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <Filter className="h-4 w-4 text-slate-400" />
+      <Filter className="h-4 w-4 text-gray-400" />
 
       <FilterDropdown
         label="Topics"
@@ -172,7 +172,7 @@ export default function FilterBar({
       {hasActiveFilters && (
         <button
           onClick={clearAllFilters}
-          className="flex items-center gap-1 px-3 py-2 text-sm text-slate-400 hover:text-white transition-colors"
+          className="flex items-center gap-1 px-3 py-2 text-sm text-gray-400 hover:text-gray-700 transition-colors"
         >
           <X className="h-4 w-4" />
           Clear all

@@ -38,25 +38,25 @@ export default function SponsorWidget({
   };
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 w-72 bg-slate-800 border border-slate-600 rounded-xl shadow-2xl overflow-hidden">
+    <div className="fixed bottom-4 right-4 z-50 w-72 bg-white rounded-2xl shadow-lg overflow-hidden">
       <div
-        className="flex items-center justify-between px-4 py-2.5 bg-gradient-to-r from-pink-600/20 to-purple-600/20 border-b border-slate-700 cursor-pointer"
+        className="flex items-center justify-between px-4 py-3 bg-pink-50 cursor-pointer"
         onClick={() => setCollapsed(!collapsed)}
       >
-        <span className="text-sm font-semibold text-white flex items-center gap-2">
-          <Heart className="h-4 w-4 text-pink-400" />
+        <span className="text-sm font-bold text-gray-900 flex items-center gap-2">
+          <Heart className="h-4 w-4 text-pink-500" />
           Support the site
         </span>
         <div className="flex items-center gap-1">
           <button
             onClick={(e) => { e.stopPropagation(); setCollapsed(!collapsed); }}
-            className="p-1 text-slate-400 hover:text-white transition-colors"
+            className="p-1 text-gray-400 hover:text-gray-700 transition-colors"
           >
             {collapsed ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </button>
           <button
             onClick={(e) => { e.stopPropagation(); handleClose(); }}
-            className="p-1 text-slate-400 hover:text-white transition-colors"
+            className="p-1 text-gray-400 hover:text-gray-700 transition-colors"
           >
             <X className="h-4 w-4" />
           </button>
@@ -68,24 +68,24 @@ export default function SponsorWidget({
           <div className="space-y-2">
             <button
               onClick={handleSponsor}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-gradient-to-r from-pink-600 to-pink-700 hover:from-pink-500 hover:to-pink-600 text-white font-medium text-sm transition-all"
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-pink-600 hover:bg-pink-700 text-white font-semibold text-sm transition-colors"
             >
               <Heart className="h-4 w-4" />
               Sponsor on GitHub
             </button>
             <button
               onClick={handleStar}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-white font-medium text-sm transition-colors"
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold text-sm transition-colors"
             >
-              <Star className="h-4 w-4 text-yellow-400" />
+              <Star className="h-4 w-4 text-amber-500" />
               Star on GitHub
             </button>
           </div>
 
-          <p className="text-xs text-slate-400 text-center leading-relaxed">
+          <p className="text-xs text-gray-500 text-center leading-relaxed">
             Support would be greatly appreciated for the upkeep of the site.
             If you can't sponsor, please consider{' '}
-            <a href="/submit" className="text-blue-400 hover:text-blue-300">
+            <a href="/submit" className="text-blue-600 hover:text-blue-700 font-medium">
               submitting some flashcards!
             </a>
           </p>
@@ -93,7 +93,7 @@ export default function SponsorWidget({
           <div className="text-center">
             <button
               onClick={handleNeverShow}
-              className="text-xs text-slate-500 hover:text-slate-400 transition-colors"
+              className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
             >
               Do not show again
             </button>

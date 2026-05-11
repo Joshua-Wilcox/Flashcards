@@ -44,7 +44,6 @@ export default function QuizCard({
   const [showReportForm, setShowReportForm] = useState(false);
   const [showDistractorForm, setShowDistractorForm] = useState(false);
 
-  // Per-answer inline edit state
   const [editingIdx, setEditingIdx] = useState<number | null>(null);
   const [editText, setEditText] = useState('');
   const [savingEdit, setSavingEdit] = useState(false);
@@ -59,8 +58,8 @@ export default function QuizCard({
   };
 
   const getAnswerIcon = (answer: string) => {
-    if (state === 'correct' && answer === selectedAnswer) return <Check className="h-5 w-5 text-green-400" />;
-    if (incorrectAnswers.has(answer)) return <X className="h-5 w-5 text-red-400" />;
+    if (state === 'correct' && answer === selectedAnswer) return <Check className="h-5 w-5 text-emerald-600" />;
+    if (incorrectAnswers.has(answer)) return <X className="h-5 w-5 text-red-500" />;
     return null;
   };
 
@@ -111,19 +110,20 @@ export default function QuizCard({
   };
 
   return (
-    <div className="card p-6 space-y-6">
-      {/* Header: topic badges + question text + action buttons */}
+    <div className="space-y-6">
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1">
-          <div className="flex flex-wrap gap-2 mb-3">
+          <div className="flex flex-wrap gap-2 mb-4">
             {question.topic && (
-              <span className="tag bg-blue-900/50 text-blue-300">{question.topic}</span>
+              <span className="tag">{question.topic}</span>
             )}
             {question.subtopic && (
-              <span className="tag bg-purple-900/50 text-purple-300">{question.subtopic}</span>
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-50 text-purple-700">
+                {question.subtopic}
+              </span>
             )}
           </div>
-          <h2 className="text-xl md:text-2xl font-semibold text-white leading-relaxed">
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 leading-snug">
             {question.question}
           </h2>
         </div>
@@ -132,7 +132,7 @@ export default function QuizCard({
           {onReportQuestion && (
             <button
               onClick={() => { setShowReportForm((v) => !v); setShowDistractorForm(false); cancelEdit(); }}
-              className={`p-2 transition-colors ${showReportForm ? 'text-yellow-400' : 'text-slate-400 hover:text-yellow-400'}`}
+              className={`p-2 rounded-lg transition-colors ${showReportForm ? 'text-amber-600 bg-amber-50' : 'text-gray-400 hover:text-amber-600 hover:bg-amber-50'}`}
               title="Report question"
             >
               <Flag className="h-5 w-5" />
@@ -141,7 +141,7 @@ export default function QuizCard({
           {onSubmitDistractors && state !== 'correct' && (
             <button
               onClick={() => { setShowDistractorForm((v) => !v); setShowReportForm(false); cancelEdit(); }}
-              className={`p-2 transition-colors ${showDistractorForm ? 'text-amber-400' : 'text-slate-400 hover:text-amber-400'}`}
+              className={`p-2 rounded-lg transition-colors ${showDistractorForm ? 'text-amber-600 bg-amber-50' : 'text-gray-400 hover:text-amber-600 hover:bg-amber-50'}`}
               title="Suggest distractors (Obvious Answer?)"
             >
               <Lightbulb className="h-5 w-5" />
@@ -150,7 +150,6 @@ export default function QuizCard({
         </div>
       </div>
 
-      {/* Report form */}
       {showReportForm && onReportQuestion && (
         <ReportForm
           question={question}
@@ -159,7 +158,6 @@ export default function QuizCard({
         />
       )}
 
-      {/* Distractor form */}
       {showDistractorForm && onSubmitDistractors && (
         <DistractorForm
           question={question}
@@ -168,12 +166,10 @@ export default function QuizCard({
         />
       )}
 
-      {/* Answer buttons */}
       <div className="space-y-3">
         {question.answers.map((answer, index) => (
           <div key={`${answer}-${index}`} className="flex items-center gap-2">
             {editingIdx === index ? (
-              /* Inline edit form */
               <div className="flex items-center gap-2 w-full">
                 <input
                   ref={editInputRef}
@@ -184,12 +180,12 @@ export default function QuizCard({
                     if (e.key === 'Enter') { e.preventDefault(); void saveEdit(index); }
                     if (e.key === 'Escape') cancelEdit();
                   }}
-                  className="flex-1 bg-slate-900 text-white rounded-lg px-4 py-3 border border-blue-500 focus:outline-none text-base"
+                  className="flex-1 bg-white text-gray-900 rounded-xl px-4 py-3 border-2 border-blue-500 focus:outline-none text-base"
                 />
                 <button
                   onClick={() => void saveEdit(index)}
                   disabled={savingEdit || !editText.trim()}
-                  className="px-3 py-2 rounded-lg bg-green-600 hover:bg-green-500 disabled:opacity-40 text-white text-sm font-medium flex items-center gap-1.5 transition-colors flex-shrink-0"
+                  className="px-3 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 text-white text-sm font-semibold flex items-center gap-1.5 transition-colors flex-shrink-0"
                   title="Save"
                 >
                   {savingEdit ? (
@@ -201,14 +197,13 @@ export default function QuizCard({
                 </button>
                 <button
                   onClick={cancelEdit}
-                  className="px-3 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 text-sm transition-colors flex-shrink-0"
+                  className="px-3 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-medium transition-colors flex-shrink-0"
                   title="Cancel"
                 >
                   Cancel
                 </button>
               </div>
             ) : (
-              /* Normal answer button */
               <>
                 <motion.button
                   onClick={() => {
@@ -235,7 +230,7 @@ export default function QuizCard({
                   <button
                     onClick={() => startEdit(index, answer)}
                     disabled={editingIdx !== null && editingIdx !== index}
-                    className="p-2 rounded-lg bg-slate-700 hover:bg-amber-500/20 text-slate-400 hover:text-amber-400 transition-colors flex-shrink-0 disabled:opacity-30"
+                    className="p-2 rounded-lg bg-gray-100 hover:bg-amber-50 text-gray-400 hover:text-amber-600 transition-colors flex-shrink-0 disabled:opacity-30"
                     title="Edit this answer"
                   >
                     <Edit3 className="h-4 w-4" />
@@ -247,12 +242,10 @@ export default function QuizCard({
         ))}
       </div>
 
-      {/* PDF dropdown */}
       {question.pdfs && question.pdfs.length > 0 && (
         <PDFDropdown pdfs={question.pdfs} />
       )}
 
-      {/* Next question button */}
       {state === 'correct' && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -261,7 +254,7 @@ export default function QuizCard({
         >
           <button
             onClick={onNextQuestion}
-            className="btn-primary flex items-center gap-2 text-lg px-8 py-3"
+            className="btn-primary flex items-center gap-2 text-lg px-8 py-3.5"
           >
             Next Question
             <ArrowRight className="h-5 w-5" />
@@ -300,8 +293,8 @@ function PDFDropdown({ pdfs }: { pdfs: PDF[] }) {
   };
 
   return (
-    <div className="border-t border-slate-700 pt-4">
-      <h3 className="text-sm font-medium text-slate-400 mb-2 flex items-center gap-2">
+    <div className="border-t border-gray-100 pt-5">
+      <h3 className="text-sm font-semibold text-gray-500 mb-3 flex items-center gap-2">
         <FileText className="h-4 w-4" />
         Related Lecture Notes
       </h3>
@@ -311,14 +304,14 @@ function PDFDropdown({ pdfs }: { pdfs: PDF[] }) {
             key={pdf.id}
             href={`/api/pdf/${pdf.id}`}
             onClick={(e) => handlePDFClick(e, pdf)}
-            className="flex items-center justify-between p-3 bg-slate-900/50 rounded-lg hover:bg-slate-900 transition-colors cursor-pointer"
+            className="flex items-center justify-between p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer"
           >
             <div className="flex items-center gap-3">
-              <FileText className="h-5 w-5 text-red-400" />
-              <span className="text-slate-200">{pdf.original_filename}</span>
+              <FileText className="h-5 w-5 text-red-500" />
+              <span className="text-gray-700 font-medium">{pdf.original_filename}</span>
             </div>
             {pdf.match_percent && (
-              <span className="text-xs text-slate-400">
+              <span className="text-xs text-gray-400 font-medium">
                 {Math.round(pdf.match_percent)}% match
               </span>
             )}

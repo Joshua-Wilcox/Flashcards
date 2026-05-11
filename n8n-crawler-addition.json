@@ -1,0 +1,119 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "hours", "hoursInterval": 24 }]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [-6048, -1800],
+      "id": "crawler-schedule-trigger",
+      "name": "Crawl Schedule (Daily)"
+    },
+    {
+      "parameters": {
+        "url": "https://api.github.com/repos/Joshua-Wilcox/university/git/trees/main?recursive=1",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [-5824, -1800],
+      "id": "crawler-get-repo-tree",
+      "name": "Get Repo Tree (Recursive)",
+      "credentials": {
+        "githubApi": { "id": "mNhv3H6SbHRLz0uz", "name": "GitHub account" }
+      }
+    },
+    {
+      "parameters": { "fieldToSplitOut": "tree", "options": {} },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [-5600, -1800],
+      "id": "crawler-split-tree",
+      "name": "Split Tree Entries"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2 },
+          "conditions": [
+            { "id": "filter-tex", "leftValue": "={{ $json.path }}", "rightValue": ".tex", "operator": { "type": "string", "operation": "endsWith" } },
+            { "id": "filter-blob", "leftValue": "={{ $json.type }}", "rightValue": "blob", "operator": { "type": "string", "operation": "equals" } }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [-5376, -1800],
+      "id": "crawler-filter-tex",
+      "name": "Filter .tex Files"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "pdfs",
+        "returnAll": true,
+        "matchType": "allFilters"
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [-5376, -1600],
+      "id": "crawler-get-all-pdfs",
+      "name": "Get All Uploaded PDFs",
+      "credentials": {
+        "supabaseApi": { "id": "NhHQBrahxXIQ218o", "name": "Flashcards Supabase" }
+      }
+    },
+    {
+      "parameters": { "mode": "chooseBranch" },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [-5152, -1800],
+      "id": "crawler-merge-data",
+      "name": "Wait for Both"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const texFiles = $('Filter .tex Files').all().map(item => item.json.path);\nconst uploadedPdfs = $('Get All Uploaded PDFs').all().map(item => item.json.original_filename);\n\nconst missingFiles = [];\n\nfor (const texPath of texFiles) {\n  const pdfFilename = texPath.split('/').pop().replace('.tex', '.pdf');\n  const isUploaded = uploadedPdfs.some(uploaded => uploaded === pdfFilename);\n  \n  if (!isUploaded) {\n    missingFiles.push({ json: { filenames: texPath } });\n  }\n}\n\nif (missingFiles.length === 0) {\n  return [{ json: { filenames: 'no_missing_files.txt' } }];\n}\n\nreturn missingFiles;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-4928, -1800],
+      "id": "crawler-find-missing",
+      "name": "Find .tex Without Uploaded PDF"
+    }
+  ],
+  "connections": {
+    "Crawl Schedule (Daily)": {
+      "main": [[{ "node": "Get Repo Tree (Recursive)", "type": "main", "index": 0 }]]
+    },
+    "Get Repo Tree (Recursive)": {
+      "main": [[
+        { "node": "Split Tree Entries", "type": "main", "index": 0 },
+        { "node": "Get All Uploaded PDFs", "type": "main", "index": 0 }
+      ]]
+    },
+    "Split Tree Entries": {
+      "main": [[{ "node": "Filter .tex Files", "type": "main", "index": 0 }]]
+    },
+    "Filter .tex Files": {
+      "main": [[{ "node": "Wait for Both", "type": "main", "index": 0 }]]
+    },
+    "Get All Uploaded PDFs": {
+      "main": [[{ "node": "Wait for Both", "type": "main", "index": 1 }]]
+    },
+    "Wait for Both": {
+      "main": [[{ "node": "Find .tex Without Uploaded PDF", "type": "main", "index": 0 }]]
+    },
+    "Find .tex Without Uploaded PDF": {
+      "main": [[{ "node": "IfEndsWithTex", "type": "main", "index": 0 }]]
+    }
+  }
+}

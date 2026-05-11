@@ -35,7 +35,6 @@ export default function ModuleSelector({
   const handleOpen = useCallback(() => {
     if (disabled) return;
     if (!isOpen) {
-      // When opening, jump to the year containing the selected module
       if (selectedModule) {
         const group = moduleGroups.find((g) =>
           g.modules.some((m) => m.name === selectedModule)
@@ -74,31 +73,31 @@ export default function ModuleSelector({
       <button
         onClick={handleOpen}
         disabled={disabled}
-        className={`w-full flex items-center justify-between px-4 py-3 bg-slate-800 border border-slate-600 rounded-lg hover:border-slate-500 transition-colors ${
+        className={`w-full flex items-center justify-between px-5 py-4 bg-white border-2 border-gray-200 rounded-xl hover:border-blue-400 hover:shadow-sm transition-all ${
           disabled ? 'opacity-50 cursor-not-allowed' : ''
-        }`}
+        } ${isOpen ? 'border-blue-500 shadow-sm' : ''}`}
       >
-        <span className={selectedModule ? 'text-white' : 'text-slate-400'}>
+        <span className={selectedModule ? 'text-gray-900 font-semibold text-lg' : 'text-gray-400 text-lg'}>
           {buttonLabel}
         </span>
         <ChevronDown
-          className={`h-5 w-5 text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+          className={`h-5 w-5 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
         />
       </button>
 
       {isOpen && (
-        <div className="absolute z-50 mt-1 w-full max-h-80 overflow-y-auto rounded-lg bg-slate-800 border border-slate-700 shadow-xl">
+        <div className="absolute z-50 mt-2 w-full max-h-80 overflow-y-auto rounded-xl bg-white shadow-lg">
           {!activeYear ? (
             <>
               {selectedModule && (
                 <>
                   <button
                     onClick={handleClear}
-                    className="w-full px-4 py-2.5 text-left text-sm text-slate-400 hover:bg-slate-700 hover:text-white transition-colors"
+                    className="w-full px-4 py-3 text-left text-sm text-gray-400 hover:bg-gray-50 hover:text-gray-700 transition-colors"
                   >
                     Clear selection
                   </button>
-                  <div className="border-t border-slate-700" />
+                  <div className="border-t border-gray-100" />
                 </>
               )}
 
@@ -107,14 +106,14 @@ export default function ModuleSelector({
                   <button
                     key={group.year}
                     onClick={() => setActiveYear(group.year)}
-                    className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-slate-700 transition-colors"
+                    className="w-full flex items-center justify-between px-4 py-3.5 text-left hover:bg-gray-50 transition-colors"
                   >
-                    <span className="text-sm font-medium text-slate-200">{group.year}</span>
+                    <span className="text-sm font-semibold text-gray-900">{group.year}</span>
                     <div className="flex items-center gap-2">
-                      <span className="text-xs text-slate-500">
+                      <span className="text-xs text-gray-400">
                         {group.modules.length} module{group.modules.length !== 1 ? 's' : ''}
                       </span>
-                      <span className="text-slate-500 text-sm">›</span>
+                      <span className="text-gray-300 text-sm">&#8250;</span>
                     </div>
                   </button>
                 ))
@@ -123,10 +122,10 @@ export default function ModuleSelector({
                   <button
                     key={module.id}
                     onClick={() => handleSelectModule(module.name)}
-                    className={`w-full px-4 py-3 text-left text-sm hover:bg-slate-700 transition-colors ${
+                    className={`w-full px-4 py-3 text-left text-sm hover:bg-gray-50 transition-colors ${
                       selectedModule === module.name
-                        ? 'bg-blue-600/20 text-blue-400'
-                        : 'text-slate-200'
+                        ? 'bg-blue-50 text-blue-700 font-medium'
+                        : 'text-gray-700'
                     }`}
                   >
                     {module.name}
@@ -138,28 +137,28 @@ export default function ModuleSelector({
             <>
               <button
                 onClick={handleBack}
-                className="w-full px-4 py-2.5 text-left text-sm text-slate-400 hover:bg-slate-700 hover:text-white transition-colors"
+                className="w-full px-4 py-3 text-left text-sm text-gray-400 hover:bg-gray-50 hover:text-gray-700 transition-colors"
               >
-                ← All years
+                &larr; All years
               </button>
-              <div className="border-t border-slate-700" />
+              <div className="border-t border-gray-100" />
 
               {activeGroup && activeGroup.modules.length > 0 ? (
                 activeGroup.modules.map((module) => (
                   <button
                     key={module.id}
                     onClick={() => handleSelectModule(module.name)}
-                    className={`w-full px-4 py-3 text-left text-sm hover:bg-slate-700 transition-colors ${
+                    className={`w-full px-4 py-3 text-left text-sm hover:bg-gray-50 transition-colors ${
                       selectedModule === module.name
-                        ? 'bg-blue-600/20 text-blue-400'
-                        : 'text-slate-200'
+                        ? 'bg-blue-50 text-blue-700 font-medium'
+                        : 'text-gray-700'
                     }`}
                   >
                     {module.name}
                   </button>
                 ))
               ) : (
-                <div className="px-4 py-3 text-sm text-slate-500">
+                <div className="px-4 py-3 text-sm text-gray-400">
                   No modules in {activeYear}
                 </div>
               )}

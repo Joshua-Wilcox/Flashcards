@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"strconv"
 
 	"flashcards-go/internal/auth"
 	"flashcards-go/internal/db/queries"
@@ -118,7 +119,14 @@ func (h *UserHandler) GetLeaderboard(w http.ResponseWriter, r *http.Request) {
 func (h *UserHandler) GetRecentActivity(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	activities, err := queries.GetRecentActivity(ctx, 10)
+	limit := 10
+	if l := r.URL.Query().Get("limit"); l != "" {
+		if n, err := strconv.Atoi(l); err == nil && n > 0 && n <= 50 {
+			limit = n
+		}
+	}
+
+	activities, err := queries.GetRecentActivity(ctx, limit)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to get recent activity")
 		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "Internal error"})

@@ -172,8 +172,8 @@ export default function PDFs({ user }: PDFsProps) {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
-      <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-        <FileText className="h-7 w-7 text-blue-400" />
+      <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+        <FileText className="h-7 w-7 text-blue-600" />
         Resource Library
       </h1>
 
@@ -181,7 +181,7 @@ export default function PDFs({ user }: PDFsProps) {
       <section>
         {/* Filter bar */}
         <div className="flex flex-wrap items-center gap-2 mb-4">
-          <Filter className="h-4 w-4 text-slate-400" />
+          <Filter className="h-4 w-4 text-gray-500" />
 
           <div className="w-52">
             <ModuleSelector
@@ -232,19 +232,19 @@ export default function PDFs({ user }: PDFsProps) {
                 setFilterSubtopics([]);
                 setFilterTags([]);
               }}
-              className="flex items-center gap-1 px-3 py-2 text-sm text-slate-400 hover:text-white transition-colors"
+              className="flex items-center gap-1 px-3 py-2 text-sm text-gray-500 hover:text-gray-900 transition-colors"
             >
               <X className="h-4 w-4" /> Clear
             </button>
           )}
 
           {isAdmin && (
-            <label className="ml-auto flex items-center gap-2 text-sm text-slate-400">
+            <label className="ml-auto flex items-center gap-2 text-sm text-gray-500">
               <input
                 type="checkbox"
                 checked={showInactive}
                 onChange={e => setShowInactive(e.target.checked)}
-                className="rounded border-slate-600 bg-slate-800"
+                className="rounded border-gray-200 bg-gray-100"
               />
               Show deleted
             </label>
@@ -257,7 +257,7 @@ export default function PDFs({ user }: PDFsProps) {
             <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500" />
           </div>
         ) : pdfs.length === 0 ? (
-          <div className="card p-12 text-center text-slate-400">
+          <div className="card p-12 text-center text-gray-500">
             <FileText className="h-12 w-12 mx-auto mb-3 opacity-30" />
             <p>No PDFs found{hasActiveFilters ? ' matching your filters' : ''}.</p>
           </div>
@@ -281,21 +281,21 @@ export default function PDFs({ user }: PDFsProps) {
           </div>
         )}
 
-        <p className="text-xs text-slate-500 mt-3">
+        <p className="text-xs text-gray-400 mt-3">
           {pdfsData?.total ?? 0} PDF{pdfsData?.total !== 1 ? 's' : ''}
         </p>
       </section>
 
       {/* ── Upload / Submit ── */}
       <section className="card p-6">
-        <h2 className="text-lg font-semibold text-white mb-1">Submit a PDF</h2>
-        <p className="text-sm text-slate-400 mb-4">
+        <h2 className="text-lg font-semibold text-gray-900 mb-1">Submit a PDF</h2>
+        <p className="text-sm text-gray-500 mb-4">
           Submissions are reviewed by an admin before appearing in the library.
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <div>
-            <label className="block text-sm text-slate-400 mb-1">Module (required)</label>
+            <label className="block text-sm text-gray-500 mb-1">Module (required)</label>
             <ModuleSelector
               modules={modulesData?.modules || []}
               moduleGroups={modulesData?.module_groups || []}
@@ -341,38 +341,38 @@ export default function PDFs({ user }: PDFsProps) {
         <div
           {...getRootProps()}
           className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
-            isDragActive ? 'border-blue-500 bg-blue-500/10' : 'border-slate-600 hover:border-slate-500'
+            isDragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
           }`}
         >
           <input {...getInputProps()} />
-          <Upload className="h-10 w-10 mx-auto mb-3 text-slate-400" />
+          <Upload className="h-10 w-10 mx-auto mb-3 text-gray-500" />
           {isDragActive ? (
-            <p className="text-blue-400">Drop the PDFs here...</p>
+            <p className="text-blue-600">Drop the PDFs here...</p>
           ) : (
-            <p className="text-slate-400">Drag & drop PDF files here, or click to select</p>
+            <p className="text-gray-500">Drag & drop PDF files here, or click to select</p>
           )}
         </div>
 
         {pendingFiles.length > 0 && (
           <div className="mt-4 space-y-2">
-            <p className="text-sm font-medium text-slate-300">
+            <p className="text-sm font-medium text-gray-700">
               {pendingFiles.length} file{pendingFiles.length > 1 ? 's' : ''} selected
             </p>
             {pendingFiles.map((file, i) => (
-              <div key={i} className="flex items-center justify-between p-2 bg-slate-800 rounded">
+              <div key={i} className="flex items-center justify-between p-2 bg-gray-100 rounded">
                 <div className="flex items-center gap-2 min-w-0">
-                  <FileText className="h-4 w-4 text-slate-400 flex-shrink-0" />
-                  <span className="text-sm text-white truncate">{file.name}</span>
-                  <span className="text-xs text-slate-500 flex-shrink-0">{formatSize(file.size)}</span>
+                  <FileText className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                  <span className="text-sm text-gray-900 truncate">{file.name}</span>
+                  <span className="text-xs text-gray-400 flex-shrink-0">{formatSize(file.size)}</span>
                 </div>
-                <button onClick={() => setPendingFiles(p => p.filter((_, j) => j !== i))} className="p-1 text-slate-400 hover:text-red-400">
+                <button onClick={() => setPendingFiles(p => p.filter((_, j) => j !== i))} className="p-1 text-gray-500 hover:text-red-600">
                   <X className="h-4 w-4" />
                 </button>
               </div>
             ))}
 
             {uploadError && (
-              <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg flex items-center gap-2 text-red-400 text-sm">
+              <div className="p-3 bg-red-50 rounded-lg flex items-center gap-2 text-red-600 text-sm">
                 <AlertCircle className="h-4 w-4 flex-shrink-0" />
                 {uploadError}
               </div>
@@ -381,7 +381,7 @@ export default function PDFs({ user }: PDFsProps) {
             <button
               onClick={() => submitMutation.mutate()}
               disabled={!uploadModuleId || submitMutation.isPending}
-              className="mt-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-700 disabled:cursor-not-allowed text-white rounded-lg flex items-center gap-2 text-sm"
+              className="mt-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-200 disabled:cursor-not-allowed text-gray-900 rounded-lg flex items-center gap-2 text-sm"
             >
               {submitMutation.isPending ? (
                 <><div className="animate-spin rounded-full h-4 w-4 border-t-2 border-white" /> Processing...</>
@@ -427,7 +427,7 @@ function ChipList({
         <span key={item} className={`px-2 py-0.5 text-xs rounded-full ${chipClass}`}>{item}</span>
       ))}
       {hidden > 0 && (
-        <span className="px-2 py-0.5 text-xs rounded-full bg-slate-700 text-slate-400" title={items.slice(max).join(', ')}>
+        <span className="px-2 py-0.5 text-xs rounded-full bg-gray-200 text-gray-500" title={items.slice(max).join(', ')}>
           +{hidden}
         </span>
       )}
@@ -460,17 +460,17 @@ function PDFCard({
     <div className={`card p-4 flex flex-col gap-2.5 ${!pdf.is_active ? 'opacity-50' : ''}`}>
       {/* Header */}
       <div className="flex items-start gap-2">
-        <FileText className="h-5 w-5 text-blue-400 flex-shrink-0 mt-0.5" />
+        <FileText className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium text-white truncate" title={pdf.original_filename}>
+          <p className="text-sm font-medium text-gray-900 truncate" title={pdf.original_filename}>
             {pdf.original_filename}
           </p>
           {pdf.module_name && (
-            <p className="text-xs text-slate-400">{pdf.module_name}</p>
+            <p className="text-xs text-gray-500">{pdf.module_name}</p>
           )}
         </div>
         {!pdf.is_active && (
-          <span className="text-xs px-1.5 py-0.5 rounded bg-red-500/20 text-red-400 flex-shrink-0">Deleted</span>
+          <span className="text-xs px-1.5 py-0.5 rounded bg-red-50 text-red-600 flex-shrink-0">Deleted</span>
         )}
       </div>
 
@@ -478,25 +478,25 @@ function PDFCard({
       <ChipList
         items={pdf.topic_names ?? []}
         max={3}
-        chipClass="bg-violet-900/40 text-violet-300"
+        chipClass="bg-purple-50 text-purple-700"
       />
 
       {/* Subtopics — max 2 */}
       <ChipList
         items={pdf.subtopic_names ?? []}
         max={2}
-        chipClass="bg-blue-900/30 text-blue-300"
+        chipClass="bg-blue-50 text-blue-700"
       />
 
       {/* Tags — max 5, rounded squares */}
       {(pdf.tag_names?.length ?? 0) > 0 && (
         <div className="flex flex-wrap gap-1">
           {pdf.tag_names!.slice(0, 5).map(t => (
-            <span key={t} className="px-1.5 py-0.5 text-xs rounded bg-slate-700 text-slate-400">{t}</span>
+            <span key={t} className="px-1.5 py-0.5 text-xs rounded bg-gray-200 text-gray-500">{t}</span>
           ))}
           {pdf.tag_names!.length > 5 && (
             <span
-              className="px-1.5 py-0.5 text-xs rounded bg-slate-700/60 text-slate-500"
+              className="px-1.5 py-0.5 text-xs rounded bg-gray-200/60 text-gray-400"
               title={pdf.tag_names!.slice(5).join(', ')}
             >
               +{pdf.tag_names!.length - 5}
@@ -506,34 +506,34 @@ function PDFCard({
       )}
 
       {/* Footer: size + actions */}
-      <div className="flex items-center justify-between pt-2 mt-auto border-t border-slate-700/50">
-        <span className="text-xs text-slate-500">{formatSize(pdf.file_size)}</span>
+      <div className="flex items-center justify-between pt-2 mt-auto border-t border-gray-200/50">
+        <span className="text-xs text-gray-400">{formatSize(pdf.file_size)}</span>
         <div className="flex items-center gap-1">
           <a
             href={pdf.url || `/api/pdf/${pdf.id}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700 rounded"
+            className="p-1.5 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded"
             title="View PDF"
           >
             <Eye className="h-4 w-4" />
           </a>
           {isAdmin && pdf.is_active && (
             <>
-              <button onClick={onEdit} className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700 rounded" title="Edit">
+              <button onClick={onEdit} className="p-1.5 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded" title="Edit">
                 <Edit2 className="h-4 w-4" />
               </button>
-              <button onClick={onDelete} className="p-1.5 text-slate-400 hover:text-red-400 hover:bg-slate-700 rounded" title="Delete">
+              <button onClick={onDelete} className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-gray-100 rounded" title="Delete">
                 <Trash2 className="h-4 w-4" />
               </button>
             </>
           )}
           {isAdmin && !pdf.is_active && (
             <>
-              <button onClick={onRestore} className="p-1.5 text-slate-400 hover:text-green-400 hover:bg-slate-700 rounded" title="Restore">
+              <button onClick={onRestore} className="p-1.5 text-gray-500 hover:text-emerald-600 hover:bg-gray-100 rounded" title="Restore">
                 <RotateCcw className="h-4 w-4" />
               </button>
-              <button onClick={onHardDelete} className="p-1.5 text-slate-400 hover:text-red-400 hover:bg-slate-700 rounded" title="Permanently Delete">
+              <button onClick={onHardDelete} className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-gray-100 rounded" title="Permanently Delete">
                 <Trash2 className="h-4 w-4" />
               </button>
             </>
@@ -591,14 +591,14 @@ function PDFFilterDropdown({
         disabled={disabled || items.length === 0}
         className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-colors text-sm ${
           selected.length > 0
-            ? 'bg-blue-600/20 border-blue-500 text-blue-400'
-            : 'bg-slate-800 border-slate-600 text-slate-300 hover:border-slate-500'
+            ? 'bg-blue-50 border-blue-200 text-blue-700'
+            : 'bg-gray-100 border-gray-200 text-gray-700 hover:border-gray-300'
         } ${disabled || items.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
       >
         <span>
           {label}
           {selected.length > 0 && (
-            <span className="ml-1 px-1.5 py-0.5 bg-blue-600 text-white text-xs rounded-full">
+            <span className="ml-1 px-1.5 py-0.5 bg-blue-600 text-gray-900 text-xs rounded-full">
               {selected.length}
             </span>
           )}
@@ -607,22 +607,22 @@ function PDFFilterDropdown({
       </button>
 
       {isOpen && items.length > 0 && (
-        <div className="absolute z-50 mt-2 w-64 max-h-64 overflow-y-auto rounded-lg bg-slate-800 border border-slate-700 shadow-xl">
+        <div className="absolute z-50 mt-2 w-64 max-h-64 overflow-y-auto rounded-lg bg-gray-100 border border-gray-200 shadow-xl">
           {items.map(item => (
             <button
               key={item}
               onClick={() => toggleItem(item)}
-              className={`w-full flex items-center gap-2 px-4 py-2 text-left text-sm hover:bg-slate-700 transition-colors ${
-                selected.includes(item) ? 'bg-blue-600/20 text-blue-400' : 'text-slate-300'
+              className={`w-full flex items-center gap-2 px-4 py-2 text-left text-sm hover:bg-gray-100 transition-colors ${
+                selected.includes(item) ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
               }`}
             >
               <div
                 className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 ${
-                  selected.includes(item) ? 'bg-blue-600 border-blue-600' : 'border-slate-500'
+                  selected.includes(item) ? 'bg-blue-600 border-blue-600' : 'border-gray-300'
                 }`}
               >
                 {selected.includes(item) && (
-                  <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="w-3 h-3 text-gray-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                   </svg>
                 )}
@@ -719,24 +719,24 @@ function EditPDFModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-      <div className="bg-slate-800 rounded-xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-white">Edit PDF Metadata</h3>
-          <button onClick={onClose} className="text-slate-400 hover:text-white">
+          <h3 className="text-lg font-semibold text-gray-900">Edit PDF Metadata</h3>
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-900">
             <X className="h-5 w-5" />
           </button>
         </div>
 
         {pdf && (
-          <p className="text-sm text-slate-400 mb-4 truncate" title={pdf.original_filename}>
+          <p className="text-sm text-gray-500 mb-4 truncate" title={pdf.original_filename}>
             {pdf.original_filename}
           </p>
         )}
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm text-slate-400 mb-1">Module</label>
+            <label className="block text-sm text-gray-500 mb-1">Module</label>
             <ModuleSelector
               modules={modules}
               moduleGroups={moduleGroups}
@@ -745,25 +745,25 @@ function EditPDFModal({
             />
           </div>
           <div>
-            <label className="block text-sm text-slate-400 mb-1">Topics</label>
+            <label className="block text-sm text-gray-500 mb-1">Topics</label>
             <MultiSelectField values={topics} onChange={setTopics} onFetch={fetchTopics} placeholder="Add topics..." disabled={!editModule} />
           </div>
           <div>
-            <label className="block text-sm text-slate-400 mb-1">Subtopics</label>
+            <label className="block text-sm text-gray-500 mb-1">Subtopics</label>
             <MultiSelectField values={subtopics} onChange={setSubtopics} onFetch={fetchSubtopics} placeholder="Add subtopics..." disabled={!editModule} />
           </div>
           <div>
-            <label className="block text-sm text-slate-400 mb-1">Tags</label>
+            <label className="block text-sm text-gray-500 mb-1">Tags</label>
             <TagInput tags={tags} onChange={setTags} onFetch={fetchTags} minCount={0} disabled={!editModule} />
           </div>
         </div>
 
         <div className="flex justify-end gap-3 mt-6">
-          <button onClick={onClose} className="px-4 py-2 text-slate-400 hover:text-white">Cancel</button>
+          <button onClick={onClose} className="px-4 py-2 text-gray-500 hover:text-gray-900">Cancel</button>
           <button
             onClick={handleSave}
             disabled={saving}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-700 text-white rounded-lg flex items-center gap-2"
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-200 text-gray-900 rounded-lg flex items-center gap-2"
           >
             {saving ? <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-white" /> : <Check className="h-4 w-4" />}
             Save

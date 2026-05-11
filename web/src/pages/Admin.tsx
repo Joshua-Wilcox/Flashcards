@@ -74,8 +74,8 @@ export default function Admin() {
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
       <div className="flex items-center gap-3 mb-6">
-        <Settings className="h-7 w-7 text-purple-500" />
-        <h1 className="text-2xl font-bold text-white">Admin Panel</h1>
+        <Settings className="h-7 w-7 text-purple-600" />
+        <h1 className="text-2xl font-bold text-gray-900">Admin Panel</h1>
       </div>
 
       <div className="flex flex-wrap gap-2 mb-6">
@@ -85,8 +85,8 @@ export default function Admin() {
             onClick={() => setActiveTab(tab.id)}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
               activeTab === tab.id
-                ? 'bg-blue-600 text-white'
-                : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                ? 'bg-blue-600 text-gray-900'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
             <tab.icon className="h-4 w-4" />
@@ -95,8 +95,8 @@ export default function Admin() {
               <span
                 className={`px-2 py-0.5 text-xs rounded-full ${
                   activeTab === tab.id
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-slate-700 text-slate-300'
+                    ? 'bg-blue-600 text-gray-900'
+                    : 'bg-gray-200 text-gray-700'
                 }`}
               >
                 {tab.count}
@@ -183,16 +183,16 @@ function EditableFlashcardCard({
     tags !== (fc.submitted_tags_comma_separated || '');
 
   const inputClass =
-    'w-full bg-slate-900 text-white rounded px-3 py-1.5 border border-slate-700 focus:border-blue-500 focus:outline-none transition-colors';
+    'w-full bg-white text-gray-900 rounded px-3 py-1.5 border border-gray-200 focus:border-blue-500 focus:outline-none transition-colors';
 
   return (
     <div className="card p-4">
-      <p className="text-sm text-slate-400 mb-3">
+      <p className="text-sm text-gray-500 mb-3">
         {fc.username} • {fc.module}
       </p>
 
       <label className="block mb-3">
-        <span className="text-xs text-slate-500 uppercase tracking-wide">Question</span>
+        <span className="text-xs text-gray-400 uppercase tracking-wide">Question</span>
         <textarea
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
@@ -202,7 +202,7 @@ function EditableFlashcardCard({
       </label>
 
       <label className="block mb-3">
-        <span className="text-xs text-slate-500 uppercase tracking-wide">Answer</span>
+        <span className="text-xs text-gray-400 uppercase tracking-wide">Answer</span>
         <input
           type="text"
           value={answer}
@@ -213,7 +213,7 @@ function EditableFlashcardCard({
 
       <div className="grid grid-cols-2 gap-3 mb-3">
         <label className="block">
-          <span className="text-xs text-slate-500 uppercase tracking-wide">Topic</span>
+          <span className="text-xs text-gray-400 uppercase tracking-wide">Topic</span>
           <input
             type="text"
             value={topic}
@@ -222,7 +222,7 @@ function EditableFlashcardCard({
           />
         </label>
         <label className="block">
-          <span className="text-xs text-slate-500 uppercase tracking-wide">Subtopic</span>
+          <span className="text-xs text-gray-400 uppercase tracking-wide">Subtopic</span>
           <input
             type="text"
             value={subtopic}
@@ -233,7 +233,7 @@ function EditableFlashcardCard({
       </div>
 
       <label className="block mb-3">
-        <span className="text-xs text-slate-500 uppercase tracking-wide">Tags (comma-separated)</span>
+        <span className="text-xs text-gray-400 uppercase tracking-wide">Tags (comma-separated)</span>
         <input
           type="text"
           value={tags}
@@ -273,7 +273,7 @@ function EditableFlashcardCard({
           Reject
         </button>
         {edited && (
-          <span className="text-xs text-amber-400 ml-2">Modified</span>
+          <span className="text-xs text-amber-600 ml-2">Modified</span>
         )}
       </div>
     </div>
@@ -319,7 +319,7 @@ function FlashcardsList({
 
   if (flashcards.length === 0) {
     return (
-      <div className="card p-8 text-center text-slate-400">
+      <div className="card p-8 text-center text-gray-500">
         No pending flashcards
       </div>
     );
@@ -357,14 +357,14 @@ function DistractorRow({
   const [text, setText] = useState(d.distractor_text);
 
   return (
-    <div className="flex items-center gap-3 py-2.5 border-t border-slate-700/50">
+    <div className="flex items-center gap-3 py-2.5 border-t border-gray-200/50">
       <div className="flex-1 min-w-0">
-        <p className="text-xs text-slate-500 mb-1">{d.username ?? 'Unknown'}</p>
+        <p className="text-xs text-gray-400 mb-1">{d.username ?? 'Unknown'}</p>
         <input
           type="text"
           value={text}
           onChange={(e) => setText(e.target.value)}
-          className="w-full bg-slate-900 text-white rounded px-3 py-1.5 border border-slate-700 focus:border-blue-500 focus:outline-none transition-colors text-sm"
+          className="w-full bg-white text-gray-900 rounded px-3 py-1.5 border border-gray-200 focus:border-blue-500 focus:outline-none transition-colors text-sm"
         />
       </div>
       <div className="flex gap-2 flex-shrink-0">
@@ -420,7 +420,7 @@ function DistractorsList({
 
   if (distractors.length === 0) {
     return (
-      <div className="card p-8 text-center text-slate-400">
+      <div className="card p-8 text-center text-gray-500">
         No pending distractors
       </div>
     );
@@ -441,14 +441,14 @@ function DistractorsList({
       {Array.from(groups.entries()).map(([key, group]) => (
         <div key={key} className="card p-4">
           <div className="flex items-start gap-2 mb-1">
-            <p className="text-sm font-medium text-slate-200 flex-1">{group.label}</p>
+            <p className="text-sm font-medium text-gray-800 flex-1">{group.label}</p>
             {group.source === 'pending' && (
-              <span className="text-xs px-2 py-0.5 rounded-full bg-amber-900/40 text-amber-400 flex-shrink-0">
+              <span className="text-xs px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 flex-shrink-0">
                 pending review
               </span>
             )}
           </div>
-          <p className="text-xs text-slate-500 mb-2">
+          <p className="text-xs text-gray-400 mb-2">
             {group.items.length} pending distractor{group.items.length !== 1 ? 's' : ''}
           </p>
           {group.items.map((d) => (
@@ -537,16 +537,16 @@ function ReportCard({
     });
   };
 
-  const inputClass = 'w-full bg-slate-900 text-white rounded px-3 py-1.5 border border-slate-700 focus:border-blue-500 focus:outline-none transition-colors text-sm mt-1 resize-y';
+  const inputClass = 'w-full bg-white text-gray-900 rounded px-3 py-1.5 border border-gray-200 focus:border-blue-500 focus:outline-none transition-colors text-sm mt-1 resize-y';
 
   return (
     <div className="card p-5 space-y-4">
       {/* Header */}
       <div className="flex items-center gap-2">
-        <AlertTriangle className="h-4 w-4 text-yellow-400" />
-        <p className="text-sm font-medium text-slateite-300">{r.username}</p>
+        <AlertTriangle className="h-4 w-4 text-amber-600" />
+        <p className="text-sm font-medium text-gray-700">{r.username}</p>
         {r.question_id && (
-          <code className="text-xs bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded font-mono">
+          <code className="text-xs bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded font-mono">
             {r.question_id.substring(0, 8)}
           </code>
         )}
@@ -554,24 +554,24 @@ function ReportCard({
 
       {/* Reporter's message */}
       {r.message && (
-        <div className="bg-yellow-900/20 border border-yellow-800/30 rounded-lg px-3 py-2">
-          <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">Complaint</p>
-          <p className="text-sm text-yellow-300">&ldquo;{r.message}&rdquo;</p>
+        <div className="bg-amber-50 rounded-lg px-3 py-2">
+          <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Complaint</p>
+          <p className="text-sm text-amber-700">&ldquo;{r.message}&rdquo;</p>
         </div>
       )}
 
       {/* Live question editing */}
       {loadingLive && (
-        <p className="text-xs text-slate-500 animate-pulse">Loading live question data...</p>
+        <p className="text-xs text-gray-400 animate-pulse">Loading live question data...</p>
       )}
 
       {liveQuestion && !loadingLive && (
         <div className="space-y-3">
-          <div className="border border-slate-700 rounded-lg p-3 space-y-3">
-            <p className="text-xs font-semibold text-blue-300 uppercase tracking-wide">Correct Answer</p>
+          <div className="border border-gray-200 rounded-lg p-3 space-y-3">
+            <p className="text-xs font-semibold text-blue-700 uppercase tracking-wide">Correct Answer</p>
 
             <label className="block">
-              <span className="text-xs text-slate-500 uppercase tracking-wide">Question</span>
+              <span className="text-xs text-gray-400 uppercase tracking-wide">Question</span>
               <textarea
                 value={editedQuestion}
                 onChange={(e) => setEditedQuestion(e.target.value)}
@@ -582,7 +582,7 @@ function ReportCard({
             </label>
 
             <label className="block">
-              <span className="text-xs text-slate-500 uppercase tracking-wide">Answer</span>
+              <span className="text-xs text-gray-400 uppercase tracking-wide">Answer</span>
               <input
                 type="text"
                 value={editedAnswer}
@@ -597,21 +597,21 @@ function ReportCard({
                 type="checkbox"
                 checked={deleteQuestion}
                 onChange={(e) => setDeleteQuestion(e.target.checked)}
-                className="rounded border-slate-600"
+                className="rounded border-gray-200"
               />
-              <span className="text-sm text-red-400">Delete this question from the database</span>
+              <span className="text-sm text-red-600">Delete this question from the database</span>
             </label>
           </div>
 
           {/* Manual distractors */}
           {distractorEdits.length > 0 && (
             <div className="space-y-2">
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
                 Manual Distractors
               </p>
               {distractorEdits.map((d, i) => (
-                <div key={d.id} className="border border-slate-700/50 rounded-lg p-3 space-y-2">
-                  <p className="text-xs text-slate-500">Distractor {i + 1}</p>
+                <div key={d.id} className="border border-gray-200/50 rounded-lg p-3 space-y-2">
+                  <p className="text-xs text-gray-400">Distractor {i + 1}</p>
                   <input
                     type="text"
                     value={d.text}
@@ -632,9 +632,9 @@ function ReportCard({
                           prev.map((item) => item.id === d.id ? { ...item, delete: e.target.checked } : item)
                         )
                       }
-                      className="rounded border-slate-600"
+                      className="rounded border-gray-200"
                     />
-                    <span className="text-xs text-red-400">Delete this distractor</span>
+                    <span className="text-xs text-red-600">Delete this distractor</span>
                   </label>
                 </div>
               ))}
@@ -666,11 +666,11 @@ function ReportCard({
       {/* No question_id — just show reported text and discard */}
       {!r.question_id && !loadingLive && (
         <div className="space-y-3">
-          <div className="bg-slate-800/50 rounded-lg p-3">
-            <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">Reported question text</p>
-            <p className="text-slate-200 text-sm">{r.question}</p>
+          <div className="bg-gray-100/50 rounded-lg p-3">
+            <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Reported question text</p>
+            <p className="text-gray-800 text-sm">{r.question}</p>
           </div>
-          <p className="text-xs text-slate-500 italic">
+          <p className="text-xs text-gray-400 italic">
             No question ID — the question may have changed or been deleted.
           </p>
           <button
@@ -696,7 +696,7 @@ function ReportsList({
 }) {
   if (reports.length === 0) {
     return (
-      <div className="card p-8 text-center text-slate-400">
+      <div className="card p-8 text-center text-gray-500">
         No pending reports
       </div>
     );
@@ -739,7 +739,7 @@ function PDFSubmissionsList({
 
   if (pdfs.length === 0) {
     return (
-      <div className="card p-8 text-center text-slate-400">
+      <div className="card p-8 text-center text-gray-500">
         No pending PDF submissions
       </div>
     );
@@ -752,14 +752,14 @@ function PDFSubmissionsList({
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
-                <FileText className="h-4 w-4 text-blue-400 flex-shrink-0" />
-                <p className="text-white font-medium truncate">{pdf.original_filename}</p>
+                <FileText className="h-4 w-4 text-blue-600 flex-shrink-0" />
+                <p className="text-gray-900 font-medium truncate">{pdf.original_filename}</p>
               </div>
-              <p className="text-xs text-slate-400 mb-2">
+              <p className="text-xs text-gray-500 mb-2">
                 {pdf.module_name && <span className="mr-2">{pdf.module_name}</span>}
-                Submitted by <span className="text-slate-300">{pdf.uploaded_by}</span>
+                Submitted by <span className="text-gray-700">{pdf.uploaded_by}</span>
                 {pdf.submitted_at && (
-                  <span className="ml-2 text-slate-500">
+                  <span className="ml-2 text-gray-400">
                     {new Date(pdf.submitted_at).toLocaleDateString()}
                   </span>
                 )}
@@ -768,13 +768,13 @@ function PDFSubmissionsList({
               {/* Metadata chips */}
               <div className="flex flex-wrap gap-1 mt-2">
                 {pdf.topic_names?.map(t => (
-                  <span key={t} className="px-2 py-0.5 text-xs rounded-full bg-violet-900/40 text-violet-300">{t}</span>
+                  <span key={t} className="px-2 py-0.5 text-xs rounded-full bg-purple-50 text-purple-700">{t}</span>
                 ))}
                 {pdf.subtopic_names?.map(s => (
-                  <span key={s} className="px-2 py-0.5 text-xs rounded-full bg-blue-900/30 text-blue-300">{s}</span>
+                  <span key={s} className="px-2 py-0.5 text-xs rounded-full bg-blue-900/30 text-blue-700">{s}</span>
                 ))}
                 {pdf.tag_names?.map(t => (
-                  <span key={t} className="px-2 py-0.5 text-xs rounded bg-slate-700 text-slate-300">{t}</span>
+                  <span key={t} className="px-2 py-0.5 text-xs rounded bg-gray-200 text-gray-700">{t}</span>
                 ))}
               </div>
             </div>
@@ -784,7 +784,7 @@ function PDFSubmissionsList({
                 href={`/api/admin/pdf/submitted/${pdf.id}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-gray-200 hover:bg-gray-200 text-gray-800 rounded-lg transition-colors"
               >
                 <Eye className="h-3.5 w-3.5" /> View
               </a>
@@ -841,7 +841,7 @@ function PDFRequestsList({
 
   if (requests.length === 0) {
     return (
-      <div className="card p-8 text-center text-slate-400">
+      <div className="card p-8 text-center text-gray-500">
         No pending PDF access requests
       </div>
     );
@@ -851,10 +851,10 @@ function PDFRequestsList({
     <div className="space-y-4">
       {requests.map((r) => (
         <div key={r.id} className="card p-4">
-          <p className="text-white font-medium mb-1">{r.username}</p>
-          <p className="text-sm text-slate-400 mb-2">Discord ID: {r.discord_id}</p>
+          <p className="text-gray-900 font-medium mb-1">{r.username}</p>
+          <p className="text-sm text-gray-500 mb-2">Discord ID: {r.discord_id}</p>
           {r.message && (
-            <p className="text-sm text-slate-300 mb-3">"{r.message}"</p>
+            <p className="text-sm text-gray-700 mb-3">"{r.message}"</p>
           )}
 
           <div className="flex gap-2">

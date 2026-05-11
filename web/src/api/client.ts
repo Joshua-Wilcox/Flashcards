@@ -34,9 +34,9 @@ async function fetchJSON<T>(url: string, options?: RequestInit): Promise<T> {
 export const api = {
   getMe: () => fetchJSON<User>(`${API_BASE}/me`),
 
-  getRecentActivity: () =>
+  getRecentActivity: (limit = 30) =>
     fetchJSON<{ activities: { user_id: string; username: string; module_name: string; streak: number; answered_at: string }[] }>(
-      `${API_BASE}/recent-activity`
+      `${API_BASE}/recent-activity?limit=${limit}`
     ),
 
   getModules: () =>

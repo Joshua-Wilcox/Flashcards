@@ -95,14 +95,14 @@ export default function TagInput({
           {tags.map((tag) => (
             <span
               key={tag}
-              className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-blue-900/40 text-blue-300 text-sm"
+              className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-sm font-medium"
             >
               {tag}
               {!disabled && (
                 <button
                   type="button"
                   onClick={() => removeTag(tag)}
-                  className="ml-1 text-blue-400 hover:text-white transition-colors"
+                  className="ml-1 text-blue-400 hover:text-blue-700 transition-colors"
                 >
                   <X className="h-3 w-3" />
                 </button>
@@ -127,19 +127,19 @@ export default function TagInput({
           <button
             type="button"
             onClick={() => { if (inputValue.trim()) addTag(inputValue); }}
-            className="px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm flex items-center gap-1 transition-colors"
+            className="btn-primary text-sm flex items-center gap-1"
           >
             <Plus className="h-4 w-4" />
             Add Tag
           </button>
 
           {isOpen && suggestions.length > 0 && (
-            <div className="absolute top-full left-0 right-0 z-50 mt-1 max-h-48 overflow-y-auto rounded-lg bg-slate-800 border border-slate-700 shadow-xl">
+            <div className="absolute top-full left-0 right-0 z-50 mt-2 max-h-48 overflow-y-auto rounded-xl bg-white shadow-lg">
               {inputValue.trim() && !tags.includes(inputValue.trim()) && (
                 <button
                   type="button"
                   onMouseDown={(e) => { e.preventDefault(); addTag(inputValue); }}
-                  className="w-full px-4 py-2.5 text-left text-sm text-blue-400 bg-blue-900/20 hover:bg-blue-900/40 transition-colors"
+                  className="w-full px-4 py-2.5 text-left text-sm text-blue-600 bg-blue-50 hover:bg-blue-100 transition-colors font-medium"
                 >
                   + Create &ldquo;{inputValue.trim()}&rdquo;
                 </button>
@@ -149,10 +149,10 @@ export default function TagInput({
                   key={s.name}
                   type="button"
                   onMouseDown={(e) => { e.preventDefault(); addTag(s.name); }}
-                  className="w-full flex items-center justify-between px-4 py-2.5 text-left text-sm text-slate-200 hover:bg-slate-700 transition-colors"
+                  className="w-full flex items-center justify-between px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                 >
                   <span>{s.name}</span>
-                  <span className="text-xs text-slate-500">{s.count} questions</span>
+                  <span className="text-xs text-gray-400">{s.count} questions</span>
                 </button>
               ))}
             </div>
@@ -161,7 +161,7 @@ export default function TagInput({
       )}
 
       {belowMin && !disabled && (
-        <p className="mt-1.5 text-xs text-red-400">
+        <p className="mt-1.5 text-xs text-red-500 font-medium">
           Please add at least {minCount} tags ({minCount - tags.length} more needed)
         </p>
       )}

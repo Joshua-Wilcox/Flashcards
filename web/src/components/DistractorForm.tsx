@@ -14,7 +14,6 @@ export default function DistractorForm({ question, onSubmit, onCancel }: Distrac
   const [distractors, setDistractors] = useState(['', '', '', '']);
   const [submitting, setSubmitting] = useState(false);
 
-  // Find the correct answer text
   const correctAnswer = question.answers.find(
     (_, i) =>
       question.answer_types?.[i] === 'question' &&
@@ -40,48 +39,44 @@ export default function DistractorForm({ question, onSubmit, onCancel }: Distrac
   };
 
   return (
-    <div className="rounded-xl border border-amber-700/40 bg-amber-950/10 p-5 space-y-4">
+    <div className="rounded-xl bg-amber-50 p-5 space-y-4">
       <div className="flex items-center gap-2">
-        <Lightbulb className="h-5 w-5 text-amber-400" />
-        <h3 className="text-base font-semibold text-amber-400">Suggest Distractors</h3>
-        <span className="text-sm text-slate-400">Help improve this question with better wrong answers.</span>
+        <Lightbulb className="h-5 w-5 text-amber-600" />
+        <h3 className="text-base font-bold text-amber-700">Suggest Distractors</h3>
+        <span className="text-sm text-gray-500">Help improve this question with better wrong answers.</span>
       </div>
 
-      {/* Question + Correct Answer display */}
-      <div className="rounded-lg bg-slate-800/50 border border-slate-700/50 p-4 space-y-3">
+      <div className="rounded-xl bg-white p-4 space-y-3">
         <div>
-          <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">Question</p>
-          <div className="bg-slate-800/60 rounded-lg p-3 text-sm text-slate-200">
+          <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Question</p>
+          <div className="bg-gray-50 rounded-lg p-3 text-sm text-gray-700">
             {question.question}
           </div>
         </div>
         <div>
-          <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">Correct Answer</p>
-          <div className="bg-blue-950/30 border border-blue-800/30 rounded-lg p-3 text-sm text-blue-300">
+          <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Correct Answer</p>
+          <div className="bg-blue-50 rounded-lg p-3 text-sm text-blue-700">
             {correctAnswer}
           </div>
         </div>
       </div>
 
-      {/* AI prompt helper */}
       <AIPromptHelper question={question.question} answer={correctAnswer} />
 
-      {/* Guidance */}
-      <p className="text-xs text-slate-400">
-        You can submit 1–4 distractors. Good distractors are wrong but believable answers that test understanding.
+      <p className="text-xs text-gray-500">
+        You can submit 1-4 distractors. Good distractors are wrong but believable answers that test understanding.
       </p>
 
-      {/* Distractor inputs */}
       <div className="space-y-2">
         {distractors.map((d, i) => (
           <div key={i}>
-            <label className="block text-xs text-slate-500 mb-1">Distractor {i + 1}:</label>
+            <label className="block text-xs text-gray-500 mb-1">Distractor {i + 1}:</label>
             <textarea
               value={d}
               onChange={(e) => update(i, e.target.value)}
               rows={2}
               placeholder="Enter a plausible wrong answer..."
-              className="w-full bg-slate-900 text-white rounded-lg px-3 py-2 border border-slate-700 focus:border-amber-500 focus:outline-none resize-y text-sm"
+              className="input text-sm"
             />
           </div>
         ))}
@@ -92,7 +87,7 @@ export default function DistractorForm({ question, onSubmit, onCancel }: Distrac
           type="button"
           onClick={handleSubmit}
           disabled={submitting}
-          className="px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-500 disabled:opacity-40 text-white text-sm font-medium flex items-center gap-1.5 transition-colors"
+          className="btn-primary text-sm flex items-center gap-1.5"
         >
           <Send className="h-3.5 w-3.5" />
           Submit Distractors for Review
@@ -100,7 +95,7 @@ export default function DistractorForm({ question, onSubmit, onCancel }: Distrac
         <button
           type="button"
           onClick={onCancel}
-          className="px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 text-sm transition-colors"
+          className="btn-secondary text-sm"
         >
           Cancel
         </button>

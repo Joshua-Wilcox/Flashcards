@@ -92,7 +92,27 @@ export function useQuiz() {
       tags: [],
     }));
     setQuestion(null);
-    setState('idle');
+    if (module) {
+      setState('loading');
+      setError(null);
+      setSelectedAnswer(null);
+      setIncorrectAnswers(new Set());
+      api.getQuestion({ module }).then((response) => {
+        if (response.error) {
+          setError(response.error);
+          setState('idle');
+          setQuestion(null);
+        } else {
+          setQuestion(response);
+          setState('answering');
+        }
+      }).catch((err) => {
+        setError(err instanceof Error ? err.message : 'Failed to load question');
+        setState('idle');
+      });
+    } else {
+      setState('idle');
+    }
   }, []);
 
   const setTopics = useCallback((topics: string[]) => {

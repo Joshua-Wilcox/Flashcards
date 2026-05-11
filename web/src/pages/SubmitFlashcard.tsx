@@ -20,7 +20,6 @@ const MIN_TAGS = 3;
 export default function SubmitFlashcard() {
   const queryClient = useQueryClient();
 
-  // Core form state
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState('');
   const [module, setModuleState] = useState('');
@@ -29,23 +28,19 @@ export default function SubmitFlashcard() {
   const [tags, setTags] = useState<string[]>([]);
   const [distractors, setDistractors] = useState(['', '', '', '']);
 
-  // Duplicate detection
   const [duplicates, setDuplicates] = useState<DuplicateMatch[]>([]);
   const [isChecking, setIsChecking] = useState(false);
   const dupTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Modules
   const { data: modulesData } = useQuery({
     queryKey: ['modules'],
     queryFn: api.getModules,
   });
 
-  // Sequential enabling
   const topicEnabled = !!module;
   const subtopicEnabled = topicEnabled && topic.trim().length > 0;
   const tagsEnabled = subtopicEnabled && subtopic.trim().length > 0;
 
-  // All required fields complete → show distractor section
   const allComplete =
     question.trim() &&
     answer.trim() &&
@@ -54,7 +49,6 @@ export default function SubmitFlashcard() {
     subtopic.trim() &&
     tags.length >= MIN_TAGS;
 
-  // Reset downstream when module changes
   const handleModuleChange = (m: string) => {
     setModuleState(m);
     setTopicState('');
@@ -62,20 +56,17 @@ export default function SubmitFlashcard() {
     setTags([]);
   };
 
-  // Reset subtopic + tags when topic changes
   const handleTopicChange = (t: string) => {
     setTopicState(t);
     setSubtopicState('');
     setTags([]);
   };
 
-  // Reset tags when subtopic changes
   const handleSubtopicChange = (st: string) => {
     setSubtopicState(st);
     setTags([]);
   };
 
-  // Suggestion fetchers
   const fetchTopics = useCallback(
     (q: string) => api.suggestTopics(module, q).then((r) => r.suggestions),
     [module]
@@ -89,7 +80,6 @@ export default function SubmitFlashcard() {
     [module]
   );
 
-  // Duplicate detection
   useEffect(() => {
     if (dupTimerRef.current) clearTimeout(dupTimerRef.current);
     if (question.length < 10 || !module) {
@@ -112,7 +102,6 @@ export default function SubmitFlashcard() {
     };
   }, [question, module]);
 
-  // Submit mutation
   const submitMutation = useMutation({
     mutationFn: () =>
       api.submitFlashcard({
@@ -155,18 +144,17 @@ export default function SubmitFlashcard() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
-      <div className="text-center mb-6">
-        <h1 className="text-2xl font-bold text-white">Submit a Flashcard</h1>
-        <p className="text-slate-400 mt-1">
-          Contribute your own flashcard for review! Please fill in all required fields.
+      <div className="text-center mb-8">
+        <h1 className="text-2xl font-bold text-gray-900">Submit a Flashcard</h1>
+        <p className="text-gray-500 mt-2">
+          Contribute your own flashcard for review. Fill in all required fields.
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="card p-6 space-y-6">
-        {/* Question */}
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-2">
-            Question <span className="text-red-400">*</span>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
+            Question <span className="text-red-500">*</span>
           </label>
           <textarea
             value={question}
@@ -178,43 +166,42 @@ export default function SubmitFlashcard() {
           />
 
           {isChecking && (
-            <p className="mt-2 text-xs text-slate-400 animate-pulse">Checking for duplicates...</p>
+            <p className="mt-2 text-xs text-gray-400 animate-pulse">Checking for duplicates...</p>
           )}
 
           {!isChecking && duplicates.length > 0 && (
-            <div className="mt-3 rounded-lg border border-amber-500/30 bg-amber-950/20 p-4">
+            <div className="mt-3 rounded-xl bg-amber-50 p-4">
               <div className="flex items-center gap-2 mb-3">
-                <AlertTriangle className="h-4 w-4 text-amber-400" />
-                <span className="text-sm font-medium text-amber-400">Potential duplicates found</span>
+                <AlertTriangle className="h-4 w-4 text-amber-600" />
+                <span className="text-sm font-semibold text-amber-700">Potential duplicates found</span>
               </div>
               <div className="space-y-2">
                 {duplicates.map((dup) => {
                   const pct = Math.round(dup.similarity * 100);
-                  const color = pct > 60 ? 'text-red-400' : pct >= 30 ? 'text-yellow-400' : 'text-green-400';
+                  const color = pct > 60 ? 'text-red-600' : pct >= 30 ? 'text-amber-600' : 'text-emerald-600';
                   return (
-                    <div key={dup.id} className="rounded-md bg-slate-800/60 border border-slate-700/50 p-3">
+                    <div key={dup.id} className="rounded-lg bg-white p-3">
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0 flex-1">
-                          <p className="text-sm text-slate-200 leading-snug">{dup.question}</p>
-                          <p className="mt-1 text-xs text-slate-400">Answer: {dup.answer}</p>
+                          <p className="text-sm text-gray-700 leading-snug">{dup.question}</p>
+                          <p className="mt-1 text-xs text-gray-400">Answer: {dup.answer}</p>
                         </div>
-                        <span className={`shrink-0 text-xs font-semibold ${color}`}>{pct}%</span>
+                        <span className={`shrink-0 text-xs font-bold ${color}`}>{pct}%</span>
                       </div>
                     </div>
                   );
                 })}
               </div>
-              <p className="mt-3 text-xs text-slate-500">
+              <p className="mt-3 text-xs text-gray-500">
                 You can still submit — these are just warnings.
               </p>
             </div>
           )}
         </div>
 
-        {/* Answer */}
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-2">
-            Answer <span className="text-red-400">*</span>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
+            Answer <span className="text-red-500">*</span>
           </label>
           <textarea
             value={answer}
@@ -226,10 +213,9 @@ export default function SubmitFlashcard() {
           />
         </div>
 
-        {/* Module */}
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-2">
-            Module <span className="text-red-400">*</span>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
+            Module <span className="text-red-500">*</span>
           </label>
           <ModuleSelector
             modules={modulesData?.modules || []}
@@ -239,10 +225,9 @@ export default function SubmitFlashcard() {
           />
         </div>
 
-        {/* Topic */}
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-2">
-            Topic <span className="text-red-400">*</span>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
+            Topic <span className="text-red-500">*</span>
           </label>
           <SuggestField
             value={topic}
@@ -254,10 +239,9 @@ export default function SubmitFlashcard() {
           />
         </div>
 
-        {/* Subtopic */}
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-2">
-            Subtopic <span className="text-red-400">*</span>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
+            Subtopic <span className="text-red-500">*</span>
           </label>
           <SuggestField
             value={subtopic}
@@ -269,11 +253,10 @@ export default function SubmitFlashcard() {
           />
         </div>
 
-        {/* Tags */}
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-2">
-            Tags <span className="text-red-400">*</span>{' '}
-            <span className="text-slate-500 font-normal">(at least {MIN_TAGS} required)</span>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
+            Tags <span className="text-red-500">*</span>{' '}
+            <span className="text-gray-400 font-normal">(at least {MIN_TAGS} required)</span>
           </label>
           <TagInput
             tags={tags}
@@ -284,45 +267,42 @@ export default function SubmitFlashcard() {
           />
         </div>
 
-        {/* Distractor section — only shown once all fields complete */}
         {allComplete && (
-          <div className="rounded-lg border border-slate-700 overflow-hidden">
+          <div className="rounded-xl bg-gray-50 overflow-hidden">
             <details>
-              <summary className="px-4 py-3 cursor-pointer bg-slate-800/50 hover:bg-slate-800 transition-colors flex items-center justify-between select-none">
+              <summary className="px-4 py-3 cursor-pointer hover:bg-gray-100 transition-colors flex items-center justify-between select-none">
                 <div>
-                  <span className="text-sm font-semibold text-purple-300">Submit Distractors</span>
-                  <span className="text-sm text-slate-400 ml-2">(optional – help improve the question)</span>
+                  <span className="text-sm font-bold text-purple-700">Submit Distractors</span>
+                  <span className="text-sm text-gray-400 ml-2">(optional)</span>
                 </div>
               </summary>
 
-              <div className="p-4 space-y-4 bg-slate-900/30">
-                <p className="text-sm text-slate-400">
+              <div className="p-4 space-y-4">
+                <p className="text-sm text-gray-500">
                   Help improve this question by suggesting plausible wrong answers that are challenging but clearly incorrect.
                 </p>
 
-                {/* AI Prompt helper */}
                 <AIPromptHelper question={question} answer={answer} />
 
-                {/* 4 distractor inputs */}
                 <div className="space-y-3">
                   <div>
-                    <label className="block text-sm text-slate-400 mb-1">
+                    <label className="block text-sm font-medium text-gray-600 mb-1">
                       Suggested Distractors{' '}
-                      <span className="text-slate-500 font-normal">(wrong answers that are plausible but incorrect)</span>
+                      <span className="text-gray-400 font-normal">(wrong answers that are plausible)</span>
                     </label>
-                    <p className="text-xs text-slate-500 mb-3">
-                      You can submit 1–4 distractors. Good distractors are wrong but believable answers that test understanding.
+                    <p className="text-xs text-gray-400 mb-3">
+                      You can submit 1-4 distractors. Good distractors are wrong but believable.
                     </p>
                   </div>
                   {distractors.map((d, i) => (
                     <div key={i}>
-                      <label className="block text-xs text-slate-500 mb-1">Distractor {i + 1}:</label>
+                      <label className="block text-xs text-gray-400 mb-1">Distractor {i + 1}:</label>
                       <textarea
                         value={d}
                         onChange={(e) => updateDistractor(i, e.target.value)}
                         rows={2}
                         placeholder="Enter a plausible wrong answer..."
-                        className="w-full bg-slate-900 text-white rounded-lg px-3 py-2 border border-slate-700 focus:border-blue-500 focus:outline-none resize-y text-sm"
+                        className="input text-sm"
                       />
                     </div>
                   ))}
@@ -332,14 +312,13 @@ export default function SubmitFlashcard() {
           </div>
         )}
 
-        {/* Submit button */}
         <button
           type="submit"
           disabled={submitMutation.isPending || tags.length < MIN_TAGS}
-          className="btn-primary w-full flex items-center justify-center gap-2 py-3 disabled:opacity-50"
+          className="btn-primary w-full flex items-center justify-center gap-2 py-3.5 disabled:opacity-50"
         >
           {submitMutation.isPending ? (
-            <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white" />
+            <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
           ) : (
             <>
               <Send className="h-5 w-5" />

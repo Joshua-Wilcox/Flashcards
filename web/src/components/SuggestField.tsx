@@ -99,23 +99,23 @@ export default function SuggestField({
         />
         {isFetching && (
           <div className="absolute right-3 top-1/2 -translate-y-1/2">
-            <div className="h-4 w-4 rounded-full border-2 border-blue-500 border-t-transparent animate-spin" />
+            <div className="h-4 w-4 rounded-full border-2 border-blue-600 border-t-transparent animate-spin" />
           </div>
         )}
         {!isFetching && !disabled && (
           <ChevronDown
-            className={`absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+            className={`absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
           />
         )}
       </div>
 
       {showDropdown && (
-        <div className="absolute z-50 mt-1 w-full max-h-56 overflow-y-auto rounded-lg bg-slate-800 border border-slate-700 shadow-xl">
+        <div className="absolute z-50 mt-2 w-full max-h-56 overflow-y-auto rounded-xl bg-white shadow-lg">
           {value.trim() && (
             <button
               type="button"
               onMouseDown={(e) => { e.preventDefault(); handleSelect(value.trim()); }}
-              className="w-full px-4 py-2.5 text-left text-sm text-blue-400 bg-blue-900/20 hover:bg-blue-900/40 transition-colors"
+              className="w-full px-4 py-2.5 text-left text-sm text-blue-600 bg-blue-50 hover:bg-blue-100 transition-colors font-medium"
             >
               + Create &ldquo;{value.trim()}&rdquo;
             </button>
@@ -127,10 +127,10 @@ export default function SuggestField({
                 key={s.name}
                 type="button"
                 onMouseDown={(e) => { e.preventDefault(); handleSelect(s.name); }}
-                className="w-full flex items-center justify-between px-4 py-2.5 text-left text-sm text-slate-200 hover:bg-slate-700 transition-colors"
+                className="w-full flex items-center justify-between px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors"
               >
                 <span>{s.name}</span>
-                <span className="text-xs text-slate-500">{s.count} questions</span>
+                <span className="text-xs text-gray-400">{s.count} questions</span>
               </button>
             ))}
         </div>
