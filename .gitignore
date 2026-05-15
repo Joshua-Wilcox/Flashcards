@@ -34,3 +34,6 @@ Thumbs.db
 
 # Supabase local
 supabase/.temp/
+
+# MCP config (contains tokens)
+.mcp.json

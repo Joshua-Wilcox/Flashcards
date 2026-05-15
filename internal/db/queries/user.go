@@ -383,6 +383,33 @@ type RecentActivity struct {
 	AnsweredAt string `json:"answered_at"`
 }
 
+func IsUserAdmin(ctx context.Context, userID string) (bool, error) {
+	var isAdmin bool
+	err := db.Pool.QueryRow(ctx, `SELECT is_admin FROM user_stats WHERE user_id = $1`, userID).Scan(&isAdmin)
+	if err == pgx.ErrNoRows {
+		return false, nil
+	}
+	return isAdmin, err
+}
+
+func HasPDFAccess(ctx context.Context, userID string) (bool, error) {
+	var has bool
+	err := db.Pool.QueryRow(ctx, `SELECT has_pdf_access FROM user_stats WHERE user_id = $1`, userID).Scan(&has)
+	if err == pgx.ErrNoRows {
+		return false, nil
+	}
+	return has, err
+}
+
+func GrantPDFAccess(ctx context.Context, userID string) error {
+	_, err := db.Pool.Exec(ctx, `
+		INSERT INTO user_stats (user_id, username, correct_answers, total_answers, current_streak, max_streak, approved_cards, has_pdf_access)
+		VALUES ($1, '', 0, 0, 0, 0, 0, true)
+		ON CONFLICT (user_id) DO UPDATE SET has_pdf_access = true
+	`, userID)
+	return err
+}
+
 func GetRecentActivity(ctx context.Context, limit int) ([]RecentActivity, error) {
 	rows, err := db.Pool.Query(ctx, `
 		SELECT user_id, username, module_name, streak, answered_at

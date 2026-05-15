@@ -3,7 +3,6 @@ package handler
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
 	"strings"
 
 	"flashcards-go/internal/auth"
@@ -274,10 +273,9 @@ func (h *AdminHandler) ApprovePDFAccess(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	userIDInt, _ := strconv.ParseInt(discordID, 10, 64)
-	if err := auth.AddUserToWhitelist(userIDInt, "whitelist.json"); err != nil {
-		log.Error().Err(err).Msg("Failed to add user to whitelist")
-		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "Failed to add user to whitelist"})
+	if err := auth.GrantPDFAccess(ctx, discordID); err != nil {
+		log.Error().Err(err).Msg("Failed to grant PDF access")
+		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "Failed to grant PDF access"})
 		return
 	}
 

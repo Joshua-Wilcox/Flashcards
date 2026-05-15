@@ -3,7 +3,6 @@ package handler
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
 
 	"flashcards-go/internal/auth"
 	"flashcards-go/internal/config"
@@ -123,8 +122,7 @@ func (h *AuthHandler) Me(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userIDInt, _ := strconv.ParseInt(userID, 10, 64)
-	isWhitelisted := auth.IsUserWhitelisted(userIDInt)
+	isWhitelisted := auth.IsUserWhitelistedCtx(r.Context(), userID)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{

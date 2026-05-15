@@ -6,7 +6,6 @@ import (
 	"encoding/base64"
 	"encoding/gob"
 	"net/http"
-	"strconv"
 
 	"flashcards-go/internal/config"
 
@@ -112,9 +111,7 @@ func RequireAuth(next http.Handler) http.Handler {
 		}
 
 		username, _ := session.Values["username"].(string)
-
-		userIDInt, _ := strconv.ParseInt(userID, 10, 64)
-		isAdmin := IsUserAdmin(userIDInt)
+		isAdmin := IsUserAdminCtx(r.Context(), userID)
 
 		ctx := context.WithValue(r.Context(), UserIDKey, userID)
 		ctx = context.WithValue(ctx, UsernameKey, username)
@@ -142,8 +139,7 @@ func RequireAdmin(next http.Handler) http.Handler {
 			return
 		}
 
-		userIDInt, _ := strconv.ParseInt(userID, 10, 64)
-		if !IsUserAdmin(userIDInt) {
+		if !IsUserAdminCtx(r.Context(), userID) {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusForbidden)
 			w.Write([]byte(`{"error": "Admin access required."}`))
@@ -171,8 +167,7 @@ func OptionalAuth(next http.Handler) http.Handler {
 		userID, ok := session.Values["user_id"].(string)
 		if ok && userID != "" {
 			username, _ := session.Values["username"].(string)
-			userIDInt, _ := strconv.ParseInt(userID, 10, 64)
-			isAdmin := IsUserAdmin(userIDInt)
+			isAdmin := IsUserAdminCtx(r.Context(), userID)
 
 			ctx := context.WithValue(r.Context(), UserIDKey, userID)
 			ctx = context.WithValue(ctx, UsernameKey, username)

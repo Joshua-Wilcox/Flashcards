@@ -33,7 +33,7 @@ func Init(c *config.Config) {
 		ClientID:     c.DiscordClientID,
 		ClientSecret: c.DiscordClientSecret,
 		RedirectURL:  c.DiscordRedirectURI,
-		Scopes:       []string{"identify", "guilds"},
+		Scopes:       []string{"identify"},
 		Endpoint: oauth2.Endpoint{
 			AuthURL:  "https://discord.com/api/oauth2/authorize",
 			TokenURL: "https://discord.com/api/oauth2/token",

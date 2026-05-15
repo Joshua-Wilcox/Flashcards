@@ -59,8 +59,7 @@ func (h *PDFHandler) ServePDF(w http.ResponseWriter, r *http.Request) {
 	userID := auth.GetUserID(ctx)
 	isAdmin := auth.GetIsAdmin(ctx)
 
-	userIDInt, _ := strconv.ParseInt(userID, 10, 64)
-	if !isAdmin && !auth.IsUserWhitelisted(userIDInt) {
+	if !isAdmin && !auth.IsUserWhitelistedCtx(ctx, userID) {
 		writeJSON(w, http.StatusForbidden, map[string]interface{}{
 			"error":         "no_access",
 			"message":       "You do not have permission to view PDFs. Please request access.",

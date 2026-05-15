@@ -44,19 +44,6 @@ func main() {
 	auth.Init(cfg)
 	auth.InitSessions(cfg)
 
-	whitelistPaths := []string{"whitelist.json", "../whitelist.json", "../../whitelist.json"}
-	whitelistLoaded := false
-	for _, p := range whitelistPaths {
-		if err := auth.LoadWhitelist(p); err == nil {
-			log.Info().Str("path", p).Msg("Loaded whitelist")
-			whitelistLoaded = true
-			break
-		}
-	}
-	if !whitelistLoaded {
-		log.Warn().Msg("Could not load whitelist.json from any known location")
-	}
-
 	if err := db.Connect(cfg.DatabaseURL); err != nil {
 		log.Fatal().Err(err).Msg("Failed to connect to database")
 	}
