@@ -10,4 +10,5 @@
 | 2026-05-15 | Add GET /api/health endpoint returning 200 + DB ping status JSON (useful for monitoring/load balancers) |
 | 2026-05-15 | Add POST /api/admin/revoke-pdf-access and POST /api/admin/toggle-admin endpoints with self-toggle guard |
 | 2026-05-15 | Add live totals summary bar (total answered, total correct, accuracy %) above leaderboard table with optimistic WebSocket updates |
+| 2026-05-15 | Add minimum length validation (10 chars) to report message textarea with inline error and red border on blur/submit |
 | 2026-05-15 | Trim form inputs at submission in SubmitFlashcard (question, answer, topic, subtopic, distractors) and ReportForm (message) |
