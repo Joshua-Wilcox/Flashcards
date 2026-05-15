@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Check, X, ArrowRight, FileText, Flag, Edit3, Lightbulb, Save } from 'lucide-react';
 import { toast } from 'sonner';
@@ -48,6 +48,31 @@ export default function QuizCard({
   const [editText, setEditText] = useState('');
   const [savingEdit, setSavingEdit] = useState(false);
   const editInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (editingIdx !== null) return;
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+
+      if (state === 'correct' && (e.key === 'Enter' || e.key === ' ')) {
+        e.preventDefault();
+        onNextQuestion();
+        return;
+      }
+
+      const num = parseInt(e.key, 10);
+      if (!isNaN(num) && num >= 1 && num <= question.answers.length) {
+        const answer = question.answers[num - 1];
+        if (state !== 'correct' && !incorrectAnswers.has(answer)) {
+          onAnswerSelect(answer);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [question.answers, state, incorrectAnswers, editingIdx, onAnswerSelect, onNextQuestion]);
 
   const getAnswerButtonClass = (answer: string, idx: number) => {
     if (editingIdx !== null && editingIdx !== idx) return 'answer-btn-disabled opacity-40';
@@ -221,7 +246,10 @@ export default function QuizCard({
                   transition={{ duration: 0.4 }}
                 >
                   <div className="flex items-center justify-between">
-                    <span>{answer}</span>
+                    <span className="flex items-center">
+                      <span className="hidden sm:inline-flex items-center justify-center w-5 h-5 rounded bg-gray-200 text-xs font-mono font-bold text-gray-500 mr-2 flex-shrink-0">{index + 1}</span>
+                      {answer}
+                    </span>
                     {getAnswerIcon(answer)}
                   </div>
                 </motion.button>
