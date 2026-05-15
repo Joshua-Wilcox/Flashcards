@@ -86,6 +86,12 @@ export interface ModuleStats {
   last_answered_time?: string;
 }
 
+export interface LeaderboardTotals {
+  total_answers: number;
+  total_correct: number;
+  total_users: number;
+}
+
 export interface LeaderboardEntry {
   user_id: string;
   username: string;

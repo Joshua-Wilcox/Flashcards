@@ -8,6 +8,7 @@ import type {
   UserStats,
   ModuleStats,
   LeaderboardEntry,
+  LeaderboardTotals,
   AdminSubmissions,
 } from '../types';
 
@@ -95,7 +96,7 @@ export const api = {
   getLeaderboard: (sort = 'correct_answers', order = 'desc', module?: string) => {
     const params = new URLSearchParams({ sort, order });
     if (module) params.set('module', module);
-    return fetchJSON<{ leaderboard: LeaderboardEntry[] }>(
+    return fetchJSON<{ leaderboard: LeaderboardEntry[]; totals: LeaderboardTotals }>(
       `${API_BASE}/leaderboard?${params}`
     );
   },

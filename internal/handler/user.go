@@ -111,8 +111,16 @@ func (h *UserHandler) GetLeaderboard(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	totals, err := queries.GetLeaderboardTotals(ctx, moduleID)
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to get leaderboard totals")
+		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "Internal error"})
+		return
+	}
+
 	writeJSON(w, http.StatusOK, map[string]interface{}{
 		"leaderboard": entries,
+		"totals":      totals,
 	})
 }
 

@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '../api/client';
 import { useWebSocket, isLeaderboardUpdate } from '../api/websocket';
 import ModuleSelector from '../components/ModuleSelector';
-import type { LeaderboardEntry, WebSocketMessage, LeaderboardUpdate } from '../types';
+import type { LeaderboardEntry, LeaderboardTotals, WebSocketMessage, LeaderboardUpdate } from '../types';
 
 type SortField = 'correct_answers' | 'total_answers' | 'current_streak' | 'max_streak' | 'approved_cards' | 'accuracy' | 'last_answer_time';
 
@@ -44,7 +44,7 @@ export default function Leaderboard() {
     if (message.type === 'leaderboard_update' && isLeaderboardUpdate(message.data)) {
       const update = message.data as LeaderboardUpdate;
 
-      queryClient.setQueryData<{ leaderboard: LeaderboardEntry[] }>(
+      queryClient.setQueryData<{ leaderboard: LeaderboardEntry[]; totals: LeaderboardTotals }>(
         ['leaderboard', sortBy, sortOrder, selectedModule],
         (oldData) => {
           if (!oldData) return oldData;
@@ -103,7 +103,14 @@ export default function Leaderboard() {
             return sortOrder === 'desc' ? bVal - aVal : aVal - bVal;
           });
 
-          return { leaderboard: newLeaderboard };
+          // Optimistically increment totals
+          const newTotals = oldData.totals ? {
+            total_answers: oldData.totals.total_answers + 1,
+            total_correct: update.current_streak > 0 ? oldData.totals.total_correct + 1 : oldData.totals.total_correct,
+            total_users: existingIndex < 0 ? oldData.totals.total_users + 1 : oldData.totals.total_users,
+          } : oldData.totals;
+
+          return { leaderboard: newLeaderboard, totals: newTotals };
         }
       );
     }
@@ -171,6 +178,27 @@ export default function Leaderboard() {
           />
         </div>
       </div>
+
+      {data?.totals && (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
+            <p className="text-sm font-medium text-blue-600">Total Questions Answered</p>
+            <p className="text-2xl font-bold text-blue-700">{data.totals.total_answers.toLocaleString()}</p>
+          </div>
+          <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 text-center">
+            <p className="text-sm font-medium text-emerald-600">Total Correct</p>
+            <p className="text-2xl font-bold text-emerald-700">{data.totals.total_correct.toLocaleString()}</p>
+          </div>
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-center">
+            <p className="text-sm font-medium text-amber-600">Overall Accuracy</p>
+            <p className="text-2xl font-bold text-amber-700">
+              {data.totals.total_answers > 0
+                ? Math.round((data.totals.total_correct / data.totals.total_answers) * 100)
+                : 0}%
+            </p>
+          </div>
+        </div>
+      )}
 
       <div className="card overflow-hidden">
         <div className="grid grid-cols-[3rem_1fr_4.5rem_4.5rem_4.5rem_4.5rem_4.5rem_4.5rem_4.5rem] gap-2 p-4 bg-gray-50 border-b border-gray-100">

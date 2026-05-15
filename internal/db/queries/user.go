@@ -186,6 +186,28 @@ func GetLeaderboard(ctx context.Context, sortBy, order string, moduleID *int, li
 	return entries, rows.Err()
 }
 
+type LeaderboardTotals struct {
+	TotalAnswers int `json:"total_answers"`
+	TotalCorrect int `json:"total_correct"`
+	TotalUsers   int `json:"total_users"`
+}
+
+func GetLeaderboardTotals(ctx context.Context, moduleID *int) (LeaderboardTotals, error) {
+	var query string
+	var args []interface{}
+	if moduleID != nil {
+		query = `SELECT COALESCE(SUM(number_answered),0), COALESCE(SUM(number_correct),0), COUNT(*)
+		         FROM module_stats WHERE module_id = $1 AND number_answered > 0`
+		args = []interface{}{*moduleID}
+	} else {
+		query = `SELECT COALESCE(SUM(total_answers),0), COALESCE(SUM(correct_answers),0), COUNT(*)
+		         FROM user_stats WHERE total_answers > 0`
+	}
+	var t LeaderboardTotals
+	err := db.Pool.QueryRow(ctx, query, args...).Scan(&t.TotalAnswers, &t.TotalCorrect, &t.TotalUsers)
+	return t, err
+}
+
 func IsTokenUsed(ctx context.Context, userID, token string) (bool, error) {
 	var exists bool
 	err := db.Pool.QueryRow(ctx, `
