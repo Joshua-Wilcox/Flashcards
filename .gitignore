@@ -46,3 +46,4 @@ scripts/autopilot.sh
 AUTOPILOT.md
 .gitignore
 scripts/autopilot-loop.sh
+runauto.txt
