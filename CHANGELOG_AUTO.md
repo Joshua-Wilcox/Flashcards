@@ -7,3 +7,4 @@
 | 2026-05-15 | Add keyboard shortcuts (1-4 keys) to select quiz answers + Enter/Space to advance; visual number badges on desktop |
 | 2026-05-15 | Remove broken "Showing X questions" filter count indicator (always showed 1) — cleaned up backend response fields and frontend types |
 | 2026-05-15 | Add GET /api/health endpoint returning 200 + DB ping status JSON (useful for monitoring/load balancers) |
+| 2026-05-15 | Add POST /api/admin/revoke-pdf-access and POST /api/admin/toggle-admin endpoints with self-toggle guard |

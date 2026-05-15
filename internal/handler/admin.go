@@ -425,6 +425,72 @@ func (h *AdminHandler) ResolveReport(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]interface{}{"success": true})
 }
 
+type RevokePDFAccessRequest struct {
+	UserID string `json:"user_id"`
+}
+
+func (h *AdminHandler) RevokePDFAccess(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var req RevokePDFAccessRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "Invalid request"})
+		return
+	}
+
+	if req.UserID == "" {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "Missing user_id"})
+		return
+	}
+
+	if err := queries.RevokePDFAccess(ctx, req.UserID); err != nil {
+		log.Error().Err(err).Msg("Failed to revoke PDF access")
+		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "Failed to revoke PDF access"})
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]interface{}{
+		"success": true,
+	})
+}
+
+type ToggleAdminRequest struct {
+	UserID string `json:"user_id"`
+}
+
+func (h *AdminHandler) ToggleAdmin(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var req ToggleAdminRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "Invalid request"})
+		return
+	}
+
+	if req.UserID == "" {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "Missing user_id"})
+		return
+	}
+
+	currentUserID := auth.GetUserID(ctx)
+	if currentUserID == req.UserID {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "Cannot toggle your own admin status"})
+		return
+	}
+
+	newVal, err := queries.ToggleAdmin(ctx, req.UserID)
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to toggle admin")
+		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "Failed to toggle admin"})
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]interface{}{
+		"success":  true,
+		"is_admin": newVal,
+	})
+}
+
 type EditAnswerRequest struct {
 	QuestionID          string `json:"question_id"`
 	ManualDistractorID  int    `json:"manual_distractor_id"`

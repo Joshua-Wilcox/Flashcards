@@ -410,6 +410,17 @@ func GrantPDFAccess(ctx context.Context, userID string) error {
 	return err
 }
 
+func RevokePDFAccess(ctx context.Context, userID string) error {
+	_, err := db.Pool.Exec(ctx, `UPDATE user_stats SET has_pdf_access = false WHERE user_id = $1`, userID)
+	return err
+}
+
+func ToggleAdmin(ctx context.Context, userID string) (bool, error) {
+	var newVal bool
+	err := db.Pool.QueryRow(ctx, `UPDATE user_stats SET is_admin = NOT is_admin WHERE user_id = $1 RETURNING is_admin`, userID).Scan(&newVal)
+	return newVal, err
+}
+
 func GetRecentActivity(ctx context.Context, limit int) ([]RecentActivity, error) {
 	rows, err := db.Pool.Query(ctx, `
 		SELECT user_id, username, module_name, streak, answered_at
