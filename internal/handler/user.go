@@ -39,9 +39,17 @@ func (h *UserHandler) GetStats(w http.ResponseWriter, r *http.Request) {
 		moduleStats = nil
 	}
 
+	rank, totalUsers, err := queries.GetUserRank(ctx, userID)
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to get user rank")
+		rank, totalUsers = 0, 0
+	}
+
 	writeJSON(w, http.StatusOK, map[string]interface{}{
 		"user_stats":   stats,
 		"module_stats": moduleStats,
+		"rank":         rank,
+		"total_users":  totalUsers,
 	})
 }
 
@@ -67,9 +75,17 @@ func (h *UserHandler) GetUserStats(w http.ResponseWriter, r *http.Request) {
 		moduleStats = nil
 	}
 
+	rank, totalUsers, err := queries.GetUserRank(ctx, userID)
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to get user rank")
+		rank, totalUsers = 0, 0
+	}
+
 	writeJSON(w, http.StatusOK, map[string]interface{}{
 		"user_stats":   stats,
 		"module_stats": moduleStats,
+		"rank":         rank,
+		"total_users":  totalUsers,
 	})
 }
 

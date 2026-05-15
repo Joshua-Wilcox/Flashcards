@@ -86,10 +86,10 @@ export const api = {
     }),
 
   getStats: () =>
-    fetchJSON<{ user_stats: UserStats; module_stats: ModuleStats[] }>(`${API_BASE}/stats`),
+    fetchJSON<{ user_stats: UserStats; module_stats: ModuleStats[]; rank: number; total_users: number }>(`${API_BASE}/stats`),
 
   getUserStats: (userId: string) =>
-    fetchJSON<{ user_stats: UserStats; module_stats: ModuleStats[] }>(
+    fetchJSON<{ user_stats: UserStats; module_stats: ModuleStats[]; rank: number; total_users: number }>(
       `${API_BASE}/stats/${userId}`
     ),
 

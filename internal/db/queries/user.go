@@ -208,6 +208,27 @@ func GetLeaderboardTotals(ctx context.Context, moduleID *int) (LeaderboardTotals
 	return t, err
 }
 
+func GetUserRank(ctx context.Context, userID string) (int, int, error) {
+	var rank, totalUsers int
+	err := db.Pool.QueryRow(ctx, `
+		SELECT rank, total_users FROM (
+			SELECT user_id,
+			       RANK() OVER (ORDER BY correct_answers DESC) as rank,
+			       COUNT(*) OVER () as total_users
+			FROM user_stats
+			WHERE total_answers > 0
+		) ranked
+		WHERE user_id = $1
+	`, userID).Scan(&rank, &totalUsers)
+	if err == pgx.ErrNoRows {
+		return 0, 0, nil
+	}
+	if err != nil {
+		return 0, 0, err
+	}
+	return rank, totalUsers, nil
+}
+
 func IsTokenUsed(ctx context.Context, userID, token string) (bool, error) {
 	var exists bool
 	err := db.Pool.QueryRow(ctx, `

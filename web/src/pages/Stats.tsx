@@ -1,6 +1,6 @@
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { BarChart3, Target, Zap, Award, BookOpen } from 'lucide-react';
+import { BarChart3, Target, Zap, Award, BookOpen, Trophy } from 'lucide-react';
 import { api } from '../api/client';
 
 export default function Stats() {
@@ -39,7 +39,7 @@ export default function Stats() {
     );
   }
 
-  const { user_stats, module_stats } = data;
+  const { user_stats, module_stats, rank, total_users } = data;
   const accuracy =
     user_stats.total_answers > 0
       ? Math.round((user_stats.correct_answers / user_stats.total_answers) * 100)
@@ -53,6 +53,19 @@ export default function Stats() {
           {userId ? `${user_stats.username}'s Stats` : 'Your Stats'}
         </h1>
       </div>
+
+      {rank > 0 && (
+        <div className="rounded-2xl p-5 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-lg">
+          <div className="flex items-center gap-3">
+            <Trophy className="h-6 w-6 text-yellow-200" />
+            <p className="text-lg font-semibold">
+              {userId
+                ? `Ranked #${rank} out of ${total_users} players`
+                : `You're ranked #${rank} globally out of ${total_users} players`}
+            </p>
+          </div>
+        </div>
+      )}
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
