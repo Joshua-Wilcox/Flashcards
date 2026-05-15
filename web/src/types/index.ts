@@ -57,9 +57,6 @@ export interface QuestionResponse {
   question_id: string;
   token: string;
   is_admin: boolean;
-  filters_applied: boolean;
-  filters_relaxed: boolean;
-  total_filtered_questions: number;
   error?: string;
 }
 

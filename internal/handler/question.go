@@ -53,9 +53,6 @@ type GetQuestionResponse struct {
 	QuestionID     string        `json:"question_id"`
 	Token          string        `json:"token"`
 	IsAdmin        bool          `json:"is_admin"`
-	FiltersApplied bool          `json:"filters_applied"`
-	FiltersRelaxed bool          `json:"filters_relaxed"`
-	TotalFiltered  int           `json:"total_filtered_questions"`
 	Error          string        `json:"error,omitempty"`
 }
 
@@ -120,9 +117,6 @@ func (h *QuestionHandler) GetQuestion(w http.ResponseWriter, r *http.Request) {
 			QuestionID:     prefetched.QuestionID,
 			Token:          token,
 			IsAdmin:        isAdmin,
-			FiltersApplied: len(req.Topics) > 0 || len(req.Subtopics) > 0 || len(req.Tags) > 0,
-			FiltersRelaxed: false,
-			TotalFiltered:  1,
 		}
 
 		// Trigger background prefetch to refill queue
@@ -161,9 +155,6 @@ func (h *QuestionHandler) GetQuestion(w http.ResponseWriter, r *http.Request) {
 			QuestionID:     question.ID,
 			Token:          token,
 			IsAdmin:        isAdmin,
-			FiltersApplied: len(req.Topics) > 0 || len(req.Subtopics) > 0 || len(req.Tags) > 0,
-			FiltersRelaxed: false,
-			TotalFiltered:  1,
 		}
 
 		// Start prefetching for next questions
