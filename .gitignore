@@ -37,3 +37,11 @@ supabase/.temp/
 
 # MCP config (contains tokens)
 .mcp.json
+
+# Autopilot logs
+scripts/*.log
+scripts/autopilot.lock
+scripts/autopilot.sh
+.gitignore
+AUTOPILOT.md
+.gitignore
