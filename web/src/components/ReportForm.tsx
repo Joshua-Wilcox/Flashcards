@@ -39,7 +39,7 @@ export default function ReportForm({ question, onSubmit, onCancel }: ReportFormP
       await onSubmit({
         question: question.question,
         question_id: question.question_id,
-        message,
+        message: message.trim(),
         distractors: JSON.stringify(
           distractorObjects.map((d) => ({
             question: question.question,
