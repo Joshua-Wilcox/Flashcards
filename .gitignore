@@ -45,3 +45,4 @@ scripts/autopilot.sh
 .gitignore
 AUTOPILOT.md
 .gitignore
+scripts/autopilot-loop.sh
