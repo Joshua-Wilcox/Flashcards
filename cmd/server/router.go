@@ -1,10 +1,14 @@
 package main
 
 import (
+	"context"
+	"encoding/json"
 	"net/http"
+	"time"
 
 	"flashcards-go/internal/auth"
 	"flashcards-go/internal/config"
+	"flashcards-go/internal/db"
 	"flashcards-go/internal/handler"
 	"flashcards-go/internal/realtime"
 
@@ -55,6 +59,8 @@ func setupRouter(cfg *config.Config) *chi.Mux {
 	r.Get("/logout", authHandler.Logout)
 
 	r.Route("/api", func(r chi.Router) {
+		r.Get("/health", apiHealthHandler)
+
 		r.With(auth.OptionalAuth).Get("/me", authHandler.Me)
 		r.With(auth.OptionalAuth).Get("/modules", filterHandler.GetModules)
 		r.With(auth.OptionalAuth).Get("/recent-activity", userHandler.GetRecentActivity)
@@ -157,4 +163,25 @@ func setupRouter(cfg *config.Config) *chi.Mux {
 func healthHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("OK"))
+}
+
+func apiHealthHandler(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(r.Context(), 3*time.Second)
+	defer cancel()
+
+	w.Header().Set("Content-Type", "application/json")
+
+	dbStatus := "ok"
+	statusCode := http.StatusOK
+
+	if err := db.HealthCheck(ctx); err != nil {
+		dbStatus = "unavailable"
+		statusCode = http.StatusServiceUnavailable
+	}
+
+	w.WriteHeader(statusCode)
+	json.NewEncoder(w).Encode(map[string]string{
+		"status": "ok",
+		"db":     dbStatus,
+	})
 }
