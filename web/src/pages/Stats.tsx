@@ -74,6 +74,7 @@ export default function Stats() {
           icon={Zap}
           label="Current Streak"
           value={user_stats.current_streak.toString()}
+          subtext={`Best: ${user_stats.max_streak}`}
           color="text-amber-600"
           bgColor="bg-amber-50"
         />
