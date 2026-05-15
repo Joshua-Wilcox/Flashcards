@@ -154,12 +154,6 @@ export default function Home({ user }: HomeProps) {
                 isLoading={filtersLoading}
               />
             )}
-            {question && (filters.topics.length > 0 || filters.subtopics.length > 0) && (
-              <p className="text-xs text-gray-400 mt-1 ml-6">
-                Showing {question.total_filtered_questions} question{question.total_filtered_questions !== 1 ? 's' : ''}
-                {question.filters_relaxed && ' (filters relaxed)'}
-              </p>
-            )}
           </div>
 
           <div className="flex-1 overflow-y-auto px-6 pb-6">
