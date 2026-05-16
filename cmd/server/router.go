@@ -10,10 +10,11 @@ import (
 	"flashcards-go/internal/config"
 	"flashcards-go/internal/db"
 	"flashcards-go/internal/handler"
+	"flashcards-go/internal/middleware"
 	"flashcards-go/internal/realtime"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+	chimiddleware "github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 )
 
@@ -22,11 +23,11 @@ var wsHub *realtime.Hub
 func setupRouter(cfg *config.Config) *chi.Mux {
 	r := chi.NewRouter()
 
-	r.Use(middleware.RequestID)
-	r.Use(middleware.RealIP)
-	r.Use(middleware.Logger)
-	r.Use(middleware.Recoverer)
-	r.Use(middleware.Compress(5))
+	r.Use(chimiddleware.RequestID)
+	r.Use(chimiddleware.RealIP)
+	r.Use(middleware.ZerologLogger)
+	r.Use(chimiddleware.Recoverer)
+	r.Use(chimiddleware.Compress(5))
 
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:*", "http://127.0.0.1:*", "https://flashcards.josh.software"},
