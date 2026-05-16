@@ -1,8 +1,10 @@
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { BarChart3, Target, Zap, Award, BookOpen, Trophy, Clock, Crown } from 'lucide-react';
+import { BarChart3, Target, Zap, Award, BookOpen, Trophy, Clock, Crown, Calendar } from 'lucide-react';
+import { ActivityCalendar } from 'react-activity-calendar';
 import { api } from '../api/client';
 import { formatRelativeTime } from '../utils/time';
+import type { HeatmapDay } from '../types';
 
 export default function Stats() {
   const { userId } = useParams();
@@ -10,6 +12,12 @@ export default function Stats() {
   const { data, isLoading, error } = useQuery({
     queryKey: ['stats', userId],
     queryFn: () => (userId ? api.getUserStats(userId) : api.getStats()),
+  });
+
+  const { data: heatmapData } = useQuery({
+    queryKey: ['heatmap', userId],
+    queryFn: () => api.getActivityHeatmap(userId),
+    enabled: !!data?.user_stats,
   });
 
   if (isLoading) {
@@ -117,6 +125,36 @@ export default function Stats() {
           bgColor="bg-purple-50"
         />
       </div>
+
+      {heatmapData?.heatmap && heatmapData.heatmap.length > 0 && (
+        <div className="card p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <Calendar className="h-5 w-5 text-blue-600" />
+            <h2 className="text-lg font-bold text-gray-900">
+              Activity Heatmap
+            </h2>
+          </div>
+          <div className="overflow-x-auto">
+            <ActivityCalendar
+              data={heatmapData.heatmap.map((day: HeatmapDay) => ({
+                date: day.date,
+                count: day.count,
+                level: day.level,
+              }))}
+              theme={{
+                light: ['#ebedf0', '#9be9a8', '#40c463', '#30a14e', '#216e39'],
+                dark: ['#161b22', '#0e4429', '#006d32', '#26a641', '#39d353'],
+              }}
+              blockSize={12}
+              blockMargin={4}
+              fontSize={14}
+              labels={{
+                totalCount: '{{count}} questions answered in the last year',
+              }}
+            />
+          </div>
+        </div>
+      )}
 
       {module_stats && module_stats.length > 0 && (
         <div className="card p-6">

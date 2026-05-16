@@ -169,6 +169,46 @@ func (h *UserHandler) GetRecentActivity(w http.ResponseWriter, r *http.Request) 
 	})
 }
 
+func (h *UserHandler) GetOwnActivityHeatmap(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	userID := auth.GetUserID(ctx)
+
+	heatmap, err := queries.GetUserAnswerHeatmap(ctx, userID)
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to get activity heatmap")
+		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "Internal error"})
+		return
+	}
+
+	if heatmap == nil {
+		heatmap = []queries.HeatmapDay{}
+	}
+
+	writeJSON(w, http.StatusOK, map[string]interface{}{
+		"heatmap": heatmap,
+	})
+}
+
+func (h *UserHandler) GetActivityHeatmap(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	userID := chi.URLParam(r, "userID")
+
+	heatmap, err := queries.GetUserAnswerHeatmap(ctx, userID)
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to get activity heatmap")
+		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "Internal error"})
+		return
+	}
+
+	if heatmap == nil {
+		heatmap = []queries.HeatmapDay{}
+	}
+
+	writeJSON(w, http.StatusOK, map[string]interface{}{
+		"heatmap": heatmap,
+	})
+}
+
 func (h *UserHandler) ExportLeaderboardCSV(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 

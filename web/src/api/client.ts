@@ -10,6 +10,7 @@ import type {
   LeaderboardEntry,
   LeaderboardTotals,
   AdminSubmissions,
+  HeatmapDay,
 } from '../types';
 
 const API_BASE = '/api';
@@ -91,6 +92,11 @@ export const api = {
   getUserStats: (userId: string) =>
     fetchJSON<{ user_stats: UserStats; module_stats: ModuleStats[]; rank: number; total_users: number }>(
       `${API_BASE}/stats/${userId}`
+    ),
+
+  getActivityHeatmap: (userId?: string) =>
+    fetchJSON<{ heatmap: HeatmapDay[] }>(
+      userId ? `${API_BASE}/stats/${userId}/heatmap` : `${API_BASE}/stats/heatmap`
     ),
 
   getLeaderboard: (sort = 'correct_answers', order = 'desc', module?: string) => {

@@ -177,3 +177,9 @@ export interface AdminSubmissions {
   reports: ReportedQuestion[];
   pdf_requests: PDFAccessRequest[];
 }
+
+export interface HeatmapDay {
+  date: string;
+  count: number;
+  level: number;
+}

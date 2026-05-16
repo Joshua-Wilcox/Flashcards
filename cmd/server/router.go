@@ -74,7 +74,9 @@ func setupRouter(cfg *config.Config) *chi.Mux {
 			r.Post("/filters", filterHandler.GetFilters)
 
 			r.Get("/stats", userHandler.GetStats)
+			r.Get("/stats/heatmap", userHandler.GetOwnActivityHeatmap)
 			r.Get("/stats/{userID}", userHandler.GetUserStats)
+			r.Get("/stats/{userID}/heatmap", userHandler.GetActivityHeatmap)
 			r.Get("/leaderboard", userHandler.GetLeaderboard)
 
 			r.Post("/submit-flashcard", submissionHandler.SubmitFlashcard)

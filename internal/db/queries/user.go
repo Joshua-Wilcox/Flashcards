@@ -374,6 +374,15 @@ func ProcessAnswerCheck(ctx context.Context, userID, questionID, submittedAnswer
 		return nil, "", err
 	}
 
+	// Log answer history
+	_, err = tx.Exec(ctx, `
+		INSERT INTO answer_history (user_id, question_id, module_id, is_correct, answered_at)
+		VALUES ($1, $2, $3, $4, $5)
+	`, userID, questionID, moduleID, isCorrect, now)
+	if err != nil {
+		return nil, "", err
+	}
+
 	if isCorrect {
 		_, err = tx.Exec(ctx, `
 			INSERT INTO used_tokens (user_id, token) VALUES ($1, $2)
@@ -482,4 +491,53 @@ func GetRecentActivity(ctx context.Context, limit int) ([]RecentActivity, error)
 		activities = append(activities, a)
 	}
 	return activities, rows.Err()
+}
+
+type HeatmapDay struct {
+	Date  string `json:"date"`
+	Count int    `json:"count"`
+	Level int    `json:"level"`
+}
+
+func GetUserAnswerHeatmap(ctx context.Context, userID string) ([]HeatmapDay, error) {
+	rows, err := db.Pool.Query(ctx, `
+		SELECT
+			DATE(answered_at) as date,
+			COUNT(*) as count
+		FROM answer_history
+		WHERE user_id = $1
+		  AND answered_at >= NOW() - INTERVAL '1 year'
+		GROUP BY DATE(answered_at)
+		ORDER BY date ASC
+	`, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var heatmap []HeatmapDay
+	for rows.Next() {
+		var h HeatmapDay
+		var date time.Time
+		if err := rows.Scan(&date, &h.Count); err != nil {
+			return nil, err
+		}
+		h.Date = date.Format("2006-01-02")
+
+		// Calculate level (0-4 based on count)
+		if h.Count == 0 {
+			h.Level = 0
+		} else if h.Count <= 5 {
+			h.Level = 1
+		} else if h.Count <= 10 {
+			h.Level = 2
+		} else if h.Count <= 20 {
+			h.Level = 3
+		} else {
+			h.Level = 4
+		}
+
+		heatmap = append(heatmap, h)
+	}
+	return heatmap, rows.Err()
 }

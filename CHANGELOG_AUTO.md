@@ -18,3 +18,4 @@
 | 2026-05-16 | Add server-side request logging middleware (method, path, status, duration, request_id) using zerolog for structured HTTP logging |
 | 2026-05-16 | Add toast notification on incorrect answer selection informing user their answer was wrong and streak has been reset |
 | 2026-05-16 | Add GET /api/admin/leaderboard/export endpoint for CSV export with rank, accuracy, and date-stamped filename |
+| 2026-05-16 | Add answer_history logging system with GitHub-style contribution heatmap on Stats page showing daily answer activity over the past year |
