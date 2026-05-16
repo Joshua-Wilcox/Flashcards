@@ -14,3 +14,4 @@
 | 2026-05-15 | Trim form inputs at submission in SubmitFlashcard (question, answer, topic, subtopic, distractors) and ReportForm (message) |
 | 2026-05-16 | Add time-since-last-answer badge to Stats page header with gradient styling and formatRelativeTime utility extracted to utils/time.ts |
 | 2026-05-16 | Convert live_activity_logs to activity_log (append-only) by removing unique constraint, fixing Recent Activity to always show full entries |
+| 2026-05-16 | Add dedicated "Best Streak" card with Crown icon on Stats page, promoting max_streak from subtext to standalone purple card |

@@ -1,6 +1,6 @@
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { BarChart3, Target, Zap, Award, BookOpen, Trophy, Clock } from 'lucide-react';
+import { BarChart3, Target, Zap, Award, BookOpen, Trophy, Clock, Crown } from 'lucide-react';
 import { api } from '../api/client';
 import { formatRelativeTime } from '../utils/time';
 
@@ -99,9 +99,15 @@ export default function Stats() {
           icon={Zap}
           label="Current Streak"
           value={user_stats.current_streak.toString()}
-          subtext={`Best: ${user_stats.max_streak}`}
           color="text-amber-600"
           bgColor="bg-amber-50"
+        />
+        <StatCard
+          icon={Crown}
+          label="Best Streak"
+          value={user_stats.max_streak.toString()}
+          color="text-purple-600"
+          bgColor="bg-purple-50"
         />
         <StatCard
           icon={Award}
