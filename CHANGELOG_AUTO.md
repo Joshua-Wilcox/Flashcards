@@ -16,3 +16,4 @@
 | 2026-05-16 | Convert live_activity_logs to activity_log (append-only) by removing unique constraint, fixing Recent Activity to always show full entries |
 | 2026-05-16 | Add dedicated "Best Streak" card with Crown icon on Stats page, promoting max_streak from subtext to standalone purple card |
 | 2026-05-16 | Add server-side request logging middleware (method, path, status, duration, request_id) using zerolog for structured HTTP logging |
+| 2026-05-16 | Add toast notification on incorrect answer selection informing user their answer was wrong and streak has been reset |
