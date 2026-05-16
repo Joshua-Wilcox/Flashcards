@@ -105,13 +105,13 @@ export default function SubmitFlashcard() {
   const submitMutation = useMutation({
     mutationFn: () =>
       api.submitFlashcard({
-        question,
-        answer,
+        question: question.trim(),
+        answer: answer.trim(),
         module,
-        topic,
-        subtopic,
+        topic: topic.trim(),
+        subtopic: subtopic.trim(),
         tags: tags.join(', '),
-        distractors: distractors.filter((d) => d.trim() !== ''),
+        distractors: distractors.filter((d) => d.trim() !== '').map((d) => d.trim()),
       }),
     onSuccess: (data) => {
       toast.success(data.message);

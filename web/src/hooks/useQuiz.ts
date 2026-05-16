@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { toast } from 'sonner';
 import { api } from '../api/client';
 import type { QuestionResponse } from '../types';
 
@@ -73,6 +74,9 @@ export function useQuiz() {
       } else {
         setIncorrectAnswers(prev => new Set(prev).add(answer));
         setState('answering');
+        toast.error('Incorrect! Your streak has been reset.', {
+          duration: 3000,
+        });
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to check answer');

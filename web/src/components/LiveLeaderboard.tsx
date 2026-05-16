@@ -116,6 +116,12 @@ export default function LiveLeaderboard({ module, maxItems }: LiveLeaderboardPro
           ))}
         </AnimatePresence>
 
+        {entries.length === 0 && (
+          <div className="flex-1 flex items-center justify-center text-sm text-gray-400">
+            No leaderboard entries yet
+          </div>
+        )}
+
         <div className="flex-1 bg-gradient-to-b from-gray-50 to-transparent rounded-xl min-h-[1rem]" />
       </div>
     </div>

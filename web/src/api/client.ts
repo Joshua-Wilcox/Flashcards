@@ -8,7 +8,9 @@ import type {
   UserStats,
   ModuleStats,
   LeaderboardEntry,
+  LeaderboardTotals,
   AdminSubmissions,
+  HeatmapDay,
 } from '../types';
 
 const API_BASE = '/api';
@@ -85,17 +87,24 @@ export const api = {
     }),
 
   getStats: () =>
-    fetchJSON<{ user_stats: UserStats; module_stats: ModuleStats[] }>(`${API_BASE}/stats`),
+    fetchJSON<{ user_stats: UserStats; module_stats: ModuleStats[]; rank: number; total_users: number }>(`${API_BASE}/stats`),
 
   getUserStats: (userId: string) =>
-    fetchJSON<{ user_stats: UserStats; module_stats: ModuleStats[] }>(
+    fetchJSON<{ user_stats: UserStats; module_stats: ModuleStats[]; rank: number; total_users: number }>(
       `${API_BASE}/stats/${userId}`
     ),
+
+  getActivityHeatmap: (userId?: string, year?: number) => {
+    const params = year ? `?year=${year}` : '';
+    return fetchJSON<{ heatmap: HeatmapDay[]; years: number[]; year: number }>(
+      userId ? `${API_BASE}/stats/${userId}/heatmap${params}` : `${API_BASE}/stats/heatmap${params}`
+    );
+  },
 
   getLeaderboard: (sort = 'correct_answers', order = 'desc', module?: string) => {
     const params = new URLSearchParams({ sort, order });
     if (module) params.set('module', module);
-    return fetchJSON<{ leaderboard: LeaderboardEntry[] }>(
+    return fetchJSON<{ leaderboard: LeaderboardEntry[]; totals: LeaderboardTotals }>(
       `${API_BASE}/leaderboard?${params}`
     );
   },

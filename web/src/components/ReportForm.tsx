@@ -13,9 +13,16 @@ interface ReportFormProps {
   onCancel: () => void;
 }
 
+const MIN_MESSAGE_LENGTH = 10;
+
 export default function ReportForm({ question, onSubmit, onCancel }: ReportFormProps) {
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [touched, setTouched] = useState(false);
+
+  const trimmedMessage = message.trim();
+  const isTooShort = trimmedMessage.length > 0 && trimmedMessage.length < MIN_MESSAGE_LENGTH;
+  const showError = touched && isTooShort;
 
   const distractorObjects = question.answers
     .map((answer, i) => ({
@@ -33,13 +40,14 @@ export default function ReportForm({ question, onSubmit, onCancel }: ReportFormP
   ) ?? '';
 
   const handleSubmit = async () => {
-    if (!message.trim()) return;
+    setTouched(true);
+    if (trimmedMessage.length < MIN_MESSAGE_LENGTH) return;
     setSubmitting(true);
     try {
       await onSubmit({
         question: question.question,
         question_id: question.question_id,
-        message,
+        message: message.trim(),
         distractors: JSON.stringify(
           distractorObjects.map((d) => ({
             question: question.question,
@@ -53,7 +61,7 @@ export default function ReportForm({ question, onSubmit, onCancel }: ReportFormP
     }
   };
 
-  const canSubmit = message.trim().length > 0 && !submitting;
+  const canSubmit = trimmedMessage.length >= MIN_MESSAGE_LENGTH && !submitting;
 
   const SubmitButtons = () => (
     <div className="flex gap-2">
@@ -102,10 +110,16 @@ export default function ReportForm({ question, onSubmit, onCancel }: ReportFormP
         <textarea
           value={message}
           onChange={(e) => setMessage(e.target.value)}
+          onBlur={() => setTouched(true)}
           rows={6}
           placeholder="Please describe what's wrong with this question, answer, or distractors."
-          className="input text-sm leading-relaxed"
+          className={`input text-sm leading-relaxed ${showError ? 'border-red-400' : ''}`}
         />
+        {showError && (
+          <p className="mt-1 text-xs text-red-600">
+            Message must be at least {MIN_MESSAGE_LENGTH} characters (currently {trimmedMessage.length}).
+          </p>
+        )}
       </div>
 
       <div className="rounded-xl bg-white p-4 space-y-3">

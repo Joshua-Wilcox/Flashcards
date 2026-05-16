@@ -186,6 +186,49 @@ func GetLeaderboard(ctx context.Context, sortBy, order string, moduleID *int, li
 	return entries, rows.Err()
 }
 
+type LeaderboardTotals struct {
+	TotalAnswers int `json:"total_answers"`
+	TotalCorrect int `json:"total_correct"`
+	TotalUsers   int `json:"total_users"`
+}
+
+func GetLeaderboardTotals(ctx context.Context, moduleID *int) (LeaderboardTotals, error) {
+	var query string
+	var args []interface{}
+	if moduleID != nil {
+		query = `SELECT COALESCE(SUM(number_answered),0), COALESCE(SUM(number_correct),0), COUNT(*)
+		         FROM module_stats WHERE module_id = $1 AND number_answered > 0`
+		args = []interface{}{*moduleID}
+	} else {
+		query = `SELECT COALESCE(SUM(total_answers),0), COALESCE(SUM(correct_answers),0), COUNT(*)
+		         FROM user_stats WHERE total_answers > 0`
+	}
+	var t LeaderboardTotals
+	err := db.Pool.QueryRow(ctx, query, args...).Scan(&t.TotalAnswers, &t.TotalCorrect, &t.TotalUsers)
+	return t, err
+}
+
+func GetUserRank(ctx context.Context, userID string) (int, int, error) {
+	var rank, totalUsers int
+	err := db.Pool.QueryRow(ctx, `
+		SELECT rank, total_users FROM (
+			SELECT user_id,
+			       RANK() OVER (ORDER BY correct_answers DESC) as rank,
+			       COUNT(*) OVER () as total_users
+			FROM user_stats
+			WHERE total_answers > 0
+		) ranked
+		WHERE user_id = $1
+	`, userID).Scan(&rank, &totalUsers)
+	if err == pgx.ErrNoRows {
+		return 0, 0, nil
+	}
+	if err != nil {
+		return 0, 0, err
+	}
+	return rank, totalUsers, nil
+}
+
 func IsTokenUsed(ctx context.Context, userID, token string) (bool, error) {
 	var exists bool
 	err := db.Pool.QueryRow(ctx, `
@@ -331,6 +374,15 @@ func ProcessAnswerCheck(ctx context.Context, userID, questionID, submittedAnswer
 		return nil, "", err
 	}
 
+	// Log answer history
+	_, err = tx.Exec(ctx, `
+		INSERT INTO answer_history (user_id, question_id, module_id, is_correct, answered_at)
+		VALUES ($1, $2, $3, $4, $5)
+	`, userID, questionID, moduleID, isCorrect, now)
+	if err != nil {
+		return nil, "", err
+	}
+
 	if isCorrect {
 		_, err = tx.Exec(ctx, `
 			INSERT INTO used_tokens (user_id, token) VALUES ($1, $2)
@@ -346,13 +398,8 @@ func ProcessAnswerCheck(ctx context.Context, userID, questionID, submittedAnswer
 		}
 
 		_, err = tx.Exec(ctx, `
-			INSERT INTO live_activity_logs (user_id, username, module_name, streak, answered_at)
+			INSERT INTO activity_log (user_id, username, module_name, streak, answered_at)
 			VALUES ($1, $2, $3, $4, $5)
-			ON CONFLICT (user_id) DO UPDATE SET
-				username = EXCLUDED.username,
-				module_name = EXCLUDED.module_name,
-				streak = EXCLUDED.streak,
-				answered_at = EXCLUDED.answered_at
 		`, userID, username, moduleName, newStreak, now)
 		if err != nil {
 			return nil, "", err
@@ -410,10 +457,24 @@ func GrantPDFAccess(ctx context.Context, userID string) error {
 	return err
 }
 
+func RevokePDFAccess(ctx context.Context, userID string) error {
+	_, err := db.Pool.Exec(ctx, `UPDATE user_stats SET has_pdf_access = false WHERE user_id = $1`, userID)
+	return err
+}
+
+func ToggleAdmin(ctx context.Context, userID string) (bool, error) {
+	var newVal bool
+	err := db.Pool.QueryRow(ctx, `UPDATE user_stats SET is_admin = NOT is_admin WHERE user_id = $1 RETURNING is_admin`, userID).Scan(&newVal)
+	return newVal, err
+}
+
 func GetRecentActivity(ctx context.Context, limit int) ([]RecentActivity, error) {
 	rows, err := db.Pool.Query(ctx, `
-		SELECT user_id, username, module_name, streak, answered_at
-		FROM live_activity_logs
+		SELECT user_id, username, module_name, streak, answered_at FROM (
+			SELECT DISTINCT ON (user_id) user_id, username, module_name, streak, answered_at
+			FROM activity_log
+			ORDER BY user_id, answered_at DESC
+		) latest
 		ORDER BY answered_at DESC
 		LIMIT $1
 	`, limit)
@@ -433,4 +494,86 @@ func GetRecentActivity(ctx context.Context, limit int) ([]RecentActivity, error)
 		activities = append(activities, a)
 	}
 	return activities, rows.Err()
+}
+
+type HeatmapDay struct {
+	Date  string `json:"date"`
+	Count int    `json:"count"`
+	Level int    `json:"level"`
+}
+
+func GetUserAnswerHeatmap(ctx context.Context, userID string, year int) ([]HeatmapDay, error) {
+	startDate := time.Date(year, 1, 1, 0, 0, 0, 0, time.UTC)
+	endDate := time.Date(year, 12, 31, 0, 0, 0, 0, time.UTC)
+
+
+	rows, err := db.Pool.Query(ctx, `
+		SELECT
+			DATE(answered_at) as date,
+			COUNT(*) as count
+		FROM answer_history
+		WHERE user_id = $1
+		  AND answered_at >= $2
+		  AND answered_at < $3
+		GROUP BY DATE(answered_at)
+		ORDER BY date ASC
+	`, userID, startDate, endDate.Add(24*time.Hour))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	counts := make(map[string]int)
+	for rows.Next() {
+		var date time.Time
+		var count int
+		if err := rows.Scan(&date, &count); err != nil {
+			return nil, err
+		}
+		counts[date.Format("2006-01-02")] = count
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	var heatmap []HeatmapDay
+	for d := startDate; !d.After(endDate); d = d.AddDate(0, 0, 1) {
+		dateStr := d.Format("2006-01-02")
+		count := counts[dateStr]
+		level := 0
+		if count >= 21 {
+			level = 4
+		} else if count >= 11 {
+			level = 3
+		} else if count >= 6 {
+			level = 2
+		} else if count >= 1 {
+			level = 1
+		}
+		heatmap = append(heatmap, HeatmapDay{Date: dateStr, Count: count, Level: level})
+	}
+	return heatmap, nil
+}
+
+func GetUserAnswerHeatmapYears(ctx context.Context, userID string) ([]int, error) {
+	rows, err := db.Pool.Query(ctx, `
+		SELECT DISTINCT EXTRACT(YEAR FROM answered_at)::int as year
+		FROM answer_history
+		WHERE user_id = $1
+		ORDER BY year DESC
+	`, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var years []int
+	for rows.Next() {
+		var y int
+		if err := rows.Scan(&y); err != nil {
+			return nil, err
+		}
+		years = append(years, y)
+	}
+	return years, rows.Err()
 }

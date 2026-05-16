@@ -1,14 +1,26 @@
+import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { BarChart3, Target, Zap, Award, BookOpen } from 'lucide-react';
+import { BarChart3, Target, Zap, Award, BookOpen, Trophy, Clock, Crown, Calendar } from 'lucide-react';
+import { ActivityCalendar } from 'react-activity-calendar';
+import { Tooltip as ReactTooltip } from 'react-tooltip';
 import { api } from '../api/client';
+import { formatRelativeTime } from '../utils/time';
+import type { HeatmapDay } from '../types';
 
 export default function Stats() {
   const { userId } = useParams();
+  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['stats', userId],
     queryFn: () => (userId ? api.getUserStats(userId) : api.getStats()),
+  });
+
+  const { data: heatmapData } = useQuery({
+    queryKey: ['heatmap', userId, selectedYear],
+    queryFn: () => api.getActivityHeatmap(userId, selectedYear),
+    enabled: !!data?.user_stats,
   });
 
   if (isLoading) {
@@ -39,7 +51,7 @@ export default function Stats() {
     );
   }
 
-  const { user_stats, module_stats } = data;
+  const { user_stats, module_stats, rank, total_users } = data;
   const accuracy =
     user_stats.total_answers > 0
       ? Math.round((user_stats.correct_answers / user_stats.total_answers) * 100)
@@ -53,6 +65,30 @@ export default function Stats() {
           {userId ? `${user_stats.username}'s Stats` : 'Your Stats'}
         </h1>
       </div>
+
+      {rank > 0 && (
+        <div className="rounded-2xl p-5 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-lg">
+          <div className="flex items-center gap-3">
+            <Trophy className="h-6 w-6 text-yellow-200" />
+            <p className="text-lg font-semibold">
+              {userId
+                ? `Ranked #${rank} out of ${total_users} players`
+                : `You're ranked #${rank} globally out of ${total_users} players`}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {user_stats.last_answer_time && (
+        <div className="rounded-2xl p-5 bg-gradient-to-r from-blue-500 via-cyan-500 to-teal-500 text-white shadow-lg">
+          <div className="flex items-center gap-3">
+            <Clock className="h-6 w-6 text-blue-100" />
+            <p className="text-lg font-semibold">
+              Last active {formatRelativeTime(user_stats.last_answer_time)} ago
+            </p>
+          </div>
+        </div>
+      )}
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
@@ -74,9 +110,15 @@ export default function Stats() {
           icon={Zap}
           label="Current Streak"
           value={user_stats.current_streak.toString()}
-          subtext={`Best: ${user_stats.max_streak}`}
           color="text-amber-600"
           bgColor="bg-amber-50"
+        />
+        <StatCard
+          icon={Crown}
+          label="Best Streak"
+          value={user_stats.max_streak.toString()}
+          color="text-purple-600"
+          bgColor="bg-purple-50"
         />
         <StatCard
           icon={Award}
@@ -86,6 +128,66 @@ export default function Stats() {
           bgColor="bg-purple-50"
         />
       </div>
+
+      {heatmapData?.heatmap && (
+        <div className="card p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <Calendar className="h-5 w-5 text-blue-600" />
+              <h2 className="text-lg font-bold text-gray-900">
+                Activity Heatmap
+              </h2>
+            </div>
+          </div>
+          <div className="overflow-x-auto">
+            <ActivityCalendar
+              data={(() => {
+                const maxCount = Math.max(...heatmapData.heatmap.map((d: HeatmapDay) => d.count), 1);
+                return heatmapData.heatmap.map((day: HeatmapDay) => ({
+                  date: day.date,
+                  count: day.count,
+                  level: day.count === 0 ? 0 : Math.min(4, Math.ceil((day.count / maxCount) * 4)) as 1 | 2 | 3 | 4,
+                }));
+              })()}
+              colorScheme="light"
+              theme={{
+                light: ['#ebedf0', '#c6e48b', '#7bc96f', '#239a3b', '#196127'],
+                dark: ['#ebedf0', '#c6e48b', '#7bc96f', '#239a3b', '#196127'],
+              }}
+              blockSize={12}
+              blockMargin={4}
+              fontSize={14}
+              showWeekdayLabels
+              labels={{
+                totalCount: `{{count}} questions answered in ${selectedYear}`,
+              }}
+              renderBlock={(block, activity) => (
+                <g data-tooltip-id="heatmap-tooltip" data-tooltip-content={`${activity.count} question${activity.count !== 1 ? 's' : ''} on ${activity.date}`}>
+                  {block}
+                </g>
+              )}
+            />
+            <ReactTooltip id="heatmap-tooltip" />
+          </div>
+          {heatmapData.years && heatmapData.years.length > 0 && (
+            <div className="flex items-center gap-2 mt-4 pt-4 border-t border-gray-100">
+              {heatmapData.years.map((year: number) => (
+                <button
+                  key={year}
+                  onClick={() => setSelectedYear(year)}
+                  className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+                    selectedYear === year
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  {year}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {module_stats && module_stats.length > 0 && (
         <div className="card p-6">

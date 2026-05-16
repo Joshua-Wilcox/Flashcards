@@ -1,15 +1,20 @@
 package main
 
 import (
+	"context"
+	"encoding/json"
 	"net/http"
+	"time"
 
 	"flashcards-go/internal/auth"
 	"flashcards-go/internal/config"
+	"flashcards-go/internal/db"
 	"flashcards-go/internal/handler"
+	"flashcards-go/internal/middleware"
 	"flashcards-go/internal/realtime"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+	chimiddleware "github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 )
 
@@ -18,11 +23,11 @@ var wsHub *realtime.Hub
 func setupRouter(cfg *config.Config) *chi.Mux {
 	r := chi.NewRouter()
 
-	r.Use(middleware.RequestID)
-	r.Use(middleware.RealIP)
-	r.Use(middleware.Logger)
-	r.Use(middleware.Recoverer)
-	r.Use(middleware.Compress(5))
+	r.Use(chimiddleware.RequestID)
+	r.Use(chimiddleware.RealIP)
+	r.Use(middleware.ZerologLogger)
+	r.Use(chimiddleware.Recoverer)
+	r.Use(chimiddleware.Compress(5))
 
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:*", "http://127.0.0.1:*", "https://flashcards.josh.software"},
@@ -55,6 +60,8 @@ func setupRouter(cfg *config.Config) *chi.Mux {
 	r.Get("/logout", authHandler.Logout)
 
 	r.Route("/api", func(r chi.Router) {
+		r.Get("/health", apiHealthHandler)
+
 		r.With(auth.OptionalAuth).Get("/me", authHandler.Me)
 		r.With(auth.OptionalAuth).Get("/modules", filterHandler.GetModules)
 		r.With(auth.OptionalAuth).Get("/recent-activity", userHandler.GetRecentActivity)
@@ -67,7 +74,9 @@ func setupRouter(cfg *config.Config) *chi.Mux {
 			r.Post("/filters", filterHandler.GetFilters)
 
 			r.Get("/stats", userHandler.GetStats)
+			r.Get("/stats/heatmap", userHandler.GetOwnActivityHeatmap)
 			r.Get("/stats/{userID}", userHandler.GetUserStats)
+			r.Get("/stats/{userID}/heatmap", userHandler.GetActivityHeatmap)
 			r.Get("/leaderboard", userHandler.GetLeaderboard)
 
 			r.Post("/submit-flashcard", submissionHandler.SubmitFlashcard)
@@ -102,6 +111,9 @@ func setupRouter(cfg *config.Config) *chi.Mux {
 			r.Post("/admin/approve-pdf-access", adminHandler.ApprovePDFAccess)
 			r.Post("/admin/deny-pdf-access", adminHandler.DenyPDFAccess)
 			r.Post("/admin/edit-answer", adminHandler.EditAnswer)
+			r.Post("/admin/revoke-pdf-access", adminHandler.RevokePDFAccess)
+			r.Post("/admin/toggle-admin", adminHandler.ToggleAdmin)
+			r.Get("/admin/leaderboard/export", userHandler.ExportLeaderboardCSV)
 
 			r.Get("/admin/pdfs/list", pdfHandler.ListPDFs)
 			r.Get("/admin/pdfs/{pdfID}", pdfHandler.GetPDFInfo)
@@ -157,4 +169,25 @@ func setupRouter(cfg *config.Config) *chi.Mux {
 func healthHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("OK"))
+}
+
+func apiHealthHandler(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(r.Context(), 3*time.Second)
+	defer cancel()
+
+	w.Header().Set("Content-Type", "application/json")
+
+	dbStatus := "ok"
+	statusCode := http.StatusOK
+
+	if err := db.HealthCheck(ctx); err != nil {
+		dbStatus = "unavailable"
+		statusCode = http.StatusServiceUnavailable
+	}
+
+	w.WriteHeader(statusCode)
+	json.NewEncoder(w).Encode(map[string]string{
+		"status": "ok",
+		"db":     dbStatus,
+	})
 }

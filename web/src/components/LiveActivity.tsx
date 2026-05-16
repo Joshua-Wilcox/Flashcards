@@ -9,22 +9,21 @@ interface LiveActivityProps {
   maxItems?: number;
 }
 
-const ITEM_HEIGHT = 68;
-
 export default function LiveActivity({ maxItems }: LiveActivityProps) {
   const [activities, setActivities] = useState<ActivityEvent[]>([]);
-  const [visibleCount, setVisibleCount] = useState(maxItems ?? 8);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [visibleCount, setVisibleCount] = useState(maxItems ?? 50);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (maxItems) return;
-    const el = containerRef.current;
+    const el = cardRef.current?.parentElement;
     if (!el) return;
     const calculate = () => {
-      const available = el.clientHeight;
-      setVisibleCount(Math.max(3, Math.floor(available / ITEM_HEIGHT)));
+      const available = el.clientHeight - 80;
+      const count = Math.max(3, Math.floor(available / 68));
+      setVisibleCount(count);
     };
-    calculate();
+    setTimeout(calculate, 50);
     const observer = new ResizeObserver(calculate);
     observer.observe(el);
     return () => observer.disconnect();
@@ -61,13 +60,13 @@ export default function LiveActivity({ maxItems }: LiveActivityProps) {
   };
 
   return (
-    <div className="card p-5 w-full flex flex-col overflow-hidden">
+    <div ref={cardRef} className="card p-5 w-full flex flex-col overflow-hidden">
       <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2 mb-4 flex-shrink-0">
         <Users className="h-4 w-4 text-blue-600" />
         Recent Activity
       </h3>
 
-      <div ref={containerRef} className="flex flex-col gap-2 flex-1 overflow-hidden">
+      <div className="flex flex-col gap-2 flex-1 overflow-hidden">
         <AnimatePresence mode="popLayout">
           {activities.slice(0, visibleCount).map((activity) => (
             <motion.div
@@ -100,7 +99,11 @@ export default function LiveActivity({ maxItems }: LiveActivityProps) {
           ))}
         </AnimatePresence>
 
-        <div className="flex-1 bg-gradient-to-b from-gray-50 to-transparent rounded-xl min-h-[1rem]" />
+        {activities.length === 0 && (
+          <div className="flex-1 flex items-center justify-center text-sm text-gray-400">
+            No recent activity yet
+          </div>
+        )}
       </div>
     </div>
   );

@@ -57,9 +57,6 @@ export interface QuestionResponse {
   question_id: string;
   token: string;
   is_admin: boolean;
-  filters_applied: boolean;
-  filters_relaxed: boolean;
-  total_filtered_questions: number;
   error?: string;
 }
 
@@ -87,6 +84,12 @@ export interface ModuleStats {
   current_streak: number;
   approved_cards: number;
   last_answered_time?: string;
+}
+
+export interface LeaderboardTotals {
+  total_answers: number;
+  total_correct: number;
+  total_users: number;
 }
 
 export interface LeaderboardEntry {
@@ -173,4 +176,10 @@ export interface AdminSubmissions {
   distractors: SubmittedDistractor[];
   reports: ReportedQuestion[];
   pdf_requests: PDFAccessRequest[];
+}
+
+export interface HeatmapDay {
+  date: string;
+  count: number;
+  level: number;
 }
