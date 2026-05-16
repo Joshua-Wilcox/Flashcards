@@ -1,13 +1,16 @@
+import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { BarChart3, Target, Zap, Award, BookOpen, Trophy, Clock, Crown, Calendar } from 'lucide-react';
 import { ActivityCalendar } from 'react-activity-calendar';
+import { Tooltip as ReactTooltip } from 'react-tooltip';
 import { api } from '../api/client';
 import { formatRelativeTime } from '../utils/time';
 import type { HeatmapDay } from '../types';
 
 export default function Stats() {
   const { userId } = useParams();
+  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['stats', userId],
@@ -15,8 +18,8 @@ export default function Stats() {
   });
 
   const { data: heatmapData } = useQuery({
-    queryKey: ['heatmap', userId],
-    queryFn: () => api.getActivityHeatmap(userId),
+    queryKey: ['heatmap', userId, selectedYear],
+    queryFn: () => api.getActivityHeatmap(userId, selectedYear),
     enabled: !!data?.user_stats,
   });
 
@@ -126,33 +129,63 @@ export default function Stats() {
         />
       </div>
 
-      {heatmapData?.heatmap && heatmapData.heatmap.length > 0 && (
+      {heatmapData?.heatmap && (
         <div className="card p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <Calendar className="h-5 w-5 text-blue-600" />
-            <h2 className="text-lg font-bold text-gray-900">
-              Activity Heatmap
-            </h2>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <Calendar className="h-5 w-5 text-blue-600" />
+              <h2 className="text-lg font-bold text-gray-900">
+                Activity Heatmap
+              </h2>
+            </div>
           </div>
           <div className="overflow-x-auto">
             <ActivityCalendar
-              data={heatmapData.heatmap.map((day: HeatmapDay) => ({
-                date: day.date,
-                count: day.count,
-                level: day.level,
-              }))}
+              data={(() => {
+                const maxCount = Math.max(...heatmapData.heatmap.map((d: HeatmapDay) => d.count), 1);
+                return heatmapData.heatmap.map((day: HeatmapDay) => ({
+                  date: day.date,
+                  count: day.count,
+                  level: day.count === 0 ? 0 : Math.min(4, Math.ceil((day.count / maxCount) * 4)) as 1 | 2 | 3 | 4,
+                }));
+              })()}
+              colorScheme="light"
               theme={{
-                light: ['#ebedf0', '#9be9a8', '#40c463', '#30a14e', '#216e39'],
-                dark: ['#161b22', '#0e4429', '#006d32', '#26a641', '#39d353'],
+                light: ['#ebedf0', '#c6e48b', '#7bc96f', '#239a3b', '#196127'],
+                dark: ['#ebedf0', '#c6e48b', '#7bc96f', '#239a3b', '#196127'],
               }}
               blockSize={12}
               blockMargin={4}
               fontSize={14}
+              showWeekdayLabels
               labels={{
-                totalCount: '{{count}} questions answered in the last year',
+                totalCount: `{{count}} questions answered in ${selectedYear}`,
               }}
+              renderBlock={(block, activity) => (
+                <g data-tooltip-id="heatmap-tooltip" data-tooltip-content={`${activity.count} question${activity.count !== 1 ? 's' : ''} on ${activity.date}`}>
+                  {block}
+                </g>
+              )}
             />
+            <ReactTooltip id="heatmap-tooltip" />
           </div>
+          {heatmapData.years && heatmapData.years.length > 0 && (
+            <div className="flex items-center gap-2 mt-4 pt-4 border-t border-gray-100">
+              {heatmapData.years.map((year: number) => (
+                <button
+                  key={year}
+                  onClick={() => setSelectedYear(year)}
+                  className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+                    selectedYear === year
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  {year}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       )}
 

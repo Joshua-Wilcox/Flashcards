@@ -470,8 +470,11 @@ func ToggleAdmin(ctx context.Context, userID string) (bool, error) {
 
 func GetRecentActivity(ctx context.Context, limit int) ([]RecentActivity, error) {
 	rows, err := db.Pool.Query(ctx, `
-		SELECT user_id, username, module_name, streak, answered_at
-		FROM activity_log
+		SELECT user_id, username, module_name, streak, answered_at FROM (
+			SELECT DISTINCT ON (user_id) user_id, username, module_name, streak, answered_at
+			FROM activity_log
+			ORDER BY user_id, answered_at DESC
+		) latest
 		ORDER BY answered_at DESC
 		LIMIT $1
 	`, limit)
@@ -499,45 +502,78 @@ type HeatmapDay struct {
 	Level int    `json:"level"`
 }
 
-func GetUserAnswerHeatmap(ctx context.Context, userID string) ([]HeatmapDay, error) {
+func GetUserAnswerHeatmap(ctx context.Context, userID string, year int) ([]HeatmapDay, error) {
+	startDate := time.Date(year, 1, 1, 0, 0, 0, 0, time.UTC)
+	endDate := time.Date(year, 12, 31, 0, 0, 0, 0, time.UTC)
+
+
 	rows, err := db.Pool.Query(ctx, `
 		SELECT
 			DATE(answered_at) as date,
 			COUNT(*) as count
 		FROM answer_history
 		WHERE user_id = $1
-		  AND answered_at >= NOW() - INTERVAL '1 year'
+		  AND answered_at >= $2
+		  AND answered_at < $3
 		GROUP BY DATE(answered_at)
 		ORDER BY date ASC
+	`, userID, startDate, endDate.Add(24*time.Hour))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	counts := make(map[string]int)
+	for rows.Next() {
+		var date time.Time
+		var count int
+		if err := rows.Scan(&date, &count); err != nil {
+			return nil, err
+		}
+		counts[date.Format("2006-01-02")] = count
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	var heatmap []HeatmapDay
+	for d := startDate; !d.After(endDate); d = d.AddDate(0, 0, 1) {
+		dateStr := d.Format("2006-01-02")
+		count := counts[dateStr]
+		level := 0
+		if count >= 21 {
+			level = 4
+		} else if count >= 11 {
+			level = 3
+		} else if count >= 6 {
+			level = 2
+		} else if count >= 1 {
+			level = 1
+		}
+		heatmap = append(heatmap, HeatmapDay{Date: dateStr, Count: count, Level: level})
+	}
+	return heatmap, nil
+}
+
+func GetUserAnswerHeatmapYears(ctx context.Context, userID string) ([]int, error) {
+	rows, err := db.Pool.Query(ctx, `
+		SELECT DISTINCT EXTRACT(YEAR FROM answered_at)::int as year
+		FROM answer_history
+		WHERE user_id = $1
+		ORDER BY year DESC
 	`, userID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var heatmap []HeatmapDay
+	var years []int
 	for rows.Next() {
-		var h HeatmapDay
-		var date time.Time
-		if err := rows.Scan(&date, &h.Count); err != nil {
+		var y int
+		if err := rows.Scan(&y); err != nil {
 			return nil, err
 		}
-		h.Date = date.Format("2006-01-02")
-
-		// Calculate level (0-4 based on count)
-		if h.Count == 0 {
-			h.Level = 0
-		} else if h.Count <= 5 {
-			h.Level = 1
-		} else if h.Count <= 10 {
-			h.Level = 2
-		} else if h.Count <= 20 {
-			h.Level = 3
-		} else {
-			h.Level = 4
-		}
-
-		heatmap = append(heatmap, h)
+		years = append(years, y)
 	}
-	return heatmap, rows.Err()
+	return years, rows.Err()
 }

@@ -94,10 +94,12 @@ export const api = {
       `${API_BASE}/stats/${userId}`
     ),
 
-  getActivityHeatmap: (userId?: string) =>
-    fetchJSON<{ heatmap: HeatmapDay[] }>(
-      userId ? `${API_BASE}/stats/${userId}/heatmap` : `${API_BASE}/stats/heatmap`
-    ),
+  getActivityHeatmap: (userId?: string, year?: number) => {
+    const params = year ? `?year=${year}` : '';
+    return fetchJSON<{ heatmap: HeatmapDay[]; years: number[]; year: number }>(
+      userId ? `${API_BASE}/stats/${userId}/heatmap${params}` : `${API_BASE}/stats/heatmap${params}`
+    );
+  },
 
   getLeaderboard: (sort = 'correct_answers', order = 'desc', module?: string) => {
     const params = new URLSearchParams({ sort, order });

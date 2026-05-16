@@ -172,12 +172,19 @@ func (h *UserHandler) GetRecentActivity(w http.ResponseWriter, r *http.Request) 
 func (h *UserHandler) GetOwnActivityHeatmap(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	userID := auth.GetUserID(ctx)
+	year := parseYearParam(r)
 
-	heatmap, err := queries.GetUserAnswerHeatmap(ctx, userID)
+	heatmap, err := queries.GetUserAnswerHeatmap(ctx, userID, year)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to get activity heatmap")
 		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "Internal error"})
 		return
+	}
+
+	years, err := queries.GetUserAnswerHeatmapYears(ctx, userID)
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to get heatmap years")
+		years = []int{year}
 	}
 
 	if heatmap == nil {
@@ -186,18 +193,27 @@ func (h *UserHandler) GetOwnActivityHeatmap(w http.ResponseWriter, r *http.Reque
 
 	writeJSON(w, http.StatusOK, map[string]interface{}{
 		"heatmap": heatmap,
+		"years":   years,
+		"year":    year,
 	})
 }
 
 func (h *UserHandler) GetActivityHeatmap(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	userID := chi.URLParam(r, "userID")
+	year := parseYearParam(r)
 
-	heatmap, err := queries.GetUserAnswerHeatmap(ctx, userID)
+	heatmap, err := queries.GetUserAnswerHeatmap(ctx, userID, year)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to get activity heatmap")
 		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "Internal error"})
 		return
+	}
+
+	years, err := queries.GetUserAnswerHeatmapYears(ctx, userID)
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to get heatmap years")
+		years = []int{year}
 	}
 
 	if heatmap == nil {
@@ -206,7 +222,18 @@ func (h *UserHandler) GetActivityHeatmap(w http.ResponseWriter, r *http.Request)
 
 	writeJSON(w, http.StatusOK, map[string]interface{}{
 		"heatmap": heatmap,
+		"years":   years,
+		"year":    year,
 	})
+}
+
+func parseYearParam(r *http.Request) int {
+	if y := r.URL.Query().Get("year"); y != "" {
+		if n, err := strconv.Atoi(y); err == nil && n >= 2020 && n <= 2100 {
+			return n
+		}
+	}
+	return time.Now().Year()
 }
 
 func (h *UserHandler) ExportLeaderboardCSV(w http.ResponseWriter, r *http.Request) {

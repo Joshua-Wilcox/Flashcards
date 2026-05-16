@@ -1,6 +1,8 @@
 package middleware
 
 import (
+	"bufio"
+	"net"
 	"net/http"
 	"time"
 
@@ -30,6 +32,16 @@ func (rw *responseWriter) Write(b []byte) (int, error) {
 	n, err := rw.ResponseWriter.Write(b)
 	rw.written += int64(n)
 	return n, err
+}
+
+func (rw *responseWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
+	return rw.ResponseWriter.(http.Hijacker).Hijack()
+}
+
+func (rw *responseWriter) Flush() {
+	if f, ok := rw.ResponseWriter.(http.Flusher); ok {
+		f.Flush()
+	}
 }
 
 func ZerologLogger(next http.Handler) http.Handler {
