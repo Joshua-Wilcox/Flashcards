@@ -1,7 +1,8 @@
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { BarChart3, Target, Zap, Award, BookOpen, Trophy } from 'lucide-react';
+import { BarChart3, Target, Zap, Award, BookOpen, Trophy, Clock } from 'lucide-react';
 import { api } from '../api/client';
+import { formatRelativeTime } from '../utils/time';
 
 export default function Stats() {
   const { userId } = useParams();
@@ -62,6 +63,17 @@ export default function Stats() {
               {userId
                 ? `Ranked #${rank} out of ${total_users} players`
                 : `You're ranked #${rank} globally out of ${total_users} players`}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {user_stats.last_answer_time && (
+        <div className="rounded-2xl p-5 bg-gradient-to-r from-blue-500 via-cyan-500 to-teal-500 text-white shadow-lg">
+          <div className="flex items-center gap-3">
+            <Clock className="h-6 w-6 text-blue-100" />
+            <p className="text-lg font-semibold">
+              Last active {formatRelativeTime(user_stats.last_answer_time)} ago
             </p>
           </div>
         </div>
