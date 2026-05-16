@@ -389,13 +389,8 @@ func ProcessAnswerCheck(ctx context.Context, userID, questionID, submittedAnswer
 		}
 
 		_, err = tx.Exec(ctx, `
-			INSERT INTO live_activity_logs (user_id, username, module_name, streak, answered_at)
+			INSERT INTO activity_log (user_id, username, module_name, streak, answered_at)
 			VALUES ($1, $2, $3, $4, $5)
-			ON CONFLICT (user_id) DO UPDATE SET
-				username = EXCLUDED.username,
-				module_name = EXCLUDED.module_name,
-				streak = EXCLUDED.streak,
-				answered_at = EXCLUDED.answered_at
 		`, userID, username, moduleName, newStreak, now)
 		if err != nil {
 			return nil, "", err
@@ -467,7 +462,7 @@ func ToggleAdmin(ctx context.Context, userID string) (bool, error) {
 func GetRecentActivity(ctx context.Context, limit int) ([]RecentActivity, error) {
 	rows, err := db.Pool.Query(ctx, `
 		SELECT user_id, username, module_name, streak, answered_at
-		FROM live_activity_logs
+		FROM activity_log
 		ORDER BY answered_at DESC
 		LIMIT $1
 	`, limit)

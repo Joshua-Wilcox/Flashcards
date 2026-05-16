@@ -13,3 +13,4 @@
 | 2026-05-15 | Add minimum length validation (10 chars) to report message textarea with inline error and red border on blur/submit |
 | 2026-05-15 | Trim form inputs at submission in SubmitFlashcard (question, answer, topic, subtopic, distractors) and ReportForm (message) |
 | 2026-05-16 | Add time-since-last-answer badge to Stats page header with gradient styling and formatRelativeTime utility extracted to utils/time.ts |
+| 2026-05-16 | Convert live_activity_logs to activity_log (append-only) by removing unique constraint, fixing Recent Activity to always show full entries |

@@ -100,6 +100,12 @@ export default function LiveActivity({ maxItems }: LiveActivityProps) {
           ))}
         </AnimatePresence>
 
+        {activities.length === 0 && (
+          <div className="flex-1 flex items-center justify-center text-sm text-gray-400">
+            No recent activity yet
+          </div>
+        )}
+
         <div className="flex-1 bg-gradient-to-b from-gray-50 to-transparent rounded-xl min-h-[1rem]" />
       </div>
     </div>

@@ -143,7 +143,7 @@ func (h *UserHandler) GetLeaderboard(w http.ResponseWriter, r *http.Request) {
 func (h *UserHandler) GetRecentActivity(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	limit := 10
+	limit := 15 // Increase default to ensure sufficient data
 	if l := r.URL.Query().Get("limit"); l != "" {
 		if n, err := strconv.Atoi(l); err == nil && n > 0 && n <= 50 {
 			limit = n
