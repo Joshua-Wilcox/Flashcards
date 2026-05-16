@@ -1,8 +1,11 @@
 package handler
 
 import (
+	"encoding/csv"
+	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
 	"flashcards-go/internal/auth"
 	"flashcards-go/internal/db/queries"
@@ -164,4 +167,93 @@ func (h *UserHandler) GetRecentActivity(w http.ResponseWriter, r *http.Request) 
 	writeJSON(w, http.StatusOK, map[string]interface{}{
 		"activities": activities,
 	})
+}
+
+func (h *UserHandler) ExportLeaderboardCSV(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	sort := r.URL.Query().Get("sort")
+	if sort == "" {
+		sort = "correct_answers"
+	}
+
+	order := r.URL.Query().Get("order")
+	if order == "" {
+		order = "desc"
+	}
+
+	moduleName := r.URL.Query().Get("module")
+	var moduleID *int
+
+	if moduleName != "" {
+		id, err := queries.GetModuleIDByName(ctx, moduleName)
+		if err != nil {
+			log.Error().Err(err).Msg("Failed to get module ID")
+		} else if id > 0 {
+			moduleID = &id
+		}
+	}
+
+	entries, err := queries.GetLeaderboard(ctx, sort, order, moduleID, 10000)
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to get leaderboard")
+		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "Internal error"})
+		return
+	}
+
+	w.Header().Set("Content-Type", "text/csv")
+	w.Header().Set("Content-Disposition", `attachment; filename="leaderboard-`+time.Now().Format("2006-01-02")+`.csv"`)
+
+	writer := csv.NewWriter(w)
+	defer writer.Flush()
+
+	// Write header row
+	if err := writer.Write([]string{
+		"rank",
+		"user_id",
+		"username",
+		"correct_answers",
+		"total_answers",
+		"accuracy",
+		"current_streak",
+		"max_streak",
+		"approved_cards",
+		"last_answer_time",
+	}); err != nil {
+		log.Error().Err(err).Msg("Failed to write CSV header")
+		return
+	}
+
+	// Write data rows
+	for i, entry := range entries {
+		rank := i + 1
+
+		var accuracy float64
+		if entry.TotalAnswers > 0 {
+			accuracy = (float64(entry.CorrectAnswers) / float64(entry.TotalAnswers)) * 100
+		}
+
+		lastAnswerTime := ""
+		if entry.LastAnswerTime != nil {
+			lastAnswerTime = entry.LastAnswerTime.Format(time.RFC3339)
+		}
+
+		row := []string{
+			strconv.Itoa(rank),
+			entry.UserID,
+			entry.Username,
+			strconv.Itoa(entry.CorrectAnswers),
+			strconv.Itoa(entry.TotalAnswers),
+			fmt.Sprintf("%.2f", accuracy),
+			strconv.Itoa(entry.CurrentStreak),
+			strconv.Itoa(entry.MaxStreak),
+			strconv.Itoa(entry.ApprovedCards),
+			lastAnswerTime,
+		}
+
+		if err := writer.Write(row); err != nil {
+			log.Error().Err(err).Msg("Failed to write CSV row")
+			return
+		}
+	}
 }

@@ -111,6 +111,7 @@ func setupRouter(cfg *config.Config) *chi.Mux {
 			r.Post("/admin/edit-answer", adminHandler.EditAnswer)
 			r.Post("/admin/revoke-pdf-access", adminHandler.RevokePDFAccess)
 			r.Post("/admin/toggle-admin", adminHandler.ToggleAdmin)
+			r.Get("/admin/leaderboard/export", userHandler.ExportLeaderboardCSV)
 
 			r.Get("/admin/pdfs/list", pdfHandler.ListPDFs)
 			r.Get("/admin/pdfs/{pdfID}", pdfHandler.GetPDFInfo)
